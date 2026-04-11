@@ -1,0 +1,1 @@
+ALTER TABLE "expenses" ADD COLUMN "includes_vat" boolean DEFAULT false NOT NULL;

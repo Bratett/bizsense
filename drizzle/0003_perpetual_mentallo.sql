@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "fx_rates_biz_currency_date_idx" ON "fx_rates" USING btree ("business_id","from_currency","to_currency","rate_date");

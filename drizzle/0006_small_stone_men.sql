@@ -1,0 +1,3 @@
+ALTER TABLE "inventory_transactions" ADD COLUMN "journal_entry_id" uuid;--> statement-breakpoint
+ALTER TABLE "products" ADD COLUMN "is_active" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "inventory_transactions" ADD CONSTRAINT "inventory_transactions_journal_entry_id_journal_entries_id_fk" FOREIGN KEY ("journal_entry_id") REFERENCES "public"."journal_entries"("id") ON DELETE no action ON UPDATE no action;
