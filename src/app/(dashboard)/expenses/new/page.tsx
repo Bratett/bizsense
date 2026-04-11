@@ -16,10 +16,7 @@ export default async function NewExpensePage() {
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="mx-auto max-w-lg">
-        <NewExpenseForm
-          vatRegistered={business?.vatRegistered ?? false}
-          userRole={role}
-        />
+        <NewExpenseForm vatRegistered={business?.vatRegistered ?? false} userRole={role} />
       </div>
     </main>
   )

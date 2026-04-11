@@ -6,36 +6,36 @@ import { getAccountBalances } from './engine'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ExpenseReportLine = {
-  accountId:        string
-  accountCode:      string
-  category:         string        // = accountName
+  accountId: string
+  accountCode: string
+  category: string // = accountName
   transactionCount: number
-  totalAmount:      number        // netBalance from getAccountBalances
-  priorAmount?:     number
-  changePercent?:   number | null // null when priorAmount === 0
+  totalAmount: number // netBalance from getAccountBalances
+  priorAmount?: number
+  changePercent?: number | null // null when priorAmount === 0
 }
 
 export type ExpenseReport = {
-  period:      { from: string; to: string }
-  lines:       ExpenseReportLine[]
-  grandTotal:  number
+  period: { from: string; to: string }
+  lines: ExpenseReportLine[]
+  grandTotal: number
   priorTotal?: number
-  hasPrior:    boolean
+  hasPrior: boolean
 }
 
 // ─── Helper: derive prior period of equal length ──────────────────────────────
 
 function derivePriorPeriod(period: { from: string; to: string }): { from: string; to: string } {
   const fromMs = new Date(period.from + 'T00:00:00Z').getTime()
-  const toMs   = new Date(period.to   + 'T00:00:00Z').getTime()
-  const span   = Math.round((toMs - fromMs) / 86_400_000) + 1
+  const toMs = new Date(period.to + 'T00:00:00Z').getTime()
+  const span = Math.round((toMs - fromMs) / 86_400_000) + 1
 
-  const priorToMs   = fromMs - 86_400_000
+  const priorToMs = fromMs - 86_400_000
   const priorFromMs = priorToMs - (span - 1) * 86_400_000
 
   return {
     from: new Date(priorFromMs).toISOString().slice(0, 10),
-    to:   new Date(priorToMs).toISOString().slice(0, 10),
+    to: new Date(priorToMs).toISOString().slice(0, 10),
   }
 }
 
@@ -59,11 +59,11 @@ export async function getExpenseReport(
   const balances = await getAccountBalances(businessId, {
     type: 'range',
     from: period.from,
-    to:   period.to,
+    to: period.to,
   })
 
   const expenseBalances = balances.filter(
-    b => b.accountType === 'expense' || b.accountType === 'cogs',
+    (b) => b.accountType === 'expense' || b.accountType === 'cogs',
   )
 
   // ── Step 2: transaction counts in parallel ─────────────────────────────────
@@ -71,7 +71,7 @@ export async function getExpenseReport(
     db
       .select({
         accountId: expenses.accountId,
-        count:     sql<string>`COUNT(*)`,
+        count: sql<string>`COUNT(*)`,
       })
       .from(expenses)
       .where(
@@ -97,19 +97,18 @@ export async function getExpenseReport(
       ),
   ])
 
-  const countMap = new Map(expenseCounts.map(r => [r.accountId, Number(r.count)]))
+  const countMap = new Map(expenseCounts.map((r) => [r.accountId, Number(r.count)]))
   const cogsOrderCount = Number(ordersCount[0]?.count ?? '0')
 
   // ── Step 3: build lines, filter zero-balance ───────────────────────────────
   const lines: ExpenseReportLine[] = expenseBalances
-    .filter(b => b.netBalance !== 0)
-    .map(b => ({
-      accountId:        b.accountId,
-      accountCode:      b.accountCode,
-      category:         b.accountName,
-      transactionCount: b.accountType === 'cogs'
-        ? cogsOrderCount
-        : (countMap.get(b.accountId) ?? 0),
+    .filter((b) => b.netBalance !== 0)
+    .map((b) => ({
+      accountId: b.accountId,
+      accountCode: b.accountCode,
+      category: b.accountName,
+      transactionCount:
+        b.accountType === 'cogs' ? cogsOrderCount : (countMap.get(b.accountId) ?? 0),
       totalAmount: b.netBalance,
     }))
     .sort((a, b) => b.totalAmount - a.totalAmount)
@@ -128,10 +127,10 @@ export async function getExpenseReport(
     const priorPeriod = derivePriorPeriod(period)
     const prior = await getExpenseReport(businessId, priorPeriod, false)
 
-    const priorMap = new Map(prior.lines.map(l => [l.accountId, l.totalAmount]))
+    const priorMap = new Map(prior.lines.map((l) => [l.accountId, l.totalAmount]))
 
-    result.lines = lines.map(l => {
-      const priorAmount  = priorMap.get(l.accountId) ?? 0
+    result.lines = lines.map((l) => {
+      const priorAmount = priorMap.get(l.accountId) ?? 0
       const changePercent =
         priorAmount === 0
           ? null
@@ -140,7 +139,7 @@ export async function getExpenseReport(
     })
 
     result.priorTotal = prior.grandTotal
-    result.hasPrior   = true
+    result.hasPrior = true
   }
 
   return result

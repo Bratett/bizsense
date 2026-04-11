@@ -11,7 +11,7 @@ export const metadata = { title: 'VAT Report | BizSense' }
 interface PageProps {
   searchParams: Promise<{
     dateFrom?: string
-    dateTo?:   string
+    dateTo?: string
   }>
 }
 
@@ -24,15 +24,15 @@ export default async function VatReportPage({ searchParams }: PageProps) {
   const params = await searchParams
 
   // Default to current quarter — the standard GRA filing period
-  const now            = new Date()
-  const year           = now.getFullYear()
-  const quarter        = (Math.floor(now.getMonth() / 3) + 1) as 1 | 2 | 3 | 4
-  const defaultPeriod  = quarterPeriod(year, quarter)
-  const defaultFrom    = defaultPeriod.type === 'range' ? defaultPeriod.from : ''
-  const defaultTo      = defaultPeriod.type === 'range' ? defaultPeriod.to   : ''
+  const now = new Date()
+  const year = now.getFullYear()
+  const quarter = (Math.floor(now.getMonth() / 3) + 1) as 1 | 2 | 3 | 4
+  const defaultPeriod = quarterPeriod(year, quarter)
+  const defaultFrom = defaultPeriod.type === 'range' ? defaultPeriod.from : ''
+  const defaultTo = defaultPeriod.type === 'range' ? defaultPeriod.to : ''
 
   const from = params.dateFrom ?? defaultFrom
-  const to   = params.dateTo   ?? defaultTo
+  const to = params.dateTo ?? defaultTo
 
   const period: { type: 'range'; from: string; to: string } = { type: 'range', from, to }
 

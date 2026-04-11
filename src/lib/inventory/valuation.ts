@@ -31,9 +31,7 @@ export type ValuationReport = {
 
 // ─── computeInventoryValuation ──────────────────────────────────────────────
 
-export async function computeInventoryValuation(
-  businessId: string,
-): Promise<ValuationReport> {
+export async function computeInventoryValuation(businessId: string): Promise<ValuationReport> {
   // 1. Fetch all active products with inventory tracking
   const activeProducts = await db
     .select({
@@ -62,14 +60,10 @@ export async function computeInventoryValuation(
     const currentQuantity = fifoValue.totalQuantity
     const totalValue = fifoValue.totalValue
     const fifoUnitCost =
-      currentQuantity > 0
-        ? Math.round((totalValue / currentQuantity) * 100) / 100
-        : 0
+      currentQuantity > 0 ? Math.round((totalValue / currentQuantity) * 100) / 100 : 0
 
     const isLowStock =
-      product.reorderLevel > 0 &&
-      currentQuantity > 0 &&
-      currentQuantity <= product.reorderLevel
+      product.reorderLevel > 0 && currentQuantity > 0 && currentQuantity <= product.reorderLevel
 
     lines.push({
       productId: product.id,
@@ -86,9 +80,7 @@ export async function computeInventoryValuation(
   }
 
   // 3. Aggregate totals
-  const grandTotalValue = Math.round(
-    lines.reduce((sum, l) => sum + l.totalValue, 0) * 100,
-  ) / 100
+  const grandTotalValue = Math.round(lines.reduce((sum, l) => sum + l.totalValue, 0) * 100) / 100
   const lowStockCount = lines.filter((l) => l.isLowStock).length
 
   // 4. Fetch GL account 1200 balance for reconciliation
@@ -98,12 +90,7 @@ export async function computeInventoryValuation(
     })
     .from(accounts)
     .leftJoin(journalLines, eq(journalLines.accountId, accounts.id))
-    .where(
-      and(
-        eq(accounts.businessId, businessId),
-        eq(accounts.code, '1200'),
-      ),
-    )
+    .where(and(eq(accounts.businessId, businessId), eq(accounts.code, '1200')))
 
   const glAccountBalance = Math.round(Number(glResult[0]?.balance ?? 0) * 100) / 100
   const discrepancy = Math.round((grandTotalValue - glAccountBalance) * 100) / 100

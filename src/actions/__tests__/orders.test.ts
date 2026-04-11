@@ -85,46 +85,38 @@ function mockAtomicWrite(orderId = 'order-001') {
   capturedJournalInput = null
   capturedTxInserts = []
 
-  vi.mocked(atomicTransactionWrite).mockImplementation(
-    async (journalInput, writeSourceRecord) => {
-      capturedJournalInput = journalInput
-      let insertCounter = 0
+  vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, writeSourceRecord) => {
+    capturedJournalInput = journalInput
+    let insertCounter = 0
 
-      const mockTx = {
-        insert: vi.fn((table: unknown) => ({
-          values: vi.fn((data: unknown) => {
-            const tableName =
-              insertCounter === 0
-                ? 'orders'
-                : insertCounter === 1
-                  ? 'orderLines'
-                  : 'paymentsReceived'
-            capturedTxInserts.push({ table: tableName, data })
-            insertCounter++
+    const mockTx = {
+      insert: vi.fn((table: unknown) => ({
+        values: vi.fn((data: unknown) => {
+          const tableName =
+            insertCounter === 0 ? 'orders' : insertCounter === 1 ? 'orderLines' : 'paymentsReceived'
+          capturedTxInserts.push({ table: tableName, data })
+          insertCounter++
 
-            const rows = Array.isArray(data) ? data : [data]
-            const returnData = rows.map((r: Record<string, unknown>) => ({
-              id: orderId,
-              ...r,
-            }))
-            return {
-              returning: vi.fn().mockResolvedValue(returnData),
-              then: (
-                onfulfilled?: ((v: unknown) => unknown) | null,
-                onrejected?: ((e: unknown) => unknown) | null,
-              ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
-              catch: (f?: ((e: unknown) => unknown) | null) =>
-                Promise.resolve(returnData).catch(f),
-              finally: (f?: (() => void) | null) =>
-                Promise.resolve(returnData).finally(f),
-            }
-          }),
-        })),
-      }
+          const rows = Array.isArray(data) ? data : [data]
+          const returnData = rows.map((r: Record<string, unknown>) => ({
+            id: orderId,
+            ...r,
+          }))
+          return {
+            returning: vi.fn().mockResolvedValue(returnData),
+            then: (
+              onfulfilled?: ((v: unknown) => unknown) | null,
+              onrejected?: ((e: unknown) => unknown) | null,
+            ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
+            catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
+            finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
+          }
+        }),
+      })),
+    }
 
-      return writeSourceRecord(mockTx as never, 'journal-entry-001')
-    },
-  )
+    return writeSourceRecord(mockTx as never, 'journal-entry-001')
+  })
 }
 
 function mockAccountLookup() {
@@ -139,17 +131,43 @@ function mockAccountLookup() {
 function mockTaxResult(totalTaxAmount: number, supplyAmount: number) {
   vi.mocked(calculateTax).mockResolvedValue({
     supplyAmount,
-    breakdown: totalTaxAmount > 0
-      ? [
-          { componentCode: 'NHIL', componentName: 'NHIL', baseAmount: supplyAmount, rate: 0.025, taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100 },
-          { componentCode: 'GETFUND', componentName: 'GETFund', baseAmount: supplyAmount, rate: 0.025, taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100 },
-          { componentCode: 'COVID', componentName: 'COVID Levy', baseAmount: supplyAmount, rate: 0.01, taxAmount: Math.round(supplyAmount * 0.01 * 100) / 100 },
-          { componentCode: 'VAT', componentName: 'VAT', baseAmount: supplyAmount + Math.round(supplyAmount * 0.06 * 100) / 100, rate: 0.15, taxAmount: totalTaxAmount - Math.round(supplyAmount * 0.06 * 100) / 100 },
-        ]
-      : [],
+    breakdown:
+      totalTaxAmount > 0
+        ? [
+            {
+              componentCode: 'NHIL',
+              componentName: 'NHIL',
+              baseAmount: supplyAmount,
+              rate: 0.025,
+              taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100,
+            },
+            {
+              componentCode: 'GETFUND',
+              componentName: 'GETFund',
+              baseAmount: supplyAmount,
+              rate: 0.025,
+              taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100,
+            },
+            {
+              componentCode: 'COVID',
+              componentName: 'COVID Levy',
+              baseAmount: supplyAmount,
+              rate: 0.01,
+              taxAmount: Math.round(supplyAmount * 0.01 * 100) / 100,
+            },
+            {
+              componentCode: 'VAT',
+              componentName: 'VAT',
+              baseAmount: supplyAmount + Math.round(supplyAmount * 0.06 * 100) / 100,
+              rate: 0.15,
+              taxAmount: totalTaxAmount - Math.round(supplyAmount * 0.06 * 100) / 100,
+            },
+          ]
+        : [],
     totalTaxAmount,
     totalAmount: supplyAmount + totalTaxAmount,
-    effectiveRate: totalTaxAmount > 0 ? Math.round((totalTaxAmount / supplyAmount) * 10000) / 10000 : 0,
+    effectiveRate:
+      totalTaxAmount > 0 ? Math.round((totalTaxAmount / supplyAmount) * 10000) / 10000 : 0,
   })
 }
 
@@ -186,7 +204,7 @@ describe('createCashOrder', () => {
   it('Test 1 — VAT-registered cash sale: correct journal entry Dr 1001 / Cr 4001 + Cr 2100', async () => {
     // GHS 100 supply, VAT ~21.90
     mockAccountLookup()
-    mockTaxResult(21.90, 100)
+    mockTaxResult(21.9, 100)
     mockAtomicWrite()
 
     const result = await createCashOrder(baseInput())
@@ -206,7 +224,7 @@ describe('createCashOrder', () => {
     const debitLine = journal.lines.find((l) => l.debitAmount > 0)
     expect(debitLine).toBeDefined()
     expect(debitLine!.accountId).toBe('acct-cash')
-    expect(debitLine!.debitAmount).toBeCloseTo(121.90, 2)
+    expect(debitLine!.debitAmount).toBeCloseTo(121.9, 2)
 
     // Cr Sales Revenue = 100.00
     const revenueLine = journal.lines.find(
@@ -220,13 +238,13 @@ describe('createCashOrder', () => {
       (l) => l.creditAmount > 0 && l.accountId === 'acct-vat-payable',
     )
     expect(vatLine).toBeDefined()
-    expect(vatLine!.creditAmount).toBeCloseTo(21.90, 2)
+    expect(vatLine!.creditAmount).toBeCloseTo(21.9, 2)
 
     // Invariant: SUM(debits) = SUM(credits)
     const totalDebits = journal.lines.reduce((s, l) => s + l.debitAmount, 0)
     const totalCredits = journal.lines.reduce((s, l) => s + l.creditAmount, 0)
     expect(totalDebits).toBeCloseTo(totalCredits, 2)
-    expect(totalDebits).toBeCloseTo(121.90, 2)
+    expect(totalDebits).toBeCloseTo(121.9, 2)
 
     // Verify order was inserted with correct fields
     const orderInsert = capturedTxInserts.find((i) => i.table === 'orders')
@@ -243,9 +261,7 @@ describe('createCashOrder', () => {
 
     const result = await createCashOrder(
       baseInput({
-        lines: [
-          { description: 'Service', quantity: 1, unitPrice: 200, unitPriceCurrency: 'GHS' },
-        ],
+        lines: [{ description: 'Service', quantity: 1, unitPrice: 200, unitPriceCurrency: 'GHS' }],
         paymentMethod: 'momo_mtn',
         momoReference: 'MOMO-12345',
         applyVat: false,
@@ -288,9 +304,7 @@ describe('createCashOrder', () => {
 
     const result = await createCashOrder(
       baseInput({
-        lines: [
-          { description: 'USD item', quantity: 1, unitPrice: 10, unitPriceCurrency: 'USD' },
-        ],
+        lines: [{ description: 'USD item', quantity: 1, unitPrice: 10, unitPriceCurrency: 'USD' }],
         fxRate: 15.4,
         applyVat: false,
       }),
@@ -363,17 +377,13 @@ describe('createCashOrder', () => {
 
   it('Test 5 — atomic write failure: throws, no order persisted', async () => {
     mockAccountLookup()
-    mockTaxResult(21.90, 100)
+    mockTaxResult(21.9, 100)
 
     // Simulate atomicTransactionWrite throwing (e.g. journal doesn't balance)
-    vi.mocked(atomicTransactionWrite).mockRejectedValue(
-      new Error('Journal entry does not balance'),
-    )
+    vi.mocked(atomicTransactionWrite).mockRejectedValue(new Error('Journal entry does not balance'))
 
     // createCashOrder propagates the throw from atomicTransactionWrite
-    await expect(createCashOrder(baseInput())).rejects.toThrow(
-      'Journal entry does not balance',
-    )
+    await expect(createCashOrder(baseInput())).rejects.toThrow('Journal entry does not balance')
 
     // atomicTransactionWrite was called (the tx was attempted)
     expect(atomicTransactionWrite).toHaveBeenCalledTimes(1)
@@ -397,9 +407,7 @@ describe('createCashOrder', () => {
 describe('orderNumber generation', () => {
   it('Test 7 — order number format and uniqueness', async () => {
     // Get the real implementation (not the mock)
-    const actual = await vi.importActual<typeof import('@/lib/orderNumber')>(
-      '@/lib/orderNumber',
-    )
+    const actual = await vi.importActual<typeof import('@/lib/orderNumber')>('@/lib/orderNumber')
 
     // Valid patterns
     expect(actual.isValidOrderNumber('ORD-X7KQ-0001')).toBe(true)
@@ -415,8 +423,9 @@ describe('orderNumber generation', () => {
     expect(actual.isValidOrderNumber('')).toBe(false)
 
     // Verify 5 sequential numbers are unique and valid
-    const numbers = Array.from({ length: 5 }, (_, i) =>
-      `ORD-X7KQ-${String(i + 1).padStart(4, '0')}`,
+    const numbers = Array.from(
+      { length: 5 },
+      (_, i) => `ORD-X7KQ-${String(i + 1).padStart(4, '0')}`,
     )
     const unique = new Set(numbers)
     expect(unique.size).toBe(5)

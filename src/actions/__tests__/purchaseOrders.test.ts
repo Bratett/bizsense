@@ -143,9 +143,7 @@ beforeEach(() => {
 describe('createPurchaseOrder', () => {
   it('Test 1 — GHS PO: inserts PO (status=draft) + lines, no journal entry, totals correct', async () => {
     // Supplier lookup returns a match
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: SUPPLIER_ID }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: SUPPLIER_ID }]) as never)
 
     const { tx } = mockTransaction()
 
@@ -183,9 +181,7 @@ describe('createPurchaseOrder', () => {
   })
 
   it('Test 2 — USD PO: lineTotal = qty × unitCost × fxRate (GHS), fxRateLockedAt set, currency=USD', async () => {
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: SUPPLIER_ID }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: SUPPLIER_ID }]) as never)
     const { tx } = mockTransaction()
 
     const result = await createPurchaseOrder(
@@ -244,9 +240,7 @@ describe('updatePurchaseOrder', () => {
     const { tx } = mockTransaction()
 
     const result = await updatePurchaseOrder(PO_ID, {
-      lines: [
-        { description: 'Updated item', quantity: 5, unitCost: 200 },
-      ],
+      lines: [{ description: 'Updated item', quantity: 5, unitCost: 200 }],
     })
 
     expect(result.success).toBe(true)

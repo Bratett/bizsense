@@ -11,8 +11,8 @@ export const metadata = { title: 'Profit & Loss | BizSense' }
 interface PageProps {
   searchParams: Promise<{
     dateFrom?: string
-    dateTo?:   string
-    compare?:  string
+    dateTo?: string
+    compare?: string
   }>
 }
 
@@ -22,13 +22,13 @@ export default async function PLPage({ searchParams }: PageProps) {
   if (!ALLOWED.includes(session.user.role)) redirect('/access-denied')
   const { businessId } = session.user
 
-  const params  = await searchParams
+  const params = await searchParams
   const compare = params.compare === '1'
 
   // Period from URL params; fall back to current month
   const defaultPeriod = currentMonthPeriod()
   const from = params.dateFrom ?? (defaultPeriod.type === 'range' ? defaultPeriod.from : '')
-  const to   = params.dateTo   ?? (defaultPeriod.type === 'range' ? defaultPeriod.to   : '')
+  const to = params.dateTo ?? (defaultPeriod.type === 'range' ? defaultPeriod.to : '')
 
   const period: { type: 'range'; from: string; to: string } = { type: 'range', from, to }
   const pl = await getProfitAndLoss(businessId, { from, to }, compare)

@@ -75,9 +75,9 @@ describe('atomicTransactionWrite', () => {
     const writeSourceRecord = vi.fn().mockRejectedValue(sourceError)
 
     // The transaction wrapper should propagate the error (simulating Postgres rollback)
-    await expect(
-      atomicTransactionWrite(MOCK_JOURNAL_INPUT, writeSourceRecord),
-    ).rejects.toThrow('Source record insert failed')
+    await expect(atomicTransactionWrite(MOCK_JOURNAL_INPUT, writeSourceRecord)).rejects.toThrow(
+      'Source record insert failed',
+    )
 
     // postJournalEntry was called (journal write attempted) but the transaction
     // as a whole failed, meaning Postgres would roll back the journal insert too.
@@ -86,15 +86,13 @@ describe('atomicTransactionWrite', () => {
   })
 
   it('never calls writeSourceRecord if postJournalEntry throws (imbalanced entry)', async () => {
-    mockedPostJournal.mockRejectedValue(
-      new Error('Journal entry does not balance: dr=100 cr=50'),
-    )
+    mockedPostJournal.mockRejectedValue(new Error('Journal entry does not balance: dr=100 cr=50'))
 
     const writeSourceRecord = vi.fn().mockResolvedValue({ id: 'should-not-run' })
 
-    await expect(
-      atomicTransactionWrite(MOCK_JOURNAL_INPUT, writeSourceRecord),
-    ).rejects.toThrow('Journal entry does not balance')
+    await expect(atomicTransactionWrite(MOCK_JOURNAL_INPUT, writeSourceRecord)).rejects.toThrow(
+      'Journal entry does not balance',
+    )
 
     expect(mockedPostJournal).toHaveBeenCalledTimes(1)
     // writeSourceRecord should never be called — postJournalEntry threw first

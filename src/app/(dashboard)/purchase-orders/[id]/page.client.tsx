@@ -72,10 +72,7 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
         const msg = encodeURIComponent(
           `Hi ${po.supplierName}, please find our Purchase Order ${po.poNumber} below:\n\n${lineText}\n\nTotal: ${formatGHS(po.totalAmount)}${po.expectedDate ? `\nExpected by: ${po.expectedDate}` : ''}`,
         )
-        window.open(
-          `https://wa.me/${po.supplierPhone.replace(/\D/g, '')}?text=${msg}`,
-          '_blank',
-        )
+        window.open(`https://wa.me/${po.supplierPhone.replace(/\D/g, '')}?text=${msg}`, '_blank')
       }
 
       router.refresh()
@@ -113,7 +110,13 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
             href="/purchase-orders"
             className="mt-0.5 rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
@@ -205,18 +208,13 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
             </div>
             <div className="divide-y divide-gray-100">
               {po.grns.map((grn) => (
-                <div
-                  key={grn.id}
-                  className="flex items-center justify-between px-4 py-3"
-                >
+                <div key={grn.id} className="flex items-center justify-between px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{grn.grnNumber}</p>
                     <p className="text-xs text-gray-500">
                       {formatDate(grn.receivedDate)} &middot;{' '}
                       <span
-                        className={
-                          grn.status === 'confirmed' ? 'text-green-600' : 'text-gray-400'
-                        }
+                        className={grn.status === 'confirmed' ? 'text-green-600' : 'text-gray-400'}
                       >
                         {grn.status}
                       </span>

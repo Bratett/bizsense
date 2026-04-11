@@ -59,11 +59,7 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
       ? bankReference.trim().length > 0
       : true
 
-  const canSubmit =
-    amountNum > 0 &&
-    amountNum <= remaining + 0.001 &&
-    hasRef &&
-    !isPending
+  const canSubmit = amountNum > 0 && amountNum <= remaining + 0.001 && hasRef && !isPending
 
   const handleSubmit = () => {
     setError(null)
@@ -103,7 +99,13 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
           className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           aria-label="Back to order"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
@@ -130,9 +132,7 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
       {/* Invoice summary */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <p className="text-xs font-medium text-gray-500">Invoice Summary</p>
-        {order.customer && (
-          <p className="mt-1 font-medium text-gray-900">{order.customer.name}</p>
-        )}
+        {order.customer && <p className="mt-1 font-medium text-gray-900">{order.customer.name}</p>}
         <div className="mt-2 space-y-1 text-sm">
           <div className="flex justify-between text-gray-600">
             <span>Invoice total</span>

@@ -9,22 +9,39 @@ import type { VatReport, VatReportLine } from '@/lib/reports/vat'
 // ─── PDF document ─────────────────────────────────────────────────────────────
 
 const pdfStyles = StyleSheet.create({
-  page:        { padding: 32, fontFamily: 'Helvetica', fontSize: 10 },
-  title:       { fontSize: 16, marginBottom: 4 },
-  subtitle:    { fontSize: 9, color: '#6B7280', marginBottom: 4 },
-  vatReg:      { fontSize: 9, color: '#6B7280', marginBottom: 16 },
-  sectionHead: { fontSize: 10, fontFamily: 'Helvetica-Bold', marginTop: 12, marginBottom: 3, color: '#111827' },
-  row:         { flexDirection: 'row', paddingVertical: 2 },
-  bold:        { fontFamily: 'Helvetica-Bold' },
-  separator:   { borderBottom: '1pt solid #E5E7EB', marginVertical: 4 },
-  total:       { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, marginTop: 2 },
-  col1:        { width: '15%' },
-  col2:        { width: '20%' },
-  col3:        { flex: 1 },
-  colAmt:      { width: '18%', textAlign: 'right' },
-  netPos:      { marginTop: 16, borderTop: '2pt solid #111827', paddingTop: 8 },
-  netRow:      { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
-  note:        { fontSize: 8, color: '#92400E', marginTop: 12, borderLeft: '2pt solid #F59E0B', paddingLeft: 8 },
+  page: { padding: 32, fontFamily: 'Helvetica', fontSize: 10 },
+  title: { fontSize: 16, marginBottom: 4 },
+  subtitle: { fontSize: 9, color: '#6B7280', marginBottom: 4 },
+  vatReg: { fontSize: 9, color: '#6B7280', marginBottom: 16 },
+  sectionHead: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    marginTop: 12,
+    marginBottom: 3,
+    color: '#111827',
+  },
+  row: { flexDirection: 'row', paddingVertical: 2 },
+  bold: { fontFamily: 'Helvetica-Bold' },
+  separator: { borderBottom: '1pt solid #E5E7EB', marginVertical: 4 },
+  total: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 3,
+    marginTop: 2,
+  },
+  col1: { width: '15%' },
+  col2: { width: '20%' },
+  col3: { flex: 1 },
+  colAmt: { width: '18%', textAlign: 'right' },
+  netPos: { marginTop: 16, borderTop: '2pt solid #111827', paddingTop: 8 },
+  netRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
+  note: {
+    fontSize: 8,
+    color: '#92400E',
+    marginTop: 12,
+    borderLeft: '2pt solid #F59E0B',
+    paddingLeft: 8,
+  },
 })
 
 function VatDocument({ data }: { data: VatReport }) {
@@ -110,9 +127,7 @@ function VatDocument({ data }: { data: VatReport }) {
             <Text style={pdfStyles.bold}>
               {isRefund ? 'VAT Refund Due from GRA' : 'Net VAT Payable to GRA'}
             </Text>
-            <Text style={pdfStyles.bold}>
-              {formatGhs(Math.abs(data.netVatPayable))}
-            </Text>
+            <Text style={pdfStyles.bold}>{formatGhs(Math.abs(data.netVatPayable))}</Text>
           </View>
         </View>
       </Page>
@@ -144,7 +159,7 @@ export default function VatReportClient({
   data,
   period,
 }: {
-  data:   VatReport
+  data: VatReport
   period: { type: 'range'; from: string; to: string }
 }) {
   const [pdfLoading, setPdfLoading] = useState(false)
@@ -156,46 +171,46 @@ export default function VatReportClient({
 
     for (const l of data.outputVat.lines) {
       rows.push({
-        Date:               l.entryDate,
-        Reference:          l.reference,
-        Description:        l.description,
-        Type:               'Output VAT',
+        Date: l.entryDate,
+        Reference: l.reference,
+        Description: l.description,
+        Type: 'Output VAT',
         'Net Amount (GHS)': l.netSupplyAmount.toFixed(2),
         'VAT Amount (GHS)': l.vatAmount.toFixed(2),
       })
     }
     rows.push({
-      Date:               '',
-      Reference:          '',
-      Description:        'Total Output VAT',
-      Type:               '',
+      Date: '',
+      Reference: '',
+      Description: 'Total Output VAT',
+      Type: '',
       'Net Amount (GHS)': data.outputVat.totalNetSupply.toFixed(2),
       'VAT Amount (GHS)': data.outputVat.totalVat.toFixed(2),
     })
 
     for (const l of data.inputVat.lines) {
       rows.push({
-        Date:               l.entryDate,
-        Reference:          l.reference,
-        Description:        l.description,
-        Type:               'Input VAT',
+        Date: l.entryDate,
+        Reference: l.reference,
+        Description: l.description,
+        Type: 'Input VAT',
         'Net Amount (GHS)': l.netSupplyAmount.toFixed(2),
         'VAT Amount (GHS)': l.vatAmount.toFixed(2),
       })
     }
     rows.push({
-      Date:               '',
-      Reference:          '',
-      Description:        'Total Input VAT',
-      Type:               '',
+      Date: '',
+      Reference: '',
+      Description: 'Total Input VAT',
+      Type: '',
       'Net Amount (GHS)': data.inputVat.totalNetPurchase.toFixed(2),
       'VAT Amount (GHS)': data.inputVat.totalVat.toFixed(2),
     })
     rows.push({
-      Date:               '',
-      Reference:          '',
-      Description:        isRefund ? 'VAT Refund Due from GRA' : 'Net VAT Payable to GRA',
-      Type:               '',
+      Date: '',
+      Reference: '',
+      Description: isRefund ? 'VAT Refund Due from GRA' : 'Net VAT Payable to GRA',
+      Type: '',
       'Net Amount (GHS)': '',
       'VAT Amount (GHS)': Math.abs(data.netVatPayable).toFixed(2),
     })
@@ -208,9 +223,9 @@ export default function VatReportClient({
     setPdfLoading(true)
     try {
       const blob = await generateReportPdf(VatDocument, data)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
       a.download = `vat-report-${period.from}-to-${period.to}.pdf`
       a.click()
       URL.revokeObjectURL(url)
@@ -247,18 +262,26 @@ export default function VatReportClient({
         </div>
 
         {data.outputVat.lines.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-gray-400">
-            No VAT-bearing sales in this period.
-          </p>
+          <p className="px-4 py-6 text-sm text-gray-400">No VAT-bearing sales in this period.</p>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="py-2 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">Date</th>
-                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">Invoice Ref</th>
-                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
-                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-32">Net Supply (GHS)</th>
-                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">VAT (GHS)</th>
+                <th className="py-2 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">
+                  Date
+                </th>
+                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">
+                  Invoice Ref
+                </th>
+                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Description
+                </th>
+                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-32">
+                  Net Supply (GHS)
+                </th>
+                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">
+                  VAT (GHS)
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -292,18 +315,26 @@ export default function VatReportClient({
         </div>
 
         {data.inputVat.lines.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-gray-400">
-            No VAT-bearing expenses in this period.
-          </p>
+          <p className="px-4 py-6 text-sm text-gray-400">No VAT-bearing expenses in this period.</p>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="py-2 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">Date</th>
-                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">Reference</th>
-                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
-                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-32">Net Purchase (GHS)</th>
-                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">VAT (GHS)</th>
+                <th className="py-2 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">
+                  Date
+                </th>
+                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">
+                  Reference
+                </th>
+                <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Description
+                </th>
+                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-32">
+                  Net Purchase (GHS)
+                </th>
+                <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 w-28">
+                  VAT (GHS)
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">

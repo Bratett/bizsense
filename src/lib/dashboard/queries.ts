@@ -1,6 +1,17 @@
 import { and, desc, eq, sql, inArray, gte, lte } from 'drizzle-orm'
 import { db } from '@/db'
-import { accounts, journalLines, orders, expenses, customers, products, inventoryTransactions, goodsReceivedNotes, supplierPayments, suppliers } from '@/db/schema'
+import {
+  accounts,
+  journalLines,
+  orders,
+  expenses,
+  customers,
+  products,
+  inventoryTransactions,
+  goodsReceivedNotes,
+  supplierPayments,
+  suppliers,
+} from '@/db/schema'
 import { format, subDays } from 'date-fns'
 
 // TODO Sprint 9: replace all queries with Dexie-first reads
@@ -67,16 +78,8 @@ export async function getDashboardCashBalance(businessId: string): Promise<CashB
       balance: sql<string>`COALESCE(SUM(${journalLines.debitAmount}), 0) - COALESCE(SUM(${journalLines.creditAmount}), 0)`,
     })
     .from(accounts)
-    .leftJoin(
-      journalLines,
-      eq(journalLines.accountId, accounts.id),
-    )
-    .where(
-      and(
-        eq(accounts.businessId, businessId),
-        inArray(accounts.code, CASH_ACCOUNT_CODES),
-      ),
-    )
+    .leftJoin(journalLines, eq(journalLines.accountId, accounts.id))
+    .where(and(eq(accounts.businessId, businessId), inArray(accounts.code, CASH_ACCOUNT_CODES)))
     .groupBy(accounts.id, accounts.name, accounts.code)
     .orderBy(accounts.code)
 
@@ -126,10 +129,7 @@ export async function getDashboardPendingApprovals(businessId: string): Promise<
     })
     .from(expenses)
     .where(
-      and(
-        eq(expenses.businessId, businessId),
-        eq(expenses.approvalStatus, 'pending_approval'),
-      ),
+      and(eq(expenses.businessId, businessId), eq(expenses.approvalStatus, 'pending_approval')),
     )
 
   return { count: Number(result[0]?.count ?? 0) }
@@ -145,10 +145,7 @@ export async function getDashboardActivity(
   const isCashier = role === 'cashier'
 
   // Build order conditions
-  const orderConditions = [
-    eq(orders.businessId, businessId),
-    eq(orders.status, 'fulfilled'),
-  ]
+  const orderConditions = [eq(orders.businessId, businessId), eq(orders.status, 'fulfilled')]
   if (isCashier && userId) {
     orderConditions.push(eq(orders.createdBy, userId))
   }

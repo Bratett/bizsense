@@ -91,9 +91,7 @@ describe('getDashboardCashBalance', () => {
   })
 
   it('returns zero balance for accounts with no journal lines', async () => {
-    const chain = makeChain([
-      { name: 'Cash on Hand', code: '1001', balance: '0' },
-    ])
+    const chain = makeChain([{ name: 'Cash on Hand', code: '1001', balance: '0' }])
     vi.mocked(db.select).mockReturnValue(chain as never)
 
     const result = await getDashboardCashBalance(BUSINESS_ID)
@@ -128,7 +126,7 @@ describe('getDashboardCashBalance', () => {
     const result = await getDashboardCashBalance(BUSINESS_ID)
 
     expect(result.breakdown[0].balance).toBe(1000.01) // rounds up
-    expect(result.breakdown[1].balance).toBe(250.99)   // rounds down
+    expect(result.breakdown[1].balance).toBe(250.99) // rounds down
     expect(result.totalBalance).toBe(1251) // 1000.01 + 250.99 = 1251.00
   })
 

@@ -91,10 +91,8 @@ function mockUpdateSet() {
         onfulfilled?: ((v: unknown) => unknown) | null,
         onrejected?: ((e: unknown) => unknown) | null,
       ) => Promise.resolve(undefined).then(onfulfilled, onrejected),
-      catch: (f?: ((e: unknown) => unknown) | null) =>
-        Promise.resolve(undefined).catch(f),
-      finally: (f?: (() => void) | null) =>
-        Promise.resolve(undefined).finally(f),
+      catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(undefined).catch(f),
+      finally: (f?: (() => void) | null) => Promise.resolve(undefined).finally(f),
     })),
   } as never)
 }
@@ -162,9 +160,7 @@ describe('createProduct', () => {
     mockUser('owner')
 
     // First select: uniqueness check finds existing product
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: 'existing-product' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: 'existing-product' }]) as never)
 
     const result = await createProduct({ ...baseInput, sku: 'DUP-001' })
 
@@ -197,9 +193,7 @@ describe('updateProduct', () => {
     mockUser('owner')
 
     // Ownership check returns existing product
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: 'product-001' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: 'product-001' }]) as never)
 
     mockUpdateSet()
 
@@ -218,9 +212,7 @@ describe('updateProduct', () => {
     mockUser('manager')
 
     // Ownership check
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: 'product-001' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: 'product-001' }]) as never)
 
     mockUpdateSet()
 

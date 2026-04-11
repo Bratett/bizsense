@@ -78,7 +78,8 @@ export default function SwipeableRow({ children, actions = [] }: SwipeableRowPro
         onTouchEnd={handleTouchEnd}
         style={{
           transform: `translateX(${translateX}px)`,
-          transition: translateX === 0 || translateX === -actionsWidth ? 'transform 0.2s ease-out' : 'none',
+          transition:
+            translateX === 0 || translateX === -actionsWidth ? 'transform 0.2s ease-out' : 'none',
         }}
         className="relative z-10 bg-white"
       >

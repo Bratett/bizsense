@@ -149,9 +149,7 @@ export default function ExpenseDetailView({
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-lg font-bold text-gray-900">
-                GHS {formatGHS(expense.amount)}
-              </p>
+              <p className="text-lg font-bold text-gray-900">GHS {formatGHS(expense.amount)}</p>
               <p className="mt-1 text-sm text-gray-600">{expense.description}</p>
             </div>
             <span

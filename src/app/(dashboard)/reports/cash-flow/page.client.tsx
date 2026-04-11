@@ -10,16 +10,27 @@ import type { CashFlowStatement, CashFlowSection } from '@/lib/reports/cashFlow'
 // ─── PDF document ─────────────────────────────────────────────────────────────
 
 const pdfStyles = StyleSheet.create({
-  page:        { padding: 32, fontFamily: 'Helvetica', fontSize: 10 },
-  title:       { fontSize: 16, marginBottom: 4 },
-  subtitle:    { fontSize: 9, color: '#6B7280', marginBottom: 16 },
+  page: { padding: 32, fontFamily: 'Helvetica', fontSize: 10 },
+  title: { fontSize: 16, marginBottom: 4 },
+  subtitle: { fontSize: 9, color: '#6B7280', marginBottom: 16 },
   sectionHead: { fontSize: 10, fontFamily: 'Helvetica-Bold', marginTop: 12, marginBottom: 2 },
-  row:         { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
-  bold:        { fontFamily: 'Helvetica-Bold' },
-  separator:   { borderBottom: '1pt solid #E5E7EB', marginVertical: 4 },
-  total:       { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, marginTop: 2 },
-  grandTotal:  { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, marginTop: 6, borderTop: '2pt solid #111827' },
-  note:        { fontSize: 8, color: '#6B7280', marginTop: 4 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
+  bold: { fontFamily: 'Helvetica-Bold' },
+  separator: { borderBottom: '1pt solid #E5E7EB', marginVertical: 4 },
+  total: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 3,
+    marginTop: 2,
+  },
+  grandTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    marginTop: 6,
+    borderTop: '2pt solid #111827',
+  },
+  note: { fontSize: 8, color: '#6B7280', marginTop: 4 },
 })
 
 function PDFSection({ section }: { section: CashFlowSection }) {
@@ -33,7 +44,10 @@ function PDFSection({ section }: { section: CashFlowSection }) {
         </View>
       ))}
       {section.lines.length === 0 && (
-        <View style={pdfStyles.row}><Text style={{ color: '#9CA3AF' }}>No activity</Text><Text>{formatGhs(0)}</Text></View>
+        <View style={pdfStyles.row}>
+          <Text style={{ color: '#9CA3AF' }}>No activity</Text>
+          <Text>{formatGhs(0)}</Text>
+        </View>
       )}
       <View style={pdfStyles.separator} />
       <View style={pdfStyles.total}>
@@ -49,7 +63,9 @@ function CFDocument({ data }: { data: CashFlowStatement }) {
     <Document>
       <Page size="A4" style={pdfStyles.page}>
         <Text style={pdfStyles.title}>Cash Flow Statement</Text>
-        <Text style={pdfStyles.subtitle}>{data.period.from} to {data.period.to}</Text>
+        <Text style={pdfStyles.subtitle}>
+          {data.period.from} to {data.period.to}
+        </Text>
 
         <PDFSection section={data.operating} />
         <PDFSection section={data.investing} />
@@ -72,8 +88,7 @@ function CFDocument({ data }: { data: CashFlowStatement }) {
           Balance Sheet cash total (as at {data.period.to}): {formatGhs(data.closingCashCrossCheck)}
           {data.isReconciled
             ? ' — Reconciled ✓'
-            : ` — Discrepancy of ${formatGhs(Math.abs(data.closingCashBalance - data.closingCashCrossCheck))}`
-          }
+            : ` — Discrepancy of ${formatGhs(Math.abs(data.closingCashBalance - data.closingCashCrossCheck))}`}
         </Text>
       </Page>
     </Document>
@@ -86,30 +101,39 @@ function CashSection({ section }: { section: CashFlowSection }) {
   return (
     <>
       <tr className="bg-gray-50">
-        <td colSpan={2} className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <td
+          colSpan={2}
+          className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500"
+        >
           {section.label}
         </td>
       </tr>
       {section.lines.length === 0 && (
         <tr>
-          <td className="py-2 pl-6 text-sm text-gray-400 italic" colSpan={2}>No activity in this period</td>
+          <td className="py-2 pl-6 text-sm text-gray-400 italic" colSpan={2}>
+            No activity in this period
+          </td>
         </tr>
       )}
       {section.lines.map((line, i) => (
         <tr key={i}>
           <td className="py-1.5 pl-6 text-sm text-gray-700">{line.description}</td>
-          <td className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
-            line.amount >= 0 ? 'text-green-700' : 'text-red-600'
-          }`}>
+          <td
+            className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
+              line.amount >= 0 ? 'text-green-700' : 'text-red-600'
+            }`}
+          >
             {formatGhs(line.amount)}
           </td>
         </tr>
       ))}
       <tr className="border-t border-gray-200 font-semibold">
         <td className="py-2 pl-4 text-sm text-gray-700">Net {section.label}</td>
-        <td className={`py-2 pr-4 text-right text-sm tabular-nums ${
-          section.netAmount >= 0 ? 'text-gray-900' : 'text-red-600'
-        }`}>
+        <td
+          className={`py-2 pr-4 text-right text-sm tabular-nums ${
+            section.netAmount >= 0 ? 'text-gray-900' : 'text-red-600'
+          }`}
+        >
           {formatGhs(section.netAmount)}
         </td>
       </tr>
@@ -133,17 +157,37 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
       for (const l of section.lines) {
         rows.push({ Section: '', Description: l.description, 'Amount (GHS)': l.amount.toFixed(2) })
       }
-      rows.push({ Section: `Net ${section.label}`, Description: '', 'Amount (GHS)': section.netAmount.toFixed(2) })
+      rows.push({
+        Section: `Net ${section.label}`,
+        Description: '',
+        'Amount (GHS)': section.netAmount.toFixed(2),
+      })
     }
 
     addSection(data.operating)
     addSection(data.investing)
     addSection(data.financing)
 
-    rows.push({ Section: 'Net Change in Cash',    Description: '', 'Amount (GHS)': data.netChange.toFixed(2) })
-    rows.push({ Section: 'Opening Cash Balance',  Description: '', 'Amount (GHS)': data.openingCashBalance.toFixed(2) })
-    rows.push({ Section: 'Closing Cash Balance',  Description: '', 'Amount (GHS)': data.closingCashBalance.toFixed(2) })
-    rows.push({ Section: 'Balance Sheet Cash (cross-check)', Description: '', 'Amount (GHS)': data.closingCashCrossCheck.toFixed(2) })
+    rows.push({
+      Section: 'Net Change in Cash',
+      Description: '',
+      'Amount (GHS)': data.netChange.toFixed(2),
+    })
+    rows.push({
+      Section: 'Opening Cash Balance',
+      Description: '',
+      'Amount (GHS)': data.openingCashBalance.toFixed(2),
+    })
+    rows.push({
+      Section: 'Closing Cash Balance',
+      Description: '',
+      'Amount (GHS)': data.closingCashBalance.toFixed(2),
+    })
+    rows.push({
+      Section: 'Balance Sheet Cash (cross-check)',
+      Description: '',
+      'Amount (GHS)': data.closingCashCrossCheck.toFixed(2),
+    })
 
     downloadCsv(`cash-flow-${data.period.from}-to-${data.period.to}.csv`, rows)
   }
@@ -153,9 +197,9 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
     setPdfLoading(true)
     try {
       const blob = await generateReportPdf(CFDocument, data)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
       a.download = `cash-flow-${data.period.from}-to-${data.period.to}.pdf`
       a.click()
       URL.revokeObjectURL(url)
@@ -169,9 +213,12 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
       {/* Unclassified amount banner */}
       {data.unclassifiedAmount > 0 && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {formatGhs(data.unclassifiedAmount)} of cash movements could not be classified because
-          one or more accounts do not have a cash flow category assigned.{' '}
-          <Link href="/settings/chart-of-accounts" className="font-medium underline hover:text-amber-900">
+          {formatGhs(data.unclassifiedAmount)} of cash movements could not be classified because one
+          or more accounts do not have a cash flow category assigned.{' '}
+          <Link
+            href="/settings/chart-of-accounts"
+            className="font-medium underline hover:text-amber-900"
+          >
             Assign categories →
           </Link>
         </div>
@@ -198,7 +245,6 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full">
           <tbody className="divide-y divide-gray-100">
-
             <CashSection section={data.operating} />
             <CashSection section={data.investing} />
             <CashSection section={data.financing} />
@@ -206,9 +252,11 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
             {/* Net change */}
             <tr className="border-t-2 border-gray-300 bg-gray-50">
               <td className="py-3 pl-4 text-sm font-bold text-gray-900">Net Change in Cash</td>
-              <td className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
-                data.netChange >= 0 ? 'text-green-700' : 'text-red-600'
-              }`}>
+              <td
+                className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
+                  data.netChange >= 0 ? 'text-green-700' : 'text-red-600'
+                }`}
+              >
                 {formatGhs(data.netChange)}
               </td>
             </tr>
@@ -228,17 +276,18 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
                 {formatGhs(data.closingCashBalance)}
               </td>
             </tr>
-
           </tbody>
         </table>
       </div>
 
       {/* Reconciliation check */}
-      <div className={`rounded-lg border px-4 py-3 text-sm ${
-        data.isReconciled
-          ? 'border-green-200 bg-green-50 text-green-800'
-          : 'border-amber-200 bg-amber-50 text-amber-800'
-      }`}>
+      <div
+        className={`rounded-lg border px-4 py-3 text-sm ${
+          data.isReconciled
+            ? 'border-green-200 bg-green-50 text-green-800'
+            : 'border-amber-200 bg-amber-50 text-amber-800'
+        }`}
+      >
         <div className="mb-1 text-xs text-gray-500">
           Balance Sheet cash total (as at {data.period.to}): {formatGhs(data.closingCashCrossCheck)}
         </div>
@@ -247,7 +296,10 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
         ) : (
           <span>
             ⚠ {formatGhs(difference)} discrepancy — check for unclassified accounts.{' '}
-            <Link href={`/reports/balance-sheet?date=${data.period.to}`} className="font-medium underline">
+            <Link
+              href={`/reports/balance-sheet?date=${data.period.to}`}
+              className="font-medium underline"
+            >
               View Balance Sheet
             </Link>
           </span>

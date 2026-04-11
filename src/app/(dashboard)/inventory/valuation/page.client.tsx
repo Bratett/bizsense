@@ -22,11 +22,7 @@ type SortDir = 'asc' | 'desc'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export default function ValuationReportView({
-  report,
-}: {
-  report: ValuationReport
-}) {
+export default function ValuationReportView({ report }: { report: ValuationReport }) {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('value')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -80,14 +76,9 @@ export default function ValuationReportView({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Stock Valuation Report</h1>
-          <p className="mt-0.5 text-sm text-gray-500">
-            As at {formatDate(report.generatedAt)}
-          </p>
+          <p className="mt-0.5 text-sm text-gray-500">As at {formatDate(report.generatedAt)}</p>
         </div>
-        <Link
-          href="/inventory"
-          className="text-sm font-medium text-green-700 hover:text-green-800"
-        >
+        <Link href="/inventory" className="text-sm font-medium text-green-700 hover:text-green-800">
           Back to Inventory
         </Link>
       </div>
@@ -130,7 +121,13 @@ export default function ValuationReportView({
       <div className="mt-3">
         {report.isReconciled ? (
           <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5">
-            <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-4 w-4 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
             <span className="text-sm font-medium text-green-800">Reconciled</span>
@@ -140,8 +137,18 @@ export default function ValuationReportView({
           </div>
         ) : (
           <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5">
-            <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            <svg
+              className="h-4 w-4 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+              />
             </svg>
             <span className="text-sm font-medium text-red-800">
               Discrepancy: GHS {formatGHS(Math.abs(report.discrepancy))}
@@ -224,10 +231,7 @@ export default function ValuationReportView({
               filtered.map((line) => (
                 <tr key={line.productId} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-900">
-                    <Link
-                      href={`/inventory/${line.productId}`}
-                      className="hover:text-green-700"
-                    >
+                    <Link href={`/inventory/${line.productId}`} className="hover:text-green-700">
                       {line.productName}
                     </Link>
                   </td>
@@ -273,10 +277,7 @@ export default function ValuationReportView({
 
       {/* Footer links */}
       <div className="mt-4 flex justify-between pb-4 text-sm">
-        <Link
-          href="/ledger"
-          className="font-medium text-green-700 hover:text-green-800"
-        >
+        <Link href="/ledger" className="font-medium text-green-700 hover:text-green-800">
           View Inventory account in General Ledger &rarr;
         </Link>
       </div>

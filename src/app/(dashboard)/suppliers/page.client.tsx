@@ -24,10 +24,7 @@ export default function SupplierList({
   const filtered = initialSuppliers.filter((s) => {
     if (!search) return true
     const term = search.toLowerCase()
-    return (
-      s.name.toLowerCase().includes(term) ||
-      (s.phone && s.phone.includes(term))
-    )
+    return s.name.toLowerCase().includes(term) || (s.phone && s.phone.includes(term))
   })
 
   return (
@@ -60,9 +57,7 @@ export default function SupplierList({
           {filtered.length === 0 && initialSuppliers.length === 0 && (
             <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center">
               <p className="text-gray-500">No suppliers yet.</p>
-              <p className="mt-1 text-sm text-gray-400">
-                Add your first supplier to get started.
-              </p>
+              <p className="mt-1 text-sm text-gray-400">Add your first supplier to get started.</p>
               <Link
                 href="/suppliers/new"
                 className="mt-4 inline-block rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800"

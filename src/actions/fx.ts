@@ -69,9 +69,7 @@ export async function recordFxRate(input: RecordFxRateInput): Promise<FxRate> {
 
 // ─── Get Latest FX Rate ─────────────────────────────────────────────────────
 
-export async function getLatestFxRate(
-  fromCurrency: string,
-): Promise<FxRate | null> {
+export async function getLatestFxRate(fromCurrency: string): Promise<FxRate | null> {
   const session = await getServerSession()
   const { businessId } = session.user
 

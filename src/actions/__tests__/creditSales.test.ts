@@ -81,35 +81,33 @@ function mockAtomicWrite(orderId = 'order-001') {
   capturedJournalInput = null
   capturedTxInserts = []
 
-  vi.mocked(atomicTransactionWrite).mockImplementation(
-    async (journalInput, writeSourceRecord) => {
-      capturedJournalInput = journalInput
-      let insertCounter = 0
+  vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, writeSourceRecord) => {
+    capturedJournalInput = journalInput
+    let insertCounter = 0
 
-      const mockTx = {
-        insert: vi.fn((table: unknown) => ({
-          values: vi.fn((data: unknown) => {
-            const tableName =
-              insertCounter === 0 ? 'orders' : insertCounter === 1 ? 'orderLines' : 'paymentsReceived'
-            capturedTxInserts.push({ table: tableName, data })
-            insertCounter++
+    const mockTx = {
+      insert: vi.fn((table: unknown) => ({
+        values: vi.fn((data: unknown) => {
+          const tableName =
+            insertCounter === 0 ? 'orders' : insertCounter === 1 ? 'orderLines' : 'paymentsReceived'
+          capturedTxInserts.push({ table: tableName, data })
+          insertCounter++
 
-            const rows = Array.isArray(data) ? data : [data]
-            const returnData = rows.map((r: Record<string, unknown>) => ({ id: orderId, ...r }))
-            return {
-              returning: vi.fn().mockResolvedValue(returnData),
-              then: (f?: ((v: unknown) => unknown) | null, r?: ((e: unknown) => unknown) | null) =>
-                Promise.resolve(returnData).then(f, r),
-              catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
-              finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
-            }
-          }),
-        })),
-      }
+          const rows = Array.isArray(data) ? data : [data]
+          const returnData = rows.map((r: Record<string, unknown>) => ({ id: orderId, ...r }))
+          return {
+            returning: vi.fn().mockResolvedValue(returnData),
+            then: (f?: ((v: unknown) => unknown) | null, r?: ((e: unknown) => unknown) | null) =>
+              Promise.resolve(returnData).then(f, r),
+            catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
+            finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
+          }
+        }),
+      })),
+    }
 
-      return writeSourceRecord(mockTx as never, 'journal-entry-001')
-    },
-  )
+    return writeSourceRecord(mockTx as never, 'journal-entry-001')
+  })
 }
 
 function mockSession(role: 'owner' | 'manager' | 'cashier' = 'owner') {
@@ -139,25 +137,51 @@ function mockCreditLookups({
 } = {}) {
   const accountRows = Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))
   vi.mocked(db.select)
-    .mockReturnValueOnce(makeChain([{ creditLimit }]) as never)  // customer
-    .mockReturnValueOnce(makeChain([{ outstanding }]) as never)   // outstanding query
-    .mockReturnValueOnce(makeChain(accountRows) as never)          // accounts
+    .mockReturnValueOnce(makeChain([{ creditLimit }]) as never) // customer
+    .mockReturnValueOnce(makeChain([{ outstanding }]) as never) // outstanding query
+    .mockReturnValueOnce(makeChain(accountRows) as never) // accounts
 }
 
 function mockTaxResult(totalTaxAmount: number, supplyAmount: number) {
   vi.mocked(calculateTax).mockResolvedValue({
     supplyAmount,
-    breakdown: totalTaxAmount > 0
-      ? [
-          { componentCode: 'NHIL', componentName: 'NHIL', baseAmount: supplyAmount, rate: 0.025, taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100 },
-          { componentCode: 'GETFUND', componentName: 'GETFund', baseAmount: supplyAmount, rate: 0.025, taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100 },
-          { componentCode: 'COVID', componentName: 'COVID Levy', baseAmount: supplyAmount, rate: 0.01, taxAmount: Math.round(supplyAmount * 0.01 * 100) / 100 },
-          { componentCode: 'VAT', componentName: 'VAT', baseAmount: supplyAmount, rate: 0.15, taxAmount: Math.round(supplyAmount * 0.15 * 100) / 100 },
-        ]
-      : [],
+    breakdown:
+      totalTaxAmount > 0
+        ? [
+            {
+              componentCode: 'NHIL',
+              componentName: 'NHIL',
+              baseAmount: supplyAmount,
+              rate: 0.025,
+              taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100,
+            },
+            {
+              componentCode: 'GETFUND',
+              componentName: 'GETFund',
+              baseAmount: supplyAmount,
+              rate: 0.025,
+              taxAmount: Math.round(supplyAmount * 0.025 * 100) / 100,
+            },
+            {
+              componentCode: 'COVID',
+              componentName: 'COVID Levy',
+              baseAmount: supplyAmount,
+              rate: 0.01,
+              taxAmount: Math.round(supplyAmount * 0.01 * 100) / 100,
+            },
+            {
+              componentCode: 'VAT',
+              componentName: 'VAT',
+              baseAmount: supplyAmount,
+              rate: 0.15,
+              taxAmount: Math.round(supplyAmount * 0.15 * 100) / 100,
+            },
+          ]
+        : [],
     totalTaxAmount,
     totalAmount: supplyAmount + totalTaxAmount,
-    effectiveRate: totalTaxAmount > 0 ? Math.round((totalTaxAmount / supplyAmount) * 10000) / 10000 : 0,
+    effectiveRate:
+      totalTaxAmount > 0 ? Math.round((totalTaxAmount / supplyAmount) * 10000) / 10000 : 0,
   })
 }
 
@@ -267,7 +291,7 @@ describe('createOrder — credit sales', () => {
 
   it('Test 5 — unpaid credit sale journal: Dr 1100 / Cr 4001 + Cr 2100, balanced, no paymentsReceived', async () => {
     // Supply GHS 100, VAT ≈ 21.90
-    mockTaxResult(21.90, 100)
+    mockTaxResult(21.9, 100)
     mockCreditLookups({ creditLimit: '1000.00', outstanding: '0.00' })
     mockAtomicWrite()
 
@@ -296,7 +320,7 @@ describe('createOrder — credit sales', () => {
     const arLine = journal.lines.find((l) => l.debitAmount > 0)
     expect(arLine).toBeDefined()
     expect(arLine!.accountId).toBe('acct-ar')
-    expect(arLine!.debitAmount).toBeCloseTo(121.90, 2)
+    expect(arLine!.debitAmount).toBeCloseTo(121.9, 2)
 
     // Cr 4001 Revenue = 100.00
     const revLine = journal.lines.find((l) => l.accountId === 'acct-revenue')
@@ -306,13 +330,13 @@ describe('createOrder — credit sales', () => {
     // Cr 2100 VAT Payable = 21.90
     const vatLine = journal.lines.find((l) => l.accountId === 'acct-vat-payable')
     expect(vatLine).toBeDefined()
-    expect(vatLine!.creditAmount).toBeCloseTo(21.90, 2)
+    expect(vatLine!.creditAmount).toBeCloseTo(21.9, 2)
 
     // Invariant
     const totalDebits = journal.lines.reduce((s, l) => s + l.debitAmount, 0)
     const totalCredits = journal.lines.reduce((s, l) => s + l.creditAmount, 0)
     expect(totalDebits).toBeCloseTo(totalCredits, 2)
-    expect(totalDebits).toBeCloseTo(121.90, 2)
+    expect(totalDebits).toBeCloseTo(121.9, 2)
 
     // Order insert: amountPaid = 0.00, paymentStatus = unpaid
     const orderInsert = capturedTxInserts.find((i) => i.table === 'orders')
@@ -329,7 +353,7 @@ describe('createOrder — credit sales', () => {
 
   it('Test 6 — partial payment sale journal: Dr 1100 AR + Dr 1001 Cash / Cr 4001 + Cr 2100, balanced', async () => {
     // Total = 121.90, amountPaid = 50, AR = 71.90
-    mockTaxResult(21.90, 100)
+    mockTaxResult(21.9, 100)
     mockCreditLookups({ creditLimit: '1000.00', outstanding: '0.00' })
     mockAtomicWrite()
 
@@ -355,16 +379,12 @@ describe('createOrder — credit sales', () => {
     expect(journal.lines).toHaveLength(4)
 
     // Dr AR = 71.90
-    const arLine = journal.lines.find(
-      (l) => l.debitAmount > 0 && l.accountId === 'acct-ar',
-    )
+    const arLine = journal.lines.find((l) => l.debitAmount > 0 && l.accountId === 'acct-ar')
     expect(arLine).toBeDefined()
-    expect(arLine!.debitAmount).toBeCloseTo(71.90, 2)
+    expect(arLine!.debitAmount).toBeCloseTo(71.9, 2)
 
     // Dr Cash = 50.00
-    const cashLine = journal.lines.find(
-      (l) => l.debitAmount > 0 && l.accountId === 'acct-cash',
-    )
+    const cashLine = journal.lines.find((l) => l.debitAmount > 0 && l.accountId === 'acct-cash')
     expect(cashLine).toBeDefined()
     expect(cashLine!.debitAmount).toBeCloseTo(50.0, 2)
 
@@ -372,7 +392,7 @@ describe('createOrder — credit sales', () => {
     const totalDebits = journal.lines.reduce((s, l) => s + l.debitAmount, 0)
     const totalCredits = journal.lines.reduce((s, l) => s + l.creditAmount, 0)
     expect(totalDebits).toBeCloseTo(totalCredits, 2)
-    expect(totalDebits).toBeCloseTo(121.90, 2)
+    expect(totalDebits).toBeCloseTo(121.9, 2)
 
     // Order insert
     const orderInsert = capturedTxInserts.find((i) => i.table === 'orders')

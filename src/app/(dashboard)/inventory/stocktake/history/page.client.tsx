@@ -20,11 +20,7 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }>
   in_progress: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'In Progress' },
 }
 
-export default function StocktakeHistoryView({
-  history,
-}: {
-  history: StocktakeHistoryItem[]
-}) {
+export default function StocktakeHistoryView({ history }: { history: StocktakeHistoryItem[] }) {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="flex items-center justify-between">
@@ -73,14 +69,10 @@ export default function StocktakeHistoryView({
                 <div className="mt-2 flex gap-4 text-xs text-gray-500">
                   <span>{item.lineCount} products</span>
                   {item.status === 'confirmed' && (
-                    <span>
-                      Total variance: GHS {formatGHS(item.totalVarianceValue)}
-                    </span>
+                    <span>Total variance: GHS {formatGHS(item.totalVarianceValue)}</span>
                   )}
                 </div>
-                {item.notes && (
-                  <p className="mt-1 text-xs text-gray-400">{item.notes}</p>
-                )}
+                {item.notes && <p className="mt-1 text-xs text-gray-400">{item.notes}</p>}
               </div>
             )
           })

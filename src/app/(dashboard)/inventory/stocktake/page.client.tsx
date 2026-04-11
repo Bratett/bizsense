@@ -175,11 +175,7 @@ export default function StocktakeView({
     setSavingProduct(productId)
     setError(null)
     startTransition(async () => {
-      const result = await updateStocktakeCount(
-        activeStocktake!.id,
-        productId,
-        numericValue,
-      )
+      const result = await updateStocktakeCount(activeStocktake!.id, productId, numericValue)
       setSavingProduct(null)
       if (!result.success) {
         setError(result.error)
@@ -228,10 +224,7 @@ export default function StocktakeView({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">Stocktake</h1>
-        <Link
-          href="/inventory"
-          className="text-sm font-medium text-green-700 hover:text-green-800"
-        >
+        <Link href="/inventory" className="text-sm font-medium text-green-700 hover:text-green-800">
           Back to Inventory
         </Link>
       </div>
@@ -276,7 +269,11 @@ export default function StocktakeView({
               {categoryLines.map((line) => {
                 const localValue = localCounts[line.productId]
                 const displayedCount =
-                  localValue !== undefined ? localValue : line.countedQuantity !== null ? String(line.countedQuantity) : ''
+                  localValue !== undefined
+                    ? localValue
+                    : line.countedQuantity !== null
+                      ? String(line.countedQuantity)
+                      : ''
                 const isCounted = line.countedQuantity !== null
                 const variance = line.varianceQuantity
 
@@ -303,9 +300,7 @@ export default function StocktakeView({
                     {/* Count input + variance */}
                     <div className="mt-3 flex items-end gap-3">
                       <div className="flex-1">
-                        <label className="text-xs font-medium text-gray-600">
-                          Actual count
-                        </label>
+                        <label className="text-xs font-medium text-gray-600">Actual count</label>
                         <input
                           type="number"
                           inputMode="decimal"
@@ -406,8 +401,9 @@ export default function StocktakeView({
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900">Confirm Stocktake</h3>
             <p className="mt-2 text-sm text-gray-600">
-              This will post {varianceLineCount} stock adjustment{varianceLineCount !== 1 ? 's' : ''} totalling
-              GHS {formatGHS(totalVarianceValue)}. This cannot be undone.
+              This will post {varianceLineCount} stock adjustment
+              {varianceLineCount !== 1 ? 's' : ''} totalling GHS {formatGHS(totalVarianceValue)}.
+              This cannot be undone.
             </p>
             <div className="mt-5 flex gap-3">
               <button

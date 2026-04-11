@@ -15,9 +15,7 @@ export type StocktakeActionResult =
   | { success: true; stocktakeId: string }
   | { success: false; error: string }
 
-export type StocktakeUpdateResult =
-  | { success: true }
-  | { success: false; error: string }
+export type StocktakeUpdateResult = { success: true } | { success: false; error: string }
 
 export type StocktakeLineData = {
   id: string
@@ -55,9 +53,7 @@ export type StocktakeHistoryItem = {
 
 // ─── initiateStocktake ──────────────────────────────────────────────────────
 
-export async function initiateStocktake(
-  notes?: string,
-): Promise<StocktakeActionResult> {
+export async function initiateStocktake(notes?: string): Promise<StocktakeActionResult> {
   const user = await requireRole(['owner', 'manager', 'accountant'])
   const { businessId } = user
 
@@ -65,12 +61,7 @@ export async function initiateStocktake(
   const existing = await db
     .select({ id: stocktakes.id })
     .from(stocktakes)
-    .where(
-      and(
-        eq(stocktakes.businessId, businessId),
-        eq(stocktakes.status, 'in_progress'),
-      ),
-    )
+    .where(and(eq(stocktakes.businessId, businessId), eq(stocktakes.status, 'in_progress')))
     .limit(1)
 
   if (existing.length > 0) {
@@ -98,7 +89,8 @@ export async function initiateStocktake(
   if (activeProducts.length === 0) {
     return {
       success: false,
-      error: 'No active products with inventory tracking. Add products before starting a stocktake.',
+      error:
+        'No active products with inventory tracking. Add products before starting a stocktake.',
     }
   }
 
@@ -159,12 +151,7 @@ export async function updateStocktakeCount(
   const [stocktake] = await db
     .select({ id: stocktakes.id, status: stocktakes.status })
     .from(stocktakes)
-    .where(
-      and(
-        eq(stocktakes.id, stocktakeId),
-        eq(stocktakes.businessId, businessId),
-      ),
-    )
+    .where(and(eq(stocktakes.id, stocktakeId), eq(stocktakes.businessId, businessId)))
 
   if (!stocktake) {
     return { success: false, error: 'Stocktake not found' }
@@ -181,10 +168,7 @@ export async function updateStocktakeCount(
     })
     .from(stocktakeLines)
     .where(
-      and(
-        eq(stocktakeLines.stocktakeId, stocktakeId),
-        eq(stocktakeLines.productId, productId),
-      ),
+      and(eq(stocktakeLines.stocktakeId, stocktakeId), eq(stocktakeLines.productId, productId)),
     )
 
   if (!line) {
@@ -228,9 +212,7 @@ export async function updateStocktakeCount(
 
 // ─── confirmStocktake ───────────────────────────────────────────────────────
 
-export async function confirmStocktake(
-  stocktakeId: string,
-): Promise<StocktakeUpdateResult> {
+export async function confirmStocktake(stocktakeId: string): Promise<StocktakeUpdateResult> {
   const user = await requireRole(['owner', 'manager'])
   const { businessId } = user
 
@@ -238,12 +220,7 @@ export async function confirmStocktake(
   const [stocktake] = await db
     .select({ id: stocktakes.id, status: stocktakes.status })
     .from(stocktakes)
-    .where(
-      and(
-        eq(stocktakes.id, stocktakeId),
-        eq(stocktakes.businessId, businessId),
-      ),
-    )
+    .where(and(eq(stocktakes.id, stocktakeId), eq(stocktakes.businessId, businessId)))
 
   if (!stocktake) {
     return { success: false, error: 'Stocktake not found' }
@@ -285,7 +262,8 @@ export async function confirmStocktake(
 
     if (variance > 0) {
       // Surplus — add stock
-      const unitCost = absVariance > 0 ? Math.round((Math.abs(varianceVal) / absVariance) * 100) / 100 : 0
+      const unitCost =
+        absVariance > 0 ? Math.round((Math.abs(varianceVal) / absVariance) * 100) / 100 : 0
       const result = await adjustStock({
         productId: line.productId,
         adjustmentType: 'add',
@@ -343,21 +321,14 @@ export async function confirmStocktake(
 
 // ─── cancelStocktake ────────────────────────────────────────────────────────
 
-export async function cancelStocktake(
-  stocktakeId: string,
-): Promise<StocktakeUpdateResult> {
+export async function cancelStocktake(stocktakeId: string): Promise<StocktakeUpdateResult> {
   const user = await requireRole(['owner', 'manager'])
   const { businessId } = user
 
   const [stocktake] = await db
     .select({ id: stocktakes.id, status: stocktakes.status })
     .from(stocktakes)
-    .where(
-      and(
-        eq(stocktakes.id, stocktakeId),
-        eq(stocktakes.businessId, businessId),
-      ),
-    )
+    .where(and(eq(stocktakes.id, stocktakeId), eq(stocktakes.businessId, businessId)))
 
   if (!stocktake) {
     return { success: false, error: 'Stocktake not found' }
@@ -392,12 +363,7 @@ export async function getActiveStocktake(): Promise<ActiveStocktake | null> {
       notes: stocktakes.notes,
     })
     .from(stocktakes)
-    .where(
-      and(
-        eq(stocktakes.businessId, businessId),
-        eq(stocktakes.status, 'in_progress'),
-      ),
-    )
+    .where(and(eq(stocktakes.businessId, businessId), eq(stocktakes.status, 'in_progress')))
     .limit(1)
 
   if (!stocktake) return null

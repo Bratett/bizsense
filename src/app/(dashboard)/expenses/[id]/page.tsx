@@ -2,11 +2,7 @@ import { getServerSession } from '@/lib/session'
 import { getExpenseById } from '@/actions/expenses'
 import ExpenseDetailView from './page.client'
 
-export default async function ExpenseDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function ExpenseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession()
   const { id } = await params
   const expense = await getExpenseById(id)

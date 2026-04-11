@@ -12,27 +12,27 @@ import type { AccountBalance } from '../engine'
 // ─── Factory ──────────────────────────────────────────────────────────────────
 
 function makeBalance(overrides: {
-  accountType:  string
+  accountType: string
   accountCode?: string
   accountName?: string
-  accountId?:   string
-  netBalance?:  number
+  accountId?: string
+  netBalance?: number
   totalDebits?: number
   totalCredits?: number
 }): AccountBalance {
   const isDebitNormal = ['asset', 'cogs', 'expense'].includes(overrides.accountType)
-  const netBalance    = overrides.netBalance ?? 0
-  const totalDebits   = overrides.totalDebits  ?? (isDebitNormal ? netBalance : 0)
-  const totalCredits  = overrides.totalCredits ?? (isDebitNormal ? 0 : netBalance)
+  const netBalance = overrides.netBalance ?? 0
+  const totalDebits = overrides.totalDebits ?? (isDebitNormal ? netBalance : 0)
+  const totalCredits = overrides.totalCredits ?? (isDebitNormal ? 0 : netBalance)
 
   return {
-    accountId:        overrides.accountId   ?? 'uuid-1',
-    accountCode:      overrides.accountCode ?? '9999',
-    accountName:      overrides.accountName ?? 'Test Account',
-    accountType:      overrides.accountType,
-    accountSubtype:   null,
+    accountId: overrides.accountId ?? 'uuid-1',
+    accountCode: overrides.accountCode ?? '9999',
+    accountName: overrides.accountName ?? 'Test Account',
+    accountType: overrides.accountType,
+    accountSubtype: null,
     cashFlowActivity: 'operating',
-    normalBalance:    isDebitNormal ? 'debit' : 'credit',
+    normalBalance: isDebitNormal ? 'debit' : 'credit',
     totalDebits,
     totalCredits,
     netBalance,
@@ -71,7 +71,7 @@ describe('getProfitAndLoss', () => {
   it('Test 3 — grossProfit = revenue - COGS', async () => {
     vi.mocked(getAccountBalances).mockResolvedValueOnce([
       makeBalance({ accountType: 'revenue', netBalance: 800 }),
-      makeBalance({ accountType: 'cogs',    netBalance: 200 }),
+      makeBalance({ accountType: 'cogs', netBalance: 200 }),
     ])
 
     const pl = await getProfitAndLoss('biz-1', JAN)
@@ -82,7 +82,7 @@ describe('getProfitAndLoss', () => {
   it('Test 4 — netProfit = grossProfit - expenses', async () => {
     vi.mocked(getAccountBalances).mockResolvedValueOnce([
       makeBalance({ accountType: 'revenue', netBalance: 800 }),
-      makeBalance({ accountType: 'cogs',    netBalance: 200 }),
+      makeBalance({ accountType: 'cogs', netBalance: 200 }),
       makeBalance({ accountType: 'expense', netBalance: 150 }),
     ])
 
@@ -94,7 +94,7 @@ describe('getProfitAndLoss', () => {
   it('Test 5 — expense account with netBalance=0 is excluded from lines', async () => {
     vi.mocked(getAccountBalances).mockResolvedValueOnce([
       makeBalance({ accountType: 'expense', accountCode: '6001', netBalance: 100 }),
-      makeBalance({ accountType: 'expense', accountCode: '6002', netBalance: 0   }),
+      makeBalance({ accountType: 'expense', accountCode: '6002', netBalance: 0 }),
     ])
 
     const pl = await getProfitAndLoss('biz-1', JAN)
@@ -123,12 +123,17 @@ describe('getProfitAndLoss', () => {
   it('Test 7 — FX gain account (e.g. code=4003) appears in revenue lines', async () => {
     vi.mocked(getAccountBalances).mockResolvedValueOnce([
       makeBalance({ accountType: 'revenue', accountCode: '4001', netBalance: 500 }),
-      makeBalance({ accountType: 'revenue', accountCode: '4003', accountName: 'FX Gain / (Loss)', netBalance: 75 }),
+      makeBalance({
+        accountType: 'revenue',
+        accountCode: '4003',
+        accountName: 'FX Gain / (Loss)',
+        netBalance: 75,
+      }),
     ])
 
     const pl = await getProfitAndLoss('biz-1', JAN)
 
-    const fxLine = pl.revenue.lines.find(l => l.accountCode === '4003')
+    const fxLine = pl.revenue.lines.find((l) => l.accountCode === '4003')
     expect(fxLine).toBeDefined()
     expect(fxLine?.netBalance).toBe(75)
     expect(pl.revenue.total).toBe(575)

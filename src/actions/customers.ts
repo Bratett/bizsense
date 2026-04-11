@@ -177,11 +177,7 @@ export async function updateCustomer(
     .select({ id: customers.id })
     .from(customers)
     .where(
-      and(
-        eq(customers.businessId, businessId),
-        eq(customers.phone, phone),
-        ne(customers.id, id),
-      ),
+      and(eq(customers.businessId, businessId), eq(customers.phone, phone), ne(customers.id, id)),
     )
     .limit(1)
 
@@ -255,9 +251,7 @@ export async function deactivateCustomer(id: string): Promise<CustomerActionResu
 
 // ─── List Customers ──────────────────────────────────────────────────────────
 
-export async function listCustomers(
-  filters?: CustomerListFilters,
-): Promise<CustomerListItem[]> {
+export async function listCustomers(filters?: CustomerListFilters): Promise<CustomerListItem[]> {
   const session = await getServerSession()
   const businessId = session.user.businessId
 
@@ -269,9 +263,7 @@ export async function listCustomers(
 
   if (filters?.search) {
     const term = `%${filters.search}%`
-    conditions.push(
-      or(ilike(customers.name, term), ilike(customers.phone, term))!,
-    )
+    conditions.push(or(ilike(customers.name, term), ilike(customers.phone, term))!)
   }
 
   return db

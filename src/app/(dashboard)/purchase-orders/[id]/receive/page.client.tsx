@@ -84,9 +84,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
   )
 
   function updateLine(poLineId: string, field: 'quantityReceiving' | 'unitCost', value: string) {
-    setLines((prev) =>
-      prev.map((l) => (l.poLineId === poLineId ? { ...l, [field]: value } : l)),
-    )
+    setLines((prev) => prev.map((l) => (l.poLineId === poLineId ? { ...l, [field]: value } : l)))
   }
 
   const hasAnyReceiving = lines.some((l) => parseNum(l.quantityReceiving) > 0)
@@ -173,9 +171,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
         >
           ← {po.poNumber}
         </Link>
-        <h1 className="mt-4 text-xl font-semibold text-gray-900">
-          Receive Goods — {po.poNumber}
-        </h1>
+        <h1 className="mt-4 text-xl font-semibold text-gray-900">Receive Goods — {po.poNumber}</h1>
         <p className="mt-1 text-sm text-gray-500">{po.supplierName}</p>
 
         <div className="mt-6 space-y-4">
@@ -210,8 +206,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {lines.map((line) => {
-                    const lineTotal =
-                      parseNum(line.quantityReceiving) * parseNum(line.unitCost)
+                    const lineTotal = parseNum(line.quantityReceiving) * parseNum(line.unitCost)
                     const receivingNum = parseNum(line.quantityReceiving)
                     const exceedsOutstanding = receivingNum > line.quantityOutstanding + 0.001
 
@@ -253,9 +248,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                             min="0"
                             step="0.01"
                             value={line.unitCost}
-                            onChange={(e) =>
-                              updateLine(line.poLineId, 'unitCost', e.target.value)
-                            }
+                            onChange={(e) => updateLine(line.poLineId, 'unitCost', e.target.value)}
                             className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </td>
@@ -268,10 +261,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                 </tbody>
                 <tfoot className="border-t border-gray-200 bg-gray-50">
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-3 text-right font-semibold text-gray-700"
-                    >
+                    <td colSpan={6} className="px-4 py-3 text-right font-semibold text-gray-700">
                       Total
                     </td>
                     <td className="px-3 py-3 text-right font-bold text-gray-900">

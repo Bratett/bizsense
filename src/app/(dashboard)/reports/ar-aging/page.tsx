@@ -15,8 +15,8 @@ export default async function ArAgingPage({ searchParams }: PageProps) {
   const session = await getServerSession()
   const { businessId } = session.user
 
-  const params    = await searchParams
-  const asOfDate  = params.date ?? new Date().toISOString().slice(0, 10)
+  const params = await searchParams
+  const asOfDate = params.date ?? new Date().toISOString().slice(0, 10)
 
   const [report, arLedgerBalance] = await Promise.all([
     getArAging(businessId, asOfDate),

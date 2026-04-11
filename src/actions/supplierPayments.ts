@@ -119,7 +119,8 @@ export async function recordSupplierPayment(
   const paymentAccountId = accountMap[paymentCode]
 
   if (!apAccountId) throw new Error('Accounts Payable account (2001) not found for this business')
-  if (!paymentAccountId) throw new Error(`Payment account (${paymentCode}) not found for this business`)
+  if (!paymentAccountId)
+    throw new Error(`Payment account (${paymentCode}) not found for this business`)
 
   // ── Build journal entry ─────────────────────────────────────────────────────
   const amountStr = input.amount.toFixed(2)
@@ -149,29 +150,26 @@ export async function recordSupplierPayment(
   }
 
   // ── Atomic write ────────────────────────────────────────────────────────────
-  const payment = await atomicTransactionWrite(
-    journalInput,
-    async (tx, journalEntryId) => {
-      const [inserted] = await tx
-        .insert(supplierPayments)
-        .values({
-          businessId,
-          supplierId: input.supplierId,
-          grnId: input.grnId ?? null,
-          amount: amountStr,
-          paymentMethod: input.paymentMethod,
-          paymentDate: input.paymentDate,
-          momoReference: input.momoReference ?? null,
-          bankReference: input.bankReference ?? null,
-          notes: input.notes ?? null,
-          journalEntryId,
-          createdBy: userId,
-        })
-        .returning()
+  const payment = await atomicTransactionWrite(journalInput, async (tx, journalEntryId) => {
+    const [inserted] = await tx
+      .insert(supplierPayments)
+      .values({
+        businessId,
+        supplierId: input.supplierId,
+        grnId: input.grnId ?? null,
+        amount: amountStr,
+        paymentMethod: input.paymentMethod,
+        paymentDate: input.paymentDate,
+        momoReference: input.momoReference ?? null,
+        bankReference: input.bankReference ?? null,
+        notes: input.notes ?? null,
+        journalEntryId,
+        createdBy: userId,
+      })
+      .returning()
 
-      return inserted
-    },
-  )
+    return inserted
+  })
 
   return { payment, warningOverpayment }
 }
@@ -194,10 +192,7 @@ export async function listSupplierPayments(supplierId: string): Promise<Supplier
     .select()
     .from(supplierPayments)
     .where(
-      and(
-        eq(supplierPayments.supplierId, supplierId),
-        eq(supplierPayments.businessId, businessId),
-      ),
+      and(eq(supplierPayments.supplierId, supplierId), eq(supplierPayments.businessId, businessId)),
     )
     .orderBy(desc(supplierPayments.paymentDate))
 
@@ -206,15 +201,18 @@ export async function listSupplierPayments(supplierId: string): Promise<Supplier
 
 // ─── getSupplierStatementData ────────────────────────────────────────────────
 
-export async function getSupplierStatementData(
-  supplierId: string,
-): Promise<SupplierStatementData> {
+export async function getSupplierStatementData(supplierId: string): Promise<SupplierStatementData> {
   const user = await requireRole(['owner', 'manager', 'accountant'])
   const { businessId } = user
 
   // Business info
   const [business] = await db
-    .select({ name: businesses.name, address: businesses.address, phone: businesses.phone, tin: businesses.tin })
+    .select({
+      name: businesses.name,
+      address: businesses.address,
+      phone: businesses.phone,
+      tin: businesses.tin,
+    })
     .from(businesses)
     .where(eq(businesses.id, businessId))
 
@@ -249,10 +247,7 @@ export async function getSupplierStatementData(
     .select()
     .from(supplierPayments)
     .where(
-      and(
-        eq(supplierPayments.supplierId, supplierId),
-        eq(supplierPayments.businessId, businessId),
-      ),
+      and(eq(supplierPayments.supplierId, supplierId), eq(supplierPayments.businessId, businessId)),
     )
     .orderBy(asc(supplierPayments.paymentDate))
 

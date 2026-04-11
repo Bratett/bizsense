@@ -28,7 +28,13 @@ export default function BackfillView() {
       {/* Header */}
       <div className="flex items-center gap-2">
         <Link href="/inventory" className="text-gray-600 hover:text-gray-900">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </Link>
@@ -39,29 +45,26 @@ export default function BackfillView() {
       <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
         <h2 className="text-sm font-semibold text-blue-900">What does this do?</h2>
         <ul className="mt-2 space-y-1.5 text-sm text-blue-800">
+          <li>Scans all past sales orders that have product-linked line items.</li>
           <li>
-            Scans all past sales orders that have product-linked line items.
+            For each order, computes the Cost of Goods Sold (COGS) using FIFO costing and adds the
+            missing journal entry lines.
           </li>
           <li>
-            For each order, computes the Cost of Goods Sold (COGS) using FIFO
-            costing and adds the missing journal entry lines.
+            This corrects the ledger so that your Profit &amp; Loss report reflects the true cost of
+            goods sold.
           </li>
           <li>
-            This corrects the ledger so that your Profit &amp; Loss report
-            reflects the true cost of goods sold.
-          </li>
-          <li>
-            Running this multiple times is safe — orders that have already been
-            backfilled are skipped automatically.
+            Running this multiple times is safe — orders that have already been backfilled are
+            skipped automatically.
           </li>
         </ul>
       </div>
 
       <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
         <p className="text-sm text-amber-800">
-          Before running, make sure you have set opening stock for all products
-          that were sold in past orders. Products without opening stock will be
-          reported as errors.
+          Before running, make sure you have set opening stock for all products that were sold in
+          past orders. Products without opening stock will be reported as errors.
         </p>
       </div>
 

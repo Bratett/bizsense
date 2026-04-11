@@ -214,9 +214,7 @@ describe('deactivateSupplier', () => {
 
     expect(result.success).toBe(true)
     expect(db.update).toHaveBeenCalled()
-    expect(setMock).toHaveBeenCalledWith(
-      expect.objectContaining({ isActive: false }),
-    )
+    expect(setMock).toHaveBeenCalledWith(expect.objectContaining({ isActive: false }))
   })
 })
 

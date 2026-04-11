@@ -160,13 +160,7 @@ function ReversalModal({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function GrnDetail({
-  grn,
-  role,
-}: {
-  grn: GrnWithLinesAndJournal
-  role: string
-}) {
+export default function GrnDetail({ grn, role }: { grn: GrnWithLinesAndJournal; role: string }) {
   const router = useRouter()
   const [showReversal, setShowReversal] = useState(false)
   const [journalExpanded, setJournalExpanded] = useState(false)
@@ -224,9 +218,7 @@ export default function GrnDetail({
                   <td className="px-4 py-3 text-right text-gray-700">
                     {Number(line.quantityReceived).toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-700">
-                    {formatGHS(line.unitCost)}
-                  </td>
+                  <td className="px-4 py-3 text-right text-gray-700">{formatGHS(line.unitCost)}</td>
                   <td className="px-4 py-3 text-right font-medium text-gray-900">
                     {formatGHS(line.lineTotal)}
                   </td>
@@ -286,8 +278,7 @@ export default function GrnDetail({
                   <span className="font-medium">Reference:</span> {grn.journalSummary.reference}
                 </p>
                 <p>
-                  <span className="font-medium">Description:</span>{' '}
-                  {grn.journalSummary.description}
+                  <span className="font-medium">Description:</span> {grn.journalSummary.description}
                 </p>
               </div>
             )}

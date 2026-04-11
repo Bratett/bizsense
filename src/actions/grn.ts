@@ -203,8 +203,7 @@ export async function createGrn(input: CreateGrnInput): Promise<GrnActionResult>
       // Sum already received from confirmed GRNs for this PO line
       const [{ alreadyReceived }] = await db
         .select({
-          alreadyReceived:
-            sql<string>`COALESCE(SUM(CASE WHEN ${goodsReceivedNotes.status} = 'confirmed' THEN ${grnLines.quantityReceived}::numeric ELSE 0 END), 0)`,
+          alreadyReceived: sql<string>`COALESCE(SUM(CASE WHEN ${goodsReceivedNotes.status} = 'confirmed' THEN ${grnLines.quantityReceived}::numeric ELSE 0 END), 0)`,
         })
         .from(grnLines)
         .leftJoin(goodsReceivedNotes, eq(goodsReceivedNotes.id, grnLines.grnId))
@@ -353,10 +352,7 @@ export async function confirmGrn(input: ConfirmGrnInput): Promise<GrnActionResul
   const creditAccountId = accountMap[creditCode]
 
   if (!inventoryAccountId || !creditAccountId) {
-    const missing = [
-      !inventoryAccountId && INVENTORY_ACCOUNT_CODE,
-      !creditAccountId && creditCode,
-    ]
+    const missing = [!inventoryAccountId && INVENTORY_ACCOUNT_CODE, !creditAccountId && creditCode]
       .filter(Boolean)
       .join(', ')
     return {
@@ -514,9 +510,7 @@ export async function reverseGrn(input: ReverseGrnInput): Promise<GrnActionResul
   const inventoryAccountRows = await db
     .select({ id: accounts.id })
     .from(accounts)
-    .where(
-      and(eq(accounts.businessId, businessId), eq(accounts.code, INVENTORY_ACCOUNT_CODE)),
-    )
+    .where(and(eq(accounts.businessId, businessId), eq(accounts.code, INVENTORY_ACCOUNT_CODE)))
     .limit(1)
 
   const inventoryAccountId = inventoryAccountRows[0]?.id
@@ -648,15 +642,13 @@ export async function reverseGrn(input: ReverseGrnInput): Promise<GrnActionResul
 
 // ─── List GRNs ────────────────────────────────────────────────────────────────
 
-export async function listGrns(
-  filters?: {
-    supplierId?: string
-    poId?: string
-    status?: 'draft' | 'confirmed'
-    dateFrom?: string
-    dateTo?: string
-  },
-): Promise<GrnWithSupplier[]> {
+export async function listGrns(filters?: {
+  supplierId?: string
+  poId?: string
+  status?: 'draft' | 'confirmed'
+  dateFrom?: string
+  dateTo?: string
+}): Promise<GrnWithSupplier[]> {
   const user = await requireRole(['owner', 'manager', 'accountant', 'cashier'])
   const { businessId } = user
 
@@ -814,10 +806,7 @@ export async function getGrnById(id: string): Promise<GrnWithLinesAndJournal> {
  * After confirming a GRN, check if the PO is now fully received.
  * Must be called within an existing database transaction.
  */
-async function updatePoStatusAfterGrn(
-  tx: DrizzleTransaction,
-  poId: string,
-) {
+async function updatePoStatusAfterGrn(tx: DrizzleTransaction, poId: string) {
   // Get all PO lines with their totals
   const poLineRows = await tx
     .select({
@@ -833,8 +822,7 @@ async function updatePoStatusAfterGrn(
   const receivedSums = await tx
     .select({
       poLineId: grnLines.poLineId,
-      totalReceived:
-        sql<string>`COALESCE(SUM(CASE WHEN ${goodsReceivedNotes.status} = 'confirmed' THEN ${grnLines.quantityReceived}::numeric ELSE 0 END), 0)`,
+      totalReceived: sql<string>`COALESCE(SUM(CASE WHEN ${goodsReceivedNotes.status} = 'confirmed' THEN ${grnLines.quantityReceived}::numeric ELSE 0 END), 0)`,
     })
     .from(grnLines)
     .leftJoin(goodsReceivedNotes, eq(goodsReceivedNotes.id, grnLines.grnId))

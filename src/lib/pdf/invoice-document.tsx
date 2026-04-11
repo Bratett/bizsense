@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-  Document,
-  Page,
-  View,
-  Text,
-  Image,
-  StyleSheet,
-} from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer'
 import type { InvoiceData } from './types'
 
 // ─── Formatting helpers ─────────────────────────────────────────────────────
@@ -238,30 +231,22 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
         {/* ── Header ── */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            {data.business.logoUrl && (
-              <Image src={data.business.logoUrl} style={styles.logo} />
-            )}
+            {data.business.logoUrl && <Image src={data.business.logoUrl} style={styles.logo} />}
             <Text style={styles.businessName}>{data.business.name}</Text>
             {data.business.address && (
               <Text style={styles.businessDetail}>{data.business.address}</Text>
             )}
             {data.business.phone && (
-              <Text style={styles.businessDetail}>
-                Tel: {data.business.phone}
-              </Text>
+              <Text style={styles.businessDetail}>Tel: {data.business.phone}</Text>
             )}
             {data.business.email && (
               <Text style={styles.businessDetail}>{data.business.email}</Text>
             )}
             {data.business.tin && (
-              <Text style={styles.businessDetail}>
-                GRA TIN: {data.business.tin}
-              </Text>
+              <Text style={styles.businessDetail}>GRA TIN: {data.business.tin}</Text>
             )}
             {data.business.vatRegistered && data.business.vatNumber && (
-              <Text style={styles.businessDetail}>
-                VAT Reg: {data.business.vatNumber}
-              </Text>
+              <Text style={styles.businessDetail}>VAT Reg: {data.business.vatNumber}</Text>
             )}
           </View>
           <View style={styles.headerRight}>
@@ -275,9 +260,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
         <View style={styles.detailRow}>
           <View style={styles.detailBlock}>
             <Text style={styles.detailLabel}>Invoice Details</Text>
-            <Text style={styles.detailValueBold}>
-              Invoice #: {data.invoiceNumber}
-            </Text>
+            <Text style={styles.detailValueBold}>Invoice #: {data.invoiceNumber}</Text>
             <Text style={styles.detailValue}>Date: {data.invoiceDate}</Text>
             <Text style={styles.detailValue}>Due: {data.invoiceDate}</Text>
           </View>
@@ -285,18 +268,12 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
             <Text style={styles.detailLabel}>Bill To</Text>
             {data.customer ? (
               <>
-                <Text style={styles.detailValueBold}>
-                  {data.customer.name}
-                </Text>
+                <Text style={styles.detailValueBold}>{data.customer.name}</Text>
                 {data.customer.phone && (
-                  <Text style={styles.detailValue}>
-                    {data.customer.phone}
-                  </Text>
+                  <Text style={styles.detailValue}>{data.customer.phone}</Text>
                 )}
                 {data.customer.location && (
-                  <Text style={styles.detailValue}>
-                    {data.customer.location}
-                  </Text>
+                  <Text style={styles.detailValue}>{data.customer.location}</Text>
                 )}
               </>
             ) : (
@@ -310,32 +287,18 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
           {/* Header */}
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderText, styles.colIndex]}>#</Text>
-            <Text style={[styles.tableHeaderText, styles.colDesc]}>
-              Description
-            </Text>
+            <Text style={[styles.tableHeaderText, styles.colDesc]}>Description</Text>
             <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
-            <Text style={[styles.tableHeaderText, styles.colPrice]}>
-              Unit Price
-            </Text>
-            <Text style={[styles.tableHeaderText, styles.colDiscount]}>
-              Discount
-            </Text>
-            <Text style={[styles.tableHeaderText, styles.colTotal]}>
-              Line Total
-            </Text>
+            <Text style={[styles.tableHeaderText, styles.colPrice]}>Unit Price</Text>
+            <Text style={[styles.tableHeaderText, styles.colDiscount]}>Discount</Text>
+            <Text style={[styles.tableHeaderText, styles.colTotal]}>Line Total</Text>
           </View>
           {/* Rows */}
           {data.lines.map((line) => (
             <View key={line.index} style={styles.tableRow}>
-              <Text style={[styles.tableCell, styles.colIndex]}>
-                {line.index}
-              </Text>
-              <Text style={[styles.tableCell, styles.colDesc]}>
-                {line.description}
-              </Text>
-              <Text style={[styles.tableCell, styles.colQty]}>
-                {line.quantity}
-              </Text>
+              <Text style={[styles.tableCell, styles.colIndex]}>{line.index}</Text>
+              <Text style={[styles.tableCell, styles.colDesc]}>{line.description}</Text>
+              <Text style={[styles.tableCell, styles.colQty]}>{line.quantity}</Text>
               <Text style={[styles.tableCell, styles.colPrice]}>
                 {line.unitPriceCurrency === 'USD' ? 'USD ' : ''}
                 {line.unitPrice.toFixed(2)}
@@ -343,16 +306,12 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
               <Text style={[styles.tableCell, styles.colDiscount]}>
                 {line.discountAmount > 0 ? formatGHS(line.discountAmount) : '-'}
               </Text>
-              <Text style={[styles.tableCell, styles.colTotal]}>
-                {formatGHS(line.lineTotal)}
-              </Text>
+              <Text style={[styles.tableCell, styles.colTotal]}>{formatGHS(line.lineTotal)}</Text>
             </View>
           ))}
           {/* FX note */}
           {data.hasUsdLines && data.fxRate && (
-            <Text style={styles.fxNote}>
-              Rate: 1 USD = GHS {data.fxRate.toFixed(2)}
-            </Text>
+            <Text style={styles.fxNote}>Rate: 1 USD = GHS {data.fxRate.toFixed(2)}</Text>
           )}
         </View>
 
@@ -369,9 +328,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
                 <Text style={styles.totalsLabel}>
                   Discount{data.discountLabel ? ` (${data.discountLabel})` : ''}
                 </Text>
-                <Text style={styles.totalsValue}>
-                  -{formatGHS(data.discountAmount)}
-                </Text>
+                <Text style={styles.totalsValue}>-{formatGHS(data.discountAmount)}</Text>
               </View>
             )}
 
@@ -380,18 +337,14 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
                 <View style={styles.totalsDivider} />
                 <View style={styles.totalsRow}>
                   <Text style={styles.totalsLabel}>Taxable Amount</Text>
-                  <Text style={styles.totalsValue}>
-                    {formatGHS(data.taxableAmount)}
-                  </Text>
+                  <Text style={styles.totalsValue}>{formatGHS(data.taxableAmount)}</Text>
                 </View>
                 {data.taxBreakdown.map((tax) => (
                   <View key={tax.componentCode} style={styles.totalsRow}>
                     <Text style={styles.totalsLabel}>
                       {tax.componentName} ({formatRate(tax.rate)})
                     </Text>
-                    <Text style={styles.totalsValue}>
-                      {formatGHS(tax.taxAmount)}
-                    </Text>
+                    <Text style={styles.totalsValue}>{formatGHS(tax.taxAmount)}</Text>
                   </View>
                 ))}
               </>
@@ -400,9 +353,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
             <View style={styles.totalsDivider} />
             <View style={styles.totalsRow}>
               <Text style={styles.grandTotalLabel}>TOTAL</Text>
-              <Text style={styles.grandTotalValue}>
-                {formatGHS(data.totalAmount)}
-              </Text>
+              <Text style={styles.grandTotalValue}>{formatGHS(data.totalAmount)}</Text>
             </View>
           </View>
         </View>
@@ -413,37 +364,27 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
             <Text style={styles.paymentTitle}>Payment Details</Text>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>Payment Method</Text>
-              <Text style={styles.paymentValue}>
-                {data.payment.paymentMethodLabel}
-              </Text>
+              <Text style={styles.paymentValue}>{data.payment.paymentMethodLabel}</Text>
             </View>
             {data.payment.momoReference && (
               <View style={styles.paymentRow}>
                 <Text style={styles.paymentLabel}>MoMo Reference</Text>
-                <Text style={styles.paymentValue}>
-                  {data.payment.momoReference}
-                </Text>
+                <Text style={styles.paymentValue}>{data.payment.momoReference}</Text>
               </View>
             )}
             {data.payment.bankReference && (
               <View style={styles.paymentRow}>
                 <Text style={styles.paymentLabel}>Bank Reference</Text>
-                <Text style={styles.paymentValue}>
-                  {data.payment.bankReference}
-                </Text>
+                <Text style={styles.paymentValue}>{data.payment.bankReference}</Text>
               </View>
             )}
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>Amount Paid</Text>
-              <Text style={styles.paymentValue}>
-                {formatGHS(data.payment.amountPaid)}
-              </Text>
+              <Text style={styles.paymentValue}>{formatGHS(data.payment.amountPaid)}</Text>
             </View>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>Balance Due</Text>
-              <Text style={styles.paymentValue}>
-                {formatGHS(data.balanceDue)}
-              </Text>
+              <Text style={styles.paymentValue}>{formatGHS(data.balanceDue)}</Text>
             </View>
           </View>
         )}

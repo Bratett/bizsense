@@ -43,9 +43,7 @@ export async function backfillCogs(): Promise<BackfillResult> {
   const [invAcct] = await db
     .select({ id: accounts.id })
     .from(accounts)
-    .where(
-      and(eq(accounts.businessId, businessId), eq(accounts.code, INVENTORY_ACCOUNT_CODE)),
-    )
+    .where(and(eq(accounts.businessId, businessId), eq(accounts.code, INVENTORY_ACCOUNT_CODE)))
 
   if (!cogsAcct || !invAcct) {
     return {
@@ -96,9 +94,7 @@ export async function backfillCogs(): Promise<BackfillResult> {
         quantity: orderLines.quantity,
       })
       .from(orderLines)
-      .where(
-        and(eq(orderLines.orderId, order.id), isNotNull(orderLines.productId)),
-      )
+      .where(and(eq(orderLines.orderId, order.id), isNotNull(orderLines.productId)))
 
     if (lines.length === 0) {
       skipped++
@@ -162,10 +158,7 @@ export async function backfillCogs(): Promise<BackfillResult> {
             lte(inventoryTransactions.transactionDate, order.orderDate),
           ),
         )
-        .orderBy(
-          asc(inventoryTransactions.transactionDate),
-          asc(inventoryTransactions.createdAt),
-        )
+        .orderBy(asc(inventoryTransactions.transactionDate), asc(inventoryTransactions.createdAt))
 
       const txInputs: FifoTransactionInput[] = transactions.map((t) => ({
         id: t.id,

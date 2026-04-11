@@ -8,7 +8,11 @@ type NavItem = { label: string; href: string; match: (p: string) => boolean }
 
 const MAIN_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', match: (p) => p === '/dashboard' },
-  { label: 'Sales', href: '/sales', match: (p) => p.startsWith('/sales') || p.startsWith('/orders') },
+  {
+    label: 'Sales',
+    href: '/sales',
+    match: (p) => p.startsWith('/sales') || p.startsWith('/orders'),
+  },
   { label: 'Expenses', href: '/expenses', match: (p) => p.startsWith('/expenses') },
   { label: 'Customers', href: '/customers', match: (p) => p.startsWith('/customers') },
 ]
@@ -28,7 +32,15 @@ const SETTINGS_NAV: NavItem[] = [
   { label: 'Settings', href: '/settings', match: (p) => p.startsWith('/settings') },
 ]
 
-function NavGroup({ title, items, pathname }: { title: string; items: NavItem[]; pathname: string }) {
+function NavGroup({
+  title,
+  items,
+  pathname,
+}: {
+  title: string
+  items: NavItem[]
+  pathname: string
+}) {
   return (
     <div>
       <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">

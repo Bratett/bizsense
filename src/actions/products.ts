@@ -39,9 +39,7 @@ export type ProductActionResult =
   | { success: true; productId: string }
   | { success: false; error: string; fieldErrors?: Record<string, string> }
 
-export type DeactivateResult =
-  | { success: true }
-  | { success: false; error: string }
+export type DeactivateResult = { success: true } | { success: false; error: string }
 
 export type ProductListItem = {
   id: string
@@ -111,9 +109,7 @@ const currentStockSubquery = sql<number>`
 
 // ─── Create Product ─────────────────────────────────────────────────────────
 
-export async function createProduct(
-  input: CreateProductInput,
-): Promise<ProductActionResult> {
+export async function createProduct(input: CreateProductInput): Promise<ProductActionResult> {
   const user = await requireRole(['owner', 'manager', 'accountant'])
   const { businessId } = user
 
@@ -186,8 +182,7 @@ export async function createProduct(
       unit: input.unit?.trim() || null,
       costPrice: String(input.costPrice),
       sellingPrice: String(input.sellingPrice),
-      sellingPriceUsd:
-        input.sellingPriceUsd != null ? String(input.sellingPriceUsd) : null,
+      sellingPriceUsd: input.sellingPriceUsd != null ? String(input.sellingPriceUsd) : null,
       trackInventory: input.trackInventory ?? true,
       reorderLevel: input.reorderLevel ?? 0,
     })
@@ -240,14 +235,11 @@ export async function updateProduct(
   // historical FIFO layers in inventory_transactions are immutable.
   const updateData: Record<string, unknown> = { updatedAt: new Date() }
   if (input.name !== undefined) updateData.name = input.name.trim()
-  if (input.description !== undefined)
-    updateData.description = input.description?.trim() || null
-  if (input.category !== undefined)
-    updateData.category = input.category?.trim() || null
+  if (input.description !== undefined) updateData.description = input.description?.trim() || null
+  if (input.category !== undefined) updateData.category = input.category?.trim() || null
   if (input.unit !== undefined) updateData.unit = input.unit?.trim() || null
   if (input.costPrice !== undefined) updateData.costPrice = String(input.costPrice)
-  if (input.sellingPrice !== undefined)
-    updateData.sellingPrice = String(input.sellingPrice)
+  if (input.sellingPrice !== undefined) updateData.sellingPrice = String(input.sellingPrice)
   if (input.sellingPriceUsd !== undefined)
     updateData.sellingPriceUsd =
       input.sellingPriceUsd != null ? String(input.sellingPriceUsd) : null
@@ -273,11 +265,7 @@ export async function deactivateProduct(id: string): Promise<DeactivateResult> {
     .select({ id: products.id, name: products.name })
     .from(products)
     .where(
-      and(
-        eq(products.id, id),
-        eq(products.businessId, businessId),
-        eq(products.isActive, true),
-      ),
+      and(eq(products.id, id), eq(products.businessId, businessId), eq(products.isActive, true)),
     )
     .limit(1)
 
@@ -288,9 +276,10 @@ export async function deactivateProduct(id: string): Promise<DeactivateResult> {
   // Check current stock — block if > 0
   const [stockRow] = await db
     .select({
-      total: sql<number>`COALESCE(SUM(CAST(${inventoryTransactions.quantity} AS numeric)), 0)`.mapWith(
-        Number,
-      ),
+      total:
+        sql<number>`COALESCE(SUM(CAST(${inventoryTransactions.quantity} AS numeric)), 0)`.mapWith(
+          Number,
+        ),
     })
     .from(inventoryTransactions)
     .where(
@@ -325,7 +314,8 @@ export async function deactivateProduct(id: string): Promise<DeactivateResult> {
   if (openOrderLines.length > 0) {
     return {
       success: false,
-      error: 'This product appears on open orders. Fulfil or cancel those orders before deactivating.',
+      error:
+        'This product appears on open orders. Fulfil or cancel those orders before deactivating.',
     }
   }
 
@@ -346,9 +336,7 @@ type ProductListFilters = {
   isActive?: boolean
 }
 
-export async function listProducts(
-  filters?: ProductListFilters,
-): Promise<ProductListItem[]> {
+export async function listProducts(filters?: ProductListFilters): Promise<ProductListItem[]> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -402,7 +390,11 @@ export async function listProducts(
   // Apply stock filter client-side after the query since it depends on computed currentStock
   if (filters?.stockFilter === 'low_stock') {
     result = result.filter(
-      (p) => p.trackInventory && p.reorderLevel > 0 && p.currentStock > 0 && p.currentStock <= p.reorderLevel,
+      (p) =>
+        p.trackInventory &&
+        p.reorderLevel > 0 &&
+        p.currentStock > 0 &&
+        p.currentStock <= p.reorderLevel,
     )
   } else if (filters?.stockFilter === 'out_of_stock') {
     result = result.filter((p) => p.trackInventory && p.currentStock <= 0)

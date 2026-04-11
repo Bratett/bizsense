@@ -2,16 +2,9 @@ import { notFound } from 'next/navigation'
 import { getProductById, listDistinctCategories } from '@/actions/products'
 import EditProductForm from './page.client'
 
-export default async function EditProductPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [product, categories] = await Promise.all([
-    getProductById(id),
-    listDistinctCategories(),
-  ])
+  const [product, categories] = await Promise.all([getProductById(id), listDistinctCategories()])
 
   if (!product) notFound()
 

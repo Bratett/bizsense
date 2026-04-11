@@ -51,56 +51,86 @@ beforeEach(() => {
 describe('allocatePaymentsToGrns', () => {
   it('6. payment with grnId: applied to that specific GRN', () => {
     const grns = [
-      { id: GRN_1, grnNumber: 'GRN-001', receivedDate: '2026-01-01', originalAmount: 1000, supplierId: SUP_A },
-      { id: GRN_2, grnNumber: 'GRN-002', receivedDate: '2026-01-15', originalAmount: 500, supplierId: SUP_A },
+      {
+        id: GRN_1,
+        grnNumber: 'GRN-001',
+        receivedDate: '2026-01-01',
+        originalAmount: 1000,
+        supplierId: SUP_A,
+      },
+      {
+        id: GRN_2,
+        grnNumber: 'GRN-002',
+        receivedDate: '2026-01-15',
+        originalAmount: 500,
+        supplierId: SUP_A,
+      },
     ]
-    const payments = [
-      { id: 'pay-1', grnId: GRN_2, amount: 200, paymentDate: '2026-01-20' },
-    ]
+    const payments = [{ id: 'pay-1', grnId: GRN_2, amount: 200, paymentDate: '2026-01-20' }]
 
     const result = allocatePaymentsToGrns(grns, payments)
 
     const g1 = result.find((r) => r.id === GRN_1)!
     const g2 = result.find((r) => r.id === GRN_2)!
 
-    expect(g1.amountPaid).toBe(0)         // GRN_1 untouched
-    expect(g2.amountPaid).toBe(200)       // payment went to specified GRN_2
+    expect(g1.amountPaid).toBe(0) // GRN_1 untouched
+    expect(g2.amountPaid).toBe(200) // payment went to specified GRN_2
   })
 
   it('7. payment without grnId: applied to oldest GRN first (FIFO)', () => {
     const grns = [
-      { id: GRN_1, grnNumber: 'GRN-001', receivedDate: '2026-01-01', originalAmount: 1000, supplierId: SUP_A },
-      { id: GRN_2, grnNumber: 'GRN-002', receivedDate: '2026-01-15', originalAmount: 500, supplierId: SUP_A },
+      {
+        id: GRN_1,
+        grnNumber: 'GRN-001',
+        receivedDate: '2026-01-01',
+        originalAmount: 1000,
+        supplierId: SUP_A,
+      },
+      {
+        id: GRN_2,
+        grnNumber: 'GRN-002',
+        receivedDate: '2026-01-15',
+        originalAmount: 500,
+        supplierId: SUP_A,
+      },
     ]
-    const payments = [
-      { id: 'pay-1', grnId: null, amount: 300, paymentDate: '2026-01-20' },
-    ]
+    const payments = [{ id: 'pay-1', grnId: null, amount: 300, paymentDate: '2026-01-20' }]
 
     const result = allocatePaymentsToGrns(grns, payments)
 
     const g1 = result.find((r) => r.id === GRN_1)!
     const g2 = result.find((r) => r.id === GRN_2)!
 
-    expect(g1.amountPaid).toBe(300)  // oldest GRN gets payment first
-    expect(g2.amountPaid).toBe(0)    // newer GRN untouched
+    expect(g1.amountPaid).toBe(300) // oldest GRN gets payment first
+    expect(g2.amountPaid).toBe(0) // newer GRN untouched
   })
 
   it('8. payment covering multiple GRNs: oldest fully settled first', () => {
     const grns = [
-      { id: GRN_1, grnNumber: 'GRN-001', receivedDate: '2026-01-01', originalAmount: 400, supplierId: SUP_A },
-      { id: GRN_2, grnNumber: 'GRN-002', receivedDate: '2026-01-15', originalAmount: 600, supplierId: SUP_A },
+      {
+        id: GRN_1,
+        grnNumber: 'GRN-001',
+        receivedDate: '2026-01-01',
+        originalAmount: 400,
+        supplierId: SUP_A,
+      },
+      {
+        id: GRN_2,
+        grnNumber: 'GRN-002',
+        receivedDate: '2026-01-15',
+        originalAmount: 600,
+        supplierId: SUP_A,
+      },
     ]
-    const payments = [
-      { id: 'pay-1', grnId: null, amount: 700, paymentDate: '2026-01-20' },
-    ]
+    const payments = [{ id: 'pay-1', grnId: null, amount: 700, paymentDate: '2026-01-20' }]
 
     const result = allocatePaymentsToGrns(grns, payments)
 
     const g1 = result.find((r) => r.id === GRN_1)!
     const g2 = result.find((r) => r.id === GRN_2)!
 
-    expect(g1.amountPaid).toBe(400)  // GRN_1 fully settled (400/400)
-    expect(g2.amountPaid).toBe(300)  // remaining 300 applied to GRN_2
+    expect(g1.amountPaid).toBe(400) // GRN_1 fully settled (400/400)
+    expect(g2.amountPaid).toBe(300) // remaining 300 applied to GRN_2
   })
 })
 

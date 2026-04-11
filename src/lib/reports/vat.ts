@@ -5,40 +5,40 @@ import { businesses, accounts, journalLines, journalEntries } from '@/db/schema'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type VatReportLine = {
-  entryDate:       string
-  reference:       string
-  description:     string
-  netSupplyAmount: number   // revenue credits (output) or expense debits (input) in same entry
-  vatAmount:       number   // VAT component only
-  sourceType:      string
+  entryDate: string
+  reference: string
+  description: string
+  netSupplyAmount: number // revenue credits (output) or expense debits (input) in same entry
+  vatAmount: number // VAT component only
+  sourceType: string
 }
 
 export type VatReport = {
-  period:                { from: string; to: string }
+  period: { from: string; to: string }
   vatRegistrationNumber: string | null
   outputVat: {
-    lines:          VatReportLine[]
+    lines: VatReportLine[]
     totalNetSupply: number
-    totalVat:       number
+    totalVat: number
   }
   inputVat: {
-    lines:            VatReportLine[]
+    lines: VatReportLine[]
     totalNetPurchase: number
-    totalVat:         number
+    totalVat: number
     graPurchasesNote: string
   }
-  netVatPayable: number   // positive = payable to GRA; negative = refund due
+  netVatPayable: number // positive = payable to GRA; negative = refund due
 }
 
 // ─── Internal raw type ────────────────────────────────────────────────────────
 
 type RawVatLine = {
-  entryId:     string
-  entryDate:   string
-  reference:   string | null
+  entryId: string
+  entryDate: string
+  reference: string | null
   description: string | null
-  sourceType:  string
-  vatAmount:   string   // numeric string from Drizzle
+  sourceType: string
+  vatAmount: string // numeric string from Drizzle
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -69,10 +69,7 @@ export async function getVatReport(
   period: { from: string; to: string },
 ): Promise<VatReport | null> {
   // ── 1. Check vatRegistered ────────────────────────────────────────────────
-  const businessRows = await db
-    .select()
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
+  const businessRows = await db.select().from(businesses).where(eq(businesses.id, businessId))
   const business = businessRows[0]
   if (!business?.vatRegistered) return null
 
@@ -103,12 +100,12 @@ export async function getVatReport(
   // ── 4. Output VAT lines (credits to account 2100) ────────────────────────
   const rawOutputLines: RawVatLine[] = await db
     .select({
-      entryId:     journalEntries.id,
-      entryDate:   journalEntries.entryDate,
-      reference:   journalEntries.reference,
+      entryId: journalEntries.id,
+      entryDate: journalEntries.entryDate,
+      reference: journalEntries.reference,
       description: journalEntries.description,
-      sourceType:  journalEntries.sourceType,
-      vatAmount:   journalLines.creditAmount,
+      sourceType: journalEntries.sourceType,
+      vatAmount: journalLines.creditAmount,
     })
     .from(journalLines)
     .innerJoin(
@@ -127,10 +124,10 @@ export async function getVatReport(
   // ── 5. Net supply per entry (revenue credits in the same entry) ───────────
   const netSupplyMap = new Map<string, number>()
   if (rawOutputLines.length > 0) {
-    const outputEntryIds = rawOutputLines.map(l => l.entryId)
+    const outputEntryIds = rawOutputLines.map((l) => l.entryId)
     const netSupplyRows = await db
       .select({
-        entryId:   journalLines.journalEntryId,
+        entryId: journalLines.journalEntryId,
         netAmount: sql<string>`SUM(${journalLines.creditAmount})`,
       })
       .from(journalLines)
@@ -153,12 +150,12 @@ export async function getVatReport(
   // ── 6. Input VAT lines (debits to account 1101) ───────────────────────────
   const rawInputLines: RawVatLine[] = await db
     .select({
-      entryId:     journalEntries.id,
-      entryDate:   journalEntries.entryDate,
-      reference:   journalEntries.reference,
+      entryId: journalEntries.id,
+      entryDate: journalEntries.entryDate,
+      reference: journalEntries.reference,
       description: journalEntries.description,
-      sourceType:  journalEntries.sourceType,
-      vatAmount:   journalLines.debitAmount,
+      sourceType: journalEntries.sourceType,
+      vatAmount: journalLines.debitAmount,
     })
     .from(journalLines)
     .innerJoin(
@@ -177,10 +174,10 @@ export async function getVatReport(
   // ── 7. Net purchase per entry (expense debits in the same entry) ──────────
   const netPurchaseMap = new Map<string, number>()
   if (rawInputLines.length > 0) {
-    const inputEntryIds = rawInputLines.map(l => l.entryId)
+    const inputEntryIds = rawInputLines.map((l) => l.entryId)
     const netPurchaseRows = await db
       .select({
-        entryId:   journalLines.journalEntryId,
+        entryId: journalLines.journalEntryId,
         netAmount: sql<string>`SUM(${journalLines.debitAmount})`,
       })
       .from(journalLines)
@@ -201,42 +198,42 @@ export async function getVatReport(
   }
 
   // ── 8. Build VatReportLines ───────────────────────────────────────────────
-  const outputVatLines: VatReportLine[] = rawOutputLines.map(r => ({
-    entryDate:       r.entryDate,
-    reference:       r.reference ?? '',
-    description:     r.description ?? '',
+  const outputVatLines: VatReportLine[] = rawOutputLines.map((r) => ({
+    entryDate: r.entryDate,
+    reference: r.reference ?? '',
+    description: r.description ?? '',
     netSupplyAmount: netSupplyMap.get(r.entryId) ?? 0,
-    vatAmount:       round2(Number(r.vatAmount)),
-    sourceType:      r.sourceType,
+    vatAmount: round2(Number(r.vatAmount)),
+    sourceType: r.sourceType,
   }))
 
-  const inputVatLines: VatReportLine[] = rawInputLines.map(r => ({
-    entryDate:       r.entryDate,
-    reference:       r.reference ?? '',
-    description:     r.description ?? '',
-    netSupplyAmount: netPurchaseMap.get(r.entryId) ?? 0,   // netSupplyAmount holds net purchase for input lines
-    vatAmount:       round2(Number(r.vatAmount)),
-    sourceType:      r.sourceType,
+  const inputVatLines: VatReportLine[] = rawInputLines.map((r) => ({
+    entryDate: r.entryDate,
+    reference: r.reference ?? '',
+    description: r.description ?? '',
+    netSupplyAmount: netPurchaseMap.get(r.entryId) ?? 0, // netSupplyAmount holds net purchase for input lines
+    vatAmount: round2(Number(r.vatAmount)),
+    sourceType: r.sourceType,
   }))
 
   // ── 9. Compute totals ─────────────────────────────────────────────────────
-  const totalOutputVat   = round2(rawOutputLines.reduce((s, l) => s + Number(l.vatAmount), 0))
-  const totalInputVat    = round2(rawInputLines.reduce((s, l)  => s + Number(l.vatAmount), 0))
-  const totalNetSupply   = round2(outputVatLines.reduce((s, l) => s + l.netSupplyAmount, 0))
-  const totalNetPurchase = round2(inputVatLines.reduce((s, l)  => s + l.netSupplyAmount, 0))
+  const totalOutputVat = round2(rawOutputLines.reduce((s, l) => s + Number(l.vatAmount), 0))
+  const totalInputVat = round2(rawInputLines.reduce((s, l) => s + Number(l.vatAmount), 0))
+  const totalNetSupply = round2(outputVatLines.reduce((s, l) => s + l.netSupplyAmount, 0))
+  const totalNetPurchase = round2(inputVatLines.reduce((s, l) => s + l.netSupplyAmount, 0))
 
   return {
     period,
     vatRegistrationNumber: business.vatNumber ?? null,
     outputVat: {
-      lines:          outputVatLines,
+      lines: outputVatLines,
       totalNetSupply,
-      totalVat:       totalOutputVat,
+      totalVat: totalOutputVat,
     },
     inputVat: {
-      lines:            inputVatLines,
+      lines: inputVatLines,
       totalNetPurchase,
-      totalVat:         totalInputVat,
+      totalVat: totalInputVat,
       graPurchasesNote: GRA_PURCHASES_NOTE,
     },
     netVatPayable: round2(totalOutputVat - totalInputVat),

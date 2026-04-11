@@ -134,12 +134,9 @@ export default function NewExpenseForm({
         const result = await createExpense(input)
 
         if (result.success) {
-          const catLabel =
-            EXPENSE_CATEGORIES.find((c) => c.key === category)?.label ?? category
+          const catLabel = EXPENSE_CATEGORIES.find((c) => c.key === category)?.label ?? category
 
-          setSuccess(
-            `Expense recorded. GHS ${formatGHS(amountNum)} ${catLabel} on ${expenseDate}.`,
-          )
+          setSuccess(`Expense recorded. GHS ${formatGHS(amountNum)} ${catLabel} on ${expenseDate}.`)
 
           // Reset form
           setCategory('')
@@ -281,9 +278,7 @@ export default function NewExpenseForm({
             placeholder="0.00"
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-lg font-semibold text-gray-900 placeholder-gray-300 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
           />
-          {fieldErrors.amount && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.amount}</p>
-          )}
+          {fieldErrors.amount && <p className="mt-1 text-xs text-red-600">{fieldErrors.amount}</p>}
         </div>
 
         {/* VAT toggle */}
@@ -438,9 +433,23 @@ export default function NewExpenseForm({
           ) : (
             <div className="mt-2 flex gap-3">
               <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-4 text-sm font-medium text-gray-500 transition-colors hover:border-green-400 hover:text-green-700">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
+                  />
                 </svg>
                 Take Photo
                 <input
@@ -458,8 +467,18 @@ export default function NewExpenseForm({
                 />
               </label>
               <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-4 text-sm font-medium text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-700">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+                  />
                 </svg>
                 Gallery
                 <input
@@ -529,7 +548,9 @@ export default function NewExpenseForm({
                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                     }`}
                   >
-                    {freq === 'biweekly' ? 'Bi-weekly' : freq.charAt(0).toUpperCase() + freq.slice(1)}
+                    {freq === 'biweekly'
+                      ? 'Bi-weekly'
+                      : freq.charAt(0).toUpperCase() + freq.slice(1)}
                   </button>
                 ))}
               </div>

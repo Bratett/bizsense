@@ -15,9 +15,7 @@ type InvoiceButtonProps = {
 async function generatePdfViaWorker(data: InvoiceData): Promise<Blob> {
   return new Promise((resolve, reject) => {
     try {
-      const worker = new Worker(
-        new URL('../lib/pdf/invoice.worker.ts', import.meta.url),
-      )
+      const worker = new Worker(new URL('../lib/pdf/invoice.worker.ts', import.meta.url))
 
       worker.onmessage = (event: MessageEvent<InvoiceWorkerResponse>) => {
         worker.terminate()
@@ -163,9 +161,7 @@ export default function InvoiceButton({
           {isSharing ? 'Sharing...' : 'Share Invoice'}
         </button>
       </div>
-      {error && (
-        <p className="mt-2 text-center text-xs text-red-600">{error}</p>
-      )}
+      {error && <p className="mt-2 text-center text-xs text-red-600">{error}</p>}
     </div>
   )
 }

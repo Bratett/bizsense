@@ -3,11 +3,7 @@ import { getServerSession } from '@/lib/session'
 import { getProductById } from '@/actions/products'
 import ProductDetailView from './page.client'
 
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getServerSession()
   const product = await getProductById(id)

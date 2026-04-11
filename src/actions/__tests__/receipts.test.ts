@@ -115,9 +115,7 @@ describe('uploadReceipt', () => {
 
   it('uploads to correct storage path, returns signed URL, and updates DB with path', async () => {
     mockSession()
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: EXPENSE_ID }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: EXPENSE_ID }]) as never)
     const updateChain = mockUpdateChain()
     const storageMock = mockSupabaseStorage()
 
@@ -164,9 +162,7 @@ describe('uploadReceipt', () => {
 
   it('rejects file larger than 5MB after base64 decode', async () => {
     mockSession()
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: EXPENSE_ID }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: EXPENSE_ID }]) as never)
 
     // Create a base64 string that decodes to > 5MB
     const largeBuffer = Buffer.alloc(6 * 1024 * 1024, 'a')
@@ -186,9 +182,7 @@ describe('uploadReceipt', () => {
 
   it('re-uploading for same expense uses upsert (no duplicate)', async () => {
     mockSession()
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: EXPENSE_ID }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: EXPENSE_ID }]) as never)
     mockUpdateChain()
     const storageMock = mockSupabaseStorage()
 
@@ -209,9 +203,7 @@ describe('getReceiptSignedUrl', () => {
   it('returns fresh signed URL for existing receipt', async () => {
     const storedPath = `receipts/${BUSINESS_ID}/2026/04/${EXPENSE_ID}.jpg`
     mockSession()
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ receiptUrl: storedPath }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ receiptUrl: storedPath }]) as never)
     const expectedUrl = 'https://storage.supabase.co/signed/test?token=fresh'
     mockSupabaseStorage({ signedUrl: expectedUrl })
 
@@ -227,9 +219,7 @@ describe('getReceiptSignedUrl', () => {
 
   it('returns error when expense has no receipt', async () => {
     mockSession()
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ receiptUrl: null }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ receiptUrl: null }]) as never)
 
     const result = await getReceiptSignedUrl(EXPENSE_ID)
 

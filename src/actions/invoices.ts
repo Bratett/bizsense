@@ -136,8 +136,7 @@ export async function getInvoiceData(orderId: string): Promise<InvoiceData> {
     payment = {
       paymentMethod: order.payment.paymentMethod,
       paymentMethodLabel:
-        PAYMENT_METHOD_LABELS[order.payment.paymentMethod] ??
-        order.payment.paymentMethod,
+        PAYMENT_METHOD_LABELS[order.payment.paymentMethod] ?? order.payment.paymentMethod,
       momoReference: order.payment.momoReference,
       bankReference: order.payment.bankReference,
       amountPaid,

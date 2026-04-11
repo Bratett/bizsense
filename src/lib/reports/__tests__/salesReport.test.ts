@@ -12,7 +12,7 @@ import { getSalesReport } from '../sales'
 
 function mockQuery(rows: unknown[]) {
   const where_ = vi.fn().mockResolvedValue(rows)
-  const from_  = vi.fn().mockReturnValue({ where: where_ })
+  const from_ = vi.fn().mockReturnValue({ where: where_ })
   vi.mocked(db.select).mockReturnValueOnce({
     from: from_,
   } as unknown as ReturnType<typeof db.select>)
@@ -22,23 +22,29 @@ const JAN = { from: '2026-01-01', to: '2026-01-31' }
 
 // Minimal fulfilled order row
 const ORDER = {
-  id:         'order-1',
+  id: 'order-1',
   customerId: 'cust-1',
-  orderDate:  '2026-01-15',
+  orderDate: '2026-01-15',
 }
 
 // Minimal orderLine row
-function makeLine(overrides: Partial<{
-  id: string; orderId: string; productId: string | null
-  description: string | null; quantity: string; lineTotal: string
-}>) {
+function makeLine(
+  overrides: Partial<{
+    id: string
+    orderId: string
+    productId: string | null
+    description: string | null
+    quantity: string
+    lineTotal: string
+  }>,
+) {
   return {
-    id:          overrides.id          ?? 'line-1',
-    orderId:     overrides.orderId     ?? 'order-1',
-    productId:   overrides.productId   ?? 'prod-1',
+    id: overrides.id ?? 'line-1',
+    orderId: overrides.orderId ?? 'order-1',
+    productId: overrides.productId ?? 'prod-1',
     description: overrides.description ?? 'Widget',
-    quantity:    overrides.quantity    ?? '1',
-    lineTotal:   overrides.lineTotal   ?? '100',
+    quantity: overrides.quantity ?? '1',
+    lineTotal: overrides.lineTotal ?? '100',
   }
 }
 
@@ -49,11 +55,11 @@ beforeEach(() => vi.resetAllMocks())
 describe('getSalesReport', () => {
   it('Test 13 — groupBy=product: quantitySold and revenue are correct', async () => {
     // Queue 5 mock calls in order: orders, orderLines, customers, inventoryTxns, products
-    mockQuery([ORDER])                                                        // orders
-    mockQuery([makeLine({ quantity: '3', lineTotal: '150' })])               // orderLines
-    mockQuery([{ id: 'cust-1', name: 'Ama Serwaa', phone: '020' }])         // customers
-    mockQuery([])                                                              // inventoryTransactions (no COGS)
-    mockQuery([{ id: 'prod-1', name: 'Widget', sku: 'WGT-01' }])            // products
+    mockQuery([ORDER]) // orders
+    mockQuery([makeLine({ quantity: '3', lineTotal: '150' })]) // orderLines
+    mockQuery([{ id: 'cust-1', name: 'Ama Serwaa', phone: '020' }]) // customers
+    mockQuery([]) // inventoryTransactions (no COGS)
+    mockQuery([{ id: 'prod-1', name: 'Widget', sku: 'WGT-01' }]) // products
 
     const report = await getSalesReport('biz-1', JAN, 'product')
 
@@ -66,10 +72,10 @@ describe('getSalesReport', () => {
   it('Test 14 — groupBy=customer: walk-in orders (customerId=null) grouped as Walk-in', async () => {
     const walkInOrder = { id: 'order-2', customerId: null, orderDate: '2026-01-20' }
 
-    mockQuery([walkInOrder])                              // orders
-    mockQuery([makeLine({ orderId: 'order-2' })])        // orderLines
-    mockQuery([])                                          // customers (customerIds empty → returns [])
-    mockQuery([])                                          // inventoryTransactions
+    mockQuery([walkInOrder]) // orders
+    mockQuery([makeLine({ orderId: 'order-2' })]) // orderLines
+    mockQuery([]) // customers (customerIds empty → returns [])
+    mockQuery([]) // inventoryTransactions
     mockQuery([{ id: 'prod-1', name: 'Widget', sku: null }]) // products
 
     const report = await getSalesReport('biz-1', JAN, 'customer')
@@ -82,7 +88,7 @@ describe('getSalesReport', () => {
 
   it('Test 15 — returns empty report when no fulfilled orders exist', async () => {
     // Orders query returns empty → early return, no further DB calls
-    mockQuery([])  // orders
+    mockQuery([]) // orders
 
     const report = await getSalesReport('biz-1', JAN, 'product')
 

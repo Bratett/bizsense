@@ -75,7 +75,12 @@ export default function ProductList({
 
     // Stock filter
     if (stockFilter === 'low_stock') {
-      return p.trackInventory && p.reorderLevel > 0 && p.currentStock > 0 && p.currentStock <= p.reorderLevel
+      return (
+        p.trackInventory &&
+        p.reorderLevel > 0 &&
+        p.currentStock > 0 &&
+        p.currentStock <= p.reorderLevel
+      )
     }
     if (stockFilter === 'out_of_stock') {
       return p.trackInventory && p.currentStock <= 0
@@ -219,9 +224,7 @@ export default function ProductList({
                 >
                   <div className="flex items-start justify-between">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-900">
-                        {product.name}
-                      </p>
+                      <p className="truncate text-sm font-medium text-gray-900">{product.name}</p>
                       <p className="mt-0.5 text-xs text-gray-500">
                         {product.sku ?? 'No SKU'}
                         {product.category && (
@@ -260,7 +263,6 @@ export default function ProductList({
           })
         )}
       </div>
-
     </div>
   )
 }

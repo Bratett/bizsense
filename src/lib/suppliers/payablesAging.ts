@@ -146,8 +146,10 @@ function emptyBuckets(): AgingBucketTotals {
 function addToBuckets(totals: AgingBucketTotals, amount: number, bucket: AgingBucket): void {
   totals.total = Math.round((totals.total + amount) * 100) / 100
   if (bucket === 'current') totals.current = Math.round((totals.current + amount) * 100) / 100
-  else if (bucket === '31-60') totals.days31to60 = Math.round((totals.days31to60 + amount) * 100) / 100
-  else if (bucket === '61-90') totals.days61to90 = Math.round((totals.days61to90 + amount) * 100) / 100
+  else if (bucket === '31-60')
+    totals.days31to60 = Math.round((totals.days31to60 + amount) * 100) / 100
+  else if (bucket === '61-90')
+    totals.days61to90 = Math.round((totals.days61to90 + amount) * 100) / 100
   else totals.over90 = Math.round((totals.over90 + amount) * 100) / 100
 }
 
@@ -283,9 +285,11 @@ export async function computePayablesAging(businessId: string): Promise<Payables
   }
 
   // Re-calculate grand total from buckets to avoid double-counting
-  grandTotals.total = Math.round(
-    (grandTotals.current + grandTotals.days31to60 + grandTotals.days61to90 + grandTotals.over90) * 100,
-  ) / 100
+  grandTotals.total =
+    Math.round(
+      (grandTotals.current + grandTotals.days31to60 + grandTotals.days61to90 + grandTotals.over90) *
+        100,
+    ) / 100
 
   return {
     generatedAt: new Date(),

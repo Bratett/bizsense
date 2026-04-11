@@ -6,10 +6,7 @@
  * 2. Find the next available sequence number for that prefix
  * 3. Return PREFIX-NNN (e.g. "RCB-001")
  */
-export function generateSku(
-  productName: string,
-  existingSkus: string[],
-): string {
+export function generateSku(productName: string, existingSkus: string[]): string {
   const consonants = productName
     .toUpperCase()
     .replace(/[^A-Z]/g, '')

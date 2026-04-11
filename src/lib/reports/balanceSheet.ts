@@ -7,26 +7,26 @@ import { getProfitAndLoss } from './pl'
 export type BalanceSheet = {
   asOfDate: string
   assets: {
-    currentAssets: AccountBalance[]      // type='asset', subtype='current_asset', code≠'1510'
+    currentAssets: AccountBalance[] // type='asset', subtype='current_asset', code≠'1510'
     fixedAssets: {
-      cost: number                       // account 1500 netBalance
-      accumulatedDepreciation: number    // Math.abs(account 1510 netBalance)
-      netBookValue: number               // cost - accumulatedDepreciation
+      cost: number // account 1500 netBalance
+      accumulatedDepreciation: number // Math.abs(account 1510 netBalance)
+      netBookValue: number // cost - accumulatedDepreciation
     }
     totalAssets: number
   }
   liabilities: {
     currentLiabilities: AccountBalance[] // type='liability', subtype='current_liability'
-    longTermLiabilities: AccountBalance[]// type='liability', subtype='long_term_liability'
+    longTermLiabilities: AccountBalance[] // type='liability', subtype='long_term_liability'
     totalLiabilities: number
   }
   equity: {
-    lines: AccountBalance[]              // type='equity'
-    currentPeriodProfit: number          // getProfitAndLoss YTD netProfit
+    lines: AccountBalance[] // type='equity'
+    currentPeriodProfit: number // getProfitAndLoss YTD netProfit
     totalEquity: number
   }
   totalLiabilitiesAndEquity: number
-  isBalanced: boolean                    // |totalAssets - totalLiabilitiesAndEquity| < 0.01
+  isBalanced: boolean // |totalAssets - totalLiabilitiesAndEquity| < 0.01
   imbalanceAmount: number
 }
 
@@ -74,57 +74,52 @@ export async function getBalanceSheet(
   const balances = await getAccountBalances(businessId, period)
 
   // O(1) lookup by account code
-  const byCode = (code: string) =>
-    balances.find(b => b.accountCode === code)?.netBalance ?? 0
+  const byCode = (code: string) => balances.find((b) => b.accountCode === code)?.netBalance ?? 0
 
   // ── Assets ─────────────────────────────────────────────────────────────────
   const currentAssets = balances.filter(
-    b =>
-      b.accountType === 'asset' &&
-      b.accountSubtype === 'current_asset' &&
-      b.accountCode !== '1510',
+    (b) =>
+      b.accountType === 'asset' && b.accountSubtype === 'current_asset' && b.accountCode !== '1510',
   )
 
   // Account 1510 (Accumulated Depreciation) is stored as type='asset' (debit-normal).
   // Normal depreciation credits 1510, making netBalance = debits - credits = negative.
   // Math.abs gives the positive accumulated depreciation figure.
-  const cost   = byCode('1500')
+  const cost = byCode('1500')
   const accDep = Math.abs(byCode('1510'))
-  const netBV  = Math.round((cost - accDep) * 100) / 100
+  const netBV = Math.round((cost - accDep) * 100) / 100
 
-  const totalCurrentAssets = sum(currentAssets.map(a => a.netBalance))
-  const totalAssets        = Math.round((totalCurrentAssets + netBV) * 100) / 100
+  const totalCurrentAssets = sum(currentAssets.map((a) => a.netBalance))
+  const totalAssets = Math.round((totalCurrentAssets + netBV) * 100) / 100
 
   // ── Liabilities ────────────────────────────────────────────────────────────
-  const currentLiabilities  = balances.filter(
-    b => b.accountType === 'liability' && b.accountSubtype === 'current_liability',
+  const currentLiabilities = balances.filter(
+    (b) => b.accountType === 'liability' && b.accountSubtype === 'current_liability',
   )
   const longTermLiabilities = balances.filter(
-    b => b.accountType === 'liability' && b.accountSubtype === 'long_term_liability',
+    (b) => b.accountType === 'liability' && b.accountSubtype === 'long_term_liability',
   )
 
-  const totalCurrentL    = sum(currentLiabilities.map(a => a.netBalance))
-  const totalLongTermL   = sum(longTermLiabilities.map(a => a.netBalance))
+  const totalCurrentL = sum(currentLiabilities.map((a) => a.netBalance))
+  const totalLongTermL = sum(longTermLiabilities.map((a) => a.netBalance))
   const totalLiabilities = Math.round((totalCurrentL + totalLongTermL) * 100) / 100
 
   // ── Equity ─────────────────────────────────────────────────────────────────
-  const equityLines = balances.filter(b => b.accountType === 'equity')
+  const equityLines = balances.filter((b) => b.accountType === 'equity')
 
   // Current period profit = P&L for financial year to date.
   // This keeps the Balance Sheet self-consistent with the Income Statement.
   const ytdFrom = getFinancialYearStart(asOfDate, financialYearStartMonth)
   const { netProfit: currentPeriodProfit } = await getProfitAndLoss(businessId, {
     from: ytdFrom,
-    to:   asOfDate,
+    to: asOfDate,
   })
 
-  const totalEquityLines = sum(equityLines.map(a => a.netBalance))
-  const totalEquity      = Math.round((totalEquityLines + currentPeriodProfit) * 100) / 100
+  const totalEquityLines = sum(equityLines.map((a) => a.netBalance))
+  const totalEquity = Math.round((totalEquityLines + currentPeriodProfit) * 100) / 100
 
   // ── Balance check ──────────────────────────────────────────────────────────
-  const totalLiabilitiesAndEquity = Math.round(
-    (totalLiabilities + totalEquity) * 100,
-  ) / 100
+  const totalLiabilitiesAndEquity = Math.round((totalLiabilities + totalEquity) * 100) / 100
   const imbalance = Math.abs(totalAssets - totalLiabilitiesAndEquity)
 
   return {
@@ -149,7 +144,7 @@ export async function getBalanceSheet(
       totalEquity,
     },
     totalLiabilitiesAndEquity,
-    isBalanced:      imbalance < 0.01,
+    isBalanced: imbalance < 0.01,
     imbalanceAmount: Math.round(imbalance * 100) / 100,
   }
 }

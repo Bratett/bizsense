@@ -144,9 +144,7 @@ export default function SaleDetail({
         <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Sale #{order.orderNumber}
-              </h1>
+              <h1 className="text-2xl font-semibold text-gray-900">Sale #{order.orderNumber}</h1>
               <span
                 className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
                   isCancelled
@@ -159,9 +157,7 @@ export default function SaleDetail({
                 {isCancelled ? 'VOIDED' : isPaid ? 'PAID' : 'PENDING'}
               </span>
             </div>
-            <p className="mt-1 text-sm text-gray-500">
-              Issued on {formatDate(order.orderDate)}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Issued on {formatDate(order.orderDate)}</p>
           </div>
         </div>
 
@@ -190,13 +186,21 @@ export default function SaleDetail({
                     {getInitials(order.customer.name)}
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {order.customer.name}
-                    </p>
+                    <p className="text-lg font-semibold text-gray-900">{order.customer.name}</p>
                     {order.customer.phone && (
                       <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                        <svg
+                          className="h-3.5 w-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                          />
                         </svg>
                         {order.customer.phone}
                       </p>
@@ -239,13 +243,22 @@ export default function SaleDetail({
                             {line.description ?? 'Item'}
                           </p>
                         </td>
-                        <td className="py-3.5 text-center text-sm text-gray-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        <td
+                          className="py-3.5 text-center text-sm text-gray-600"
+                          style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
                           {Number(line.quantity)}
                         </td>
-                        <td className="py-3.5 text-right text-sm text-gray-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        <td
+                          className="py-3.5 text-right text-sm text-gray-600"
+                          style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
                           GHS {formatGHS(line.unitPrice)}
                         </td>
-                        <td className="py-3.5 text-right text-sm font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        <td
+                          className="py-3.5 text-right text-sm font-semibold text-gray-900"
+                          style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
                           GHS {formatGHS(line.lineTotal)}
                         </td>
                       </tr>
@@ -281,7 +294,10 @@ export default function SaleDetail({
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm font-semibold text-green-700" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        <p
+                          className="text-sm font-semibold text-green-700"
+                          style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
                           GHS {formatGHS(p.amount)}
                         </p>
                       </div>
@@ -301,22 +317,14 @@ export default function SaleDetail({
                       <div className="relative flex flex-col items-center">
                         <div
                           className={`h-3 w-3 rounded-full ${
-                            event.icon === 'create'
-                              ? 'bg-gray-400'
-                              : 'bg-green-500'
+                            event.icon === 'create' ? 'bg-gray-400' : 'bg-green-500'
                           }`}
                         />
-                        {idx < timeline.length - 1 && (
-                          <div className="mt-1 h-8 w-px bg-gray-200" />
-                        )}
+                        {idx < timeline.length - 1 && <div className="mt-1 h-8 w-px bg-gray-200" />}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {event.label}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {formatTimestamp(event.date)}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{event.label}</p>
+                        <p className="text-xs text-gray-400">{formatTimestamp(event.date)}</p>
                       </div>
                     </div>
                   ))}
@@ -335,14 +343,20 @@ export default function SaleDetail({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <span
+                    className="font-medium text-gray-900"
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
                     GHS {formatGHS(order.subtotal)}
                   </span>
                 </div>
                 {Number(order.taxAmount ?? 0) > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Tax (VAT 15%)</span>
-                    <span className="font-medium text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <span
+                      className="font-medium text-gray-900"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
                       GHS {formatGHS(order.taxAmount)}
                     </span>
                   </div>
@@ -350,17 +364,21 @@ export default function SaleDetail({
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-red-500">Discount (GHS)</span>
-                    <span className="font-medium text-red-500" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <span
+                      className="font-medium text-red-500"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
                       -GHS {formatGHS(discountAmount)}
                     </span>
                   </div>
                 )}
                 <div className="my-3 border-t border-gray-100" />
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-gray-900">
-                    Grand Total
-                  </span>
-                  <span className="text-2xl font-bold text-green-700" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <span className="text-sm font-semibold text-gray-900">Grand Total</span>
+                  <span
+                    className="text-2xl font-bold text-green-700"
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
                     GHS {formatGHS(order.totalAmount)}
                   </span>
                 </div>
@@ -381,8 +399,18 @@ export default function SaleDetail({
                 {isCancelled ? (
                   <>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                      <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      <svg
+                        className="h-5 w-5 text-gray-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                        />
                       </svg>
                     </div>
                     <div>
@@ -393,8 +421,18 @@ export default function SaleDetail({
                 ) : isPaid ? (
                   <>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-200">
-                      <svg className="h-5 w-5 text-green-700" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      <svg
+                        className="h-5 w-5 text-green-700"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 12.75l6 6 9-13.5"
+                        />
                       </svg>
                     </div>
                     <div>
@@ -407,13 +445,26 @@ export default function SaleDetail({
                 ) : (
                   <>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-200">
-                      <svg className="h-5 w-5 text-amber-700" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="h-5 w-5 text-amber-700"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-amber-700">OUTSTANDING</p>
-                      <p className="text-xs text-amber-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <p
+                        className="text-xs text-amber-600"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         GHS {formatGHS(remaining)} remaining
                       </p>
                     </div>
@@ -450,8 +501,18 @@ export default function SaleDetail({
                   Share via WhatsApp
                 </button>
                 <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+                    />
                   </svg>
                   Send Invoice Email
                 </button>
@@ -459,8 +520,18 @@ export default function SaleDetail({
                   onClick={() => setShowVoidModal(true)}
                   className="flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                    />
                   </svg>
                   Void Sale
                 </button>
@@ -472,9 +543,7 @@ export default function SaleDetail({
               <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
                 <div className="mb-2 flex items-center gap-2">
                   <span className="text-amber-500">✨</span>
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    Growth Insight
-                  </h3>
+                  <h3 className="text-sm font-semibold text-gray-900">Growth Insight</h3>
                 </div>
                 <p className="text-sm text-gray-600">
                   Track this customer&apos;s purchase patterns over time to identify upsell
@@ -492,8 +561,8 @@ export default function SaleDetail({
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900">Void Sale</h3>
             <p className="mt-1 text-sm text-gray-500">
-              This will reverse all journal entries and mark the sale as
-              cancelled. This action cannot be undone.
+              This will reverse all journal entries and mark the sale as cancelled. This action
+              cannot be undone.
             </p>
             <div className="mt-4 space-y-3">
               <div>
@@ -520,9 +589,7 @@ export default function SaleDetail({
                 />
                 <span className="text-sm text-gray-700">Restock inventory</span>
               </label>
-              {voidError && (
-                <p className="text-sm text-red-600">{voidError}</p>
-              )}
+              {voidError && <p className="text-sm text-red-600">{voidError}</p>}
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button

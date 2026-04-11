@@ -33,10 +33,7 @@ export async function getProductTransactions(
         eq(inventoryTransactions.businessId, businessId),
       ),
     )
-    .orderBy(
-      asc(inventoryTransactions.transactionDate),
-      asc(inventoryTransactions.createdAt),
-    )
+    .orderBy(asc(inventoryTransactions.transactionDate), asc(inventoryTransactions.createdAt))
 
   return rows.map((row) => ({
     id: row.id,

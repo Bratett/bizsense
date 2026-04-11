@@ -180,9 +180,7 @@ export default function NewOrderForm({
 
   // ─── FX deviation check ───────────────────────────────────────────────────
   const fxDeviation =
-    lastStoredRate && fxRateNum > 0
-      ? Math.abs(fxRateNum - lastStoredRate) / lastStoredRate
-      : 0
+    lastStoredRate && fxRateNum > 0 ? Math.abs(fxRateNum - lastStoredRate) / lastStoredRate : 0
   const fxDeviationWarning = fxDeviation > 0.2
 
   // ─── Tax preview fetch ─────────────────────────────────────────────────────
@@ -192,7 +190,9 @@ export default function NewOrderForm({
       return
     }
     const timeout = setTimeout(() => {
-      previewOrderTax(taxableAmount).then(setTaxPreview).catch(() => setTaxPreview(null))
+      previewOrderTax(taxableAmount)
+        .then(setTaxPreview)
+        .catch(() => setTaxPreview(null))
     }, 300)
     return () => clearTimeout(timeout)
   }, [applyVat, taxableAmount])
@@ -217,23 +217,15 @@ export default function NewOrderForm({
     setLines((prev) => (prev.length > 1 ? prev.filter((l) => l.key !== key) : prev))
   }, [])
 
-  const updateLine = useCallback(
-    (key: number, field: keyof LineItem, value: string) => {
-      setLines((prev) =>
-        prev.map((l) => (l.key === key ? { ...l, [field]: value } : l)),
-      )
-    },
-    [],
-  )
+  const updateLine = useCallback((key: number, field: keyof LineItem, value: string) => {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, [field]: value } : l)))
+  }, [])
 
   // ─── Customer filtering ────────────────────────────────────────────────────
   const filteredCustomers = customers.filter((c) => {
     if (!customerSearch) return true
     const term = customerSearch.toLowerCase()
-    return (
-      c.name.toLowerCase().includes(term) ||
-      (c.phone && c.phone.includes(term))
-    )
+    return c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term))
   })
 
   const selectedCustomer = customers.find((c) => c.id === customerId)
@@ -252,10 +244,9 @@ export default function NewOrderForm({
     canProceedFromStep1 &&
     !needsCustomerForCredit &&
     (paymentMode === 'unpaid' ||
-      (!selectedOption?.requiresRef ||
-        (paymentMethod.startsWith('momo_') ? momoReference.trim() : bankReference.trim()))) &&
-    (paymentMode !== 'partial' ||
-      (amountPaidNowNum > 0 && amountPaidNowNum < total)) &&
+      !selectedOption?.requiresRef ||
+      (paymentMethod.startsWith('momo_') ? momoReference.trim() : bankReference.trim())) &&
+    (paymentMode !== 'partial' || (amountPaidNowNum > 0 && amountPaidNowNum < total)) &&
     (!hasUsdLine || fxRateNum > 0) &&
     (!fxDeviationWarning || fxRateConfirmed)
 
@@ -297,7 +288,9 @@ export default function NewOrderForm({
 
         if (result.success) {
           if (hasUsdLine && fxRateNum > 0) {
-            recordFxRate({ fromCurrency: 'USD', rate: fxRateNum, rateDate: orderDate }).catch(() => {})
+            recordFxRate({ fromCurrency: 'USD', rate: fxRateNum, rateDate: orderDate }).catch(
+              () => {},
+            )
           }
           if (result.creditWarning) {
             setCreditWarning(result.creditWarning)
@@ -444,7 +437,13 @@ export default function NewOrderForm({
                     onClick={() => removeLine(line.key)}
                     className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -493,9 +492,7 @@ export default function NewOrderForm({
                   <label className="text-xs text-gray-500">Currency</label>
                   <select
                     value={line.unitPriceCurrency}
-                    onChange={(e) =>
-                      updateLine(line.key, 'unitPriceCurrency', e.target.value)
-                    }
+                    onChange={(e) => updateLine(line.key, 'unitPriceCurrency', e.target.value)}
                     className="w-full rounded-lg border border-gray-300 px-2 py-2 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
                   >
                     <option value="GHS">GHS</option>
@@ -548,8 +545,8 @@ export default function NewOrderForm({
               {fxDeviationWarning && !fxRateConfirmed && (
                 <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
                   <p className="text-sm text-amber-800">
-                    This rate looks unusual. Last recorded rate: GHS{' '}
-                    {lastStoredRate!.toFixed(4)}. Continue?
+                    This rate looks unusual. Last recorded rate: GHS {lastStoredRate!.toFixed(4)}.
+                    Continue?
                   </p>
                   <div className="mt-2 flex gap-2">
                     <button
@@ -570,9 +567,7 @@ export default function NewOrderForm({
                 </div>
               )}
               {fxDeviationWarning && fxRateConfirmed && (
-                <p className="mt-1 text-xs text-amber-600">
-                  Rate deviation confirmed.
-                </p>
+                <p className="mt-1 text-xs text-amber-600">Rate deviation confirmed.</p>
               )}
             </div>
           )}
@@ -597,9 +592,7 @@ export default function NewOrderForm({
                   type="button"
                   onClick={() => setDiscountType('percentage')}
                   className={`px-3 py-1.5 text-sm ${
-                    discountType === 'percentage'
-                      ? 'bg-green-700 text-white'
-                      : 'text-gray-600'
+                    discountType === 'percentage' ? 'bg-green-700 text-white' : 'text-gray-600'
                   } rounded-l-lg`}
                 >
                   %
@@ -608,9 +601,7 @@ export default function NewOrderForm({
                   type="button"
                   onClick={() => setDiscountType('fixed')}
                   className={`px-3 py-1.5 text-sm ${
-                    discountType === 'fixed'
-                      ? 'bg-green-700 text-white'
-                      : 'text-gray-600'
+                    discountType === 'fixed' ? 'bg-green-700 text-white' : 'text-gray-600'
                   } rounded-r-lg`}
                 >
                   GHS
@@ -679,8 +670,13 @@ export default function NewOrderForm({
             {taxPreview && taxPreview.totalTaxAmount > 0 && (
               <>
                 {taxPreview.breakdown.map((b) => (
-                  <div key={b.componentCode} className="mt-1 flex justify-between text-xs text-gray-500">
-                    <span>{b.componentName} ({(b.rate * 100).toFixed(1)}%)</span>
+                  <div
+                    key={b.componentCode}
+                    className="mt-1 flex justify-between text-xs text-gray-500"
+                  >
+                    <span>
+                      {b.componentName} ({(b.rate * 100).toFixed(1)}%)
+                    </span>
                     <span>GHS {formatGHS(b.taxAmount)}</span>
                   </div>
                 ))}
@@ -722,8 +718,8 @@ export default function NewOrderForm({
           {/* Order summary */}
           <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
             <p>
-              {selectedCustomer ? selectedCustomer.name : 'Walk-in'} &middot;{' '}
-              {lines.length} item{lines.length > 1 ? 's' : ''}
+              {selectedCustomer ? selectedCustomer.name : 'Walk-in'} &middot; {lines.length} item
+              {lines.length > 1 ? 's' : ''}
             </p>
             <p className="text-lg font-bold text-gray-900">GHS {formatGHS(total)}</p>
           </div>
@@ -772,8 +768,8 @@ export default function NewOrderForm({
           {/* Credit mode: customer info */}
           {paymentMode === 'unpaid' && !needsCustomerForCredit && selectedCustomer && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-              Invoice will be recorded to <strong>{selectedCustomer.name}</strong>. Payment
-              expected later.
+              Invoice will be recorded to <strong>{selectedCustomer.name}</strong>. Payment expected
+              later.
             </div>
           )}
 
@@ -795,7 +791,8 @@ export default function NewOrderForm({
               />
               {amountPaidNowNum > 0 && total > 0 && (
                 <p className="mt-1 text-xs text-gray-500">
-                  GHS {formatGHS(Math.max(0, total - amountPaidNowNum))} remaining after this payment
+                  GHS {formatGHS(Math.max(0, total - amountPaidNowNum))} remaining after this
+                  payment
                 </p>
               )}
               {fieldErrors.amountPaid && (

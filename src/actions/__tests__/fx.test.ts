@@ -9,7 +9,10 @@ vi.mock('@/lib/session', () => ({
 vi.mock('@/db', () => {
   const mockReturning = vi.fn()
   const mockOnConflictDoUpdate = vi.fn(() => ({ returning: mockReturning }))
-  const mockValues = vi.fn(() => ({ onConflictDoUpdate: mockOnConflictDoUpdate, returning: mockReturning }))
+  const mockValues = vi.fn(() => ({
+    onConflictDoUpdate: mockOnConflictDoUpdate,
+    returning: mockReturning,
+  }))
   const mockInsert = vi.fn(() => ({ values: mockValues }))
 
   const mockLimit = vi.fn()
@@ -277,8 +280,7 @@ describe('FX rate locking in createCashOrder', () => {
                 ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
                 catch: (f?: ((e: unknown) => unknown) | null) =>
                   Promise.resolve(returnData).catch(f),
-                finally: (f?: (() => void) | null) =>
-                  Promise.resolve(returnData).finally(f),
+                finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
               }
             }),
           })),
@@ -328,9 +330,7 @@ describe('FX rate locking in createCashOrder', () => {
 
     const result = await createCashOrder(
       baseInput({
-        lines: [
-          { description: 'USD item', quantity: 1, unitPrice: 10, unitPriceCurrency: 'USD' },
-        ],
+        lines: [{ description: 'USD item', quantity: 1, unitPrice: 10, unitPriceCurrency: 'USD' }],
         fxRate: 15.4,
         applyVat: false,
       }),
@@ -377,9 +377,7 @@ describe('FX rate locking in createCashOrder', () => {
     // Create order with rate 15.40
     const result = await createCashOrder(
       baseInput({
-        lines: [
-          { description: 'USD item', quantity: 1, unitPrice: 10, unitPriceCurrency: 'USD' },
-        ],
+        lines: [{ description: 'USD item', quantity: 1, unitPrice: 10, unitPriceCurrency: 'USD' }],
         fxRate: 15.4,
         applyVat: false,
       }),

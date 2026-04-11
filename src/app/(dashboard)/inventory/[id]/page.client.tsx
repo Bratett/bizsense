@@ -81,7 +81,13 @@ export default function ProductDetailView({
       {/* Header */}
       <div className="flex items-center gap-2">
         <Link href="/inventory" className="text-gray-600 hover:text-gray-900">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </Link>
@@ -122,9 +128,7 @@ export default function ProductDetailView({
           </div>
           <div className="flex items-center gap-1.5">
             <span className={`inline-block h-2.5 w-2.5 rounded-full ${status.dot}`} />
-            <span className={`text-sm font-medium ${status.textColor}`}>
-              {status.label}
-            </span>
+            <span className={`text-sm font-medium ${status.textColor}`}>{status.label}</span>
           </div>
         </div>
 
@@ -298,16 +302,13 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
           <span
             className={`text-sm font-semibold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}
           >
-            {isPositive ? '+' : ''}{qty} {unit ?? 'units'}
+            {isPositive ? '+' : ''}
+            {qty} {unit ?? 'units'}
           </span>
-          <p className="text-xs tabular-nums text-gray-500">
-            @ GHS {formatGHS(movement.unitCost)}
-          </p>
+          <p className="text-xs tabular-nums text-gray-500">@ GHS {formatGHS(movement.unitCost)}</p>
         </div>
       </div>
-      {movement.notes && (
-        <p className="mt-1 text-xs text-gray-500">{movement.notes}</p>
-      )}
+      {movement.notes && <p className="mt-1 text-xs text-gray-500">{movement.notes}</p>}
     </div>
   )
 }

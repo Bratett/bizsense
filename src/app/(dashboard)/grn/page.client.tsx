@@ -52,10 +52,7 @@ export default function GrnList({ initialGrns }: { initialGrns: GrnWithSupplier[
     if (activeTab !== 'all' && g.status !== activeTab) return false
     if (search) {
       const term = search.toLowerCase()
-      return (
-        g.grnNumber.toLowerCase().includes(term) ||
-        g.supplierName.toLowerCase().includes(term)
-      )
+      return g.grnNumber.toLowerCase().includes(term) || g.supplierName.toLowerCase().includes(term)
     }
     return true
   })
@@ -138,9 +135,7 @@ export default function GrnList({ initialGrns }: { initialGrns: GrnWithSupplier[
                   <p className="text-xs text-gray-400">{formatDate(grn.receivedDate)}</p>
                 </div>
                 <div className="ml-4 shrink-0 text-right">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {formatGHS(grn.totalCost)}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-900">{formatGHS(grn.totalCost)}</p>
                   {grn.poId && <p className="text-xs text-gray-400">From PO</p>}
                 </div>
               </Link>

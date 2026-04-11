@@ -21,10 +21,10 @@ import type { AccountBalance } from '../engine'
  * Terminates at .where(), returns Promise<rows>.
  */
 function mockQ1(rows: unknown[]) {
-  const where_   = vi.fn().mockResolvedValue(rows)
+  const where_ = vi.fn().mockResolvedValue(rows)
   const ijEntry_ = vi.fn().mockReturnValue({ where: where_ })
-  const ijAcct_  = vi.fn().mockReturnValue({ innerJoin: ijEntry_ })
-  const from_    = vi.fn().mockReturnValue({ innerJoin: ijAcct_ })
+  const ijAcct_ = vi.fn().mockReturnValue({ innerJoin: ijEntry_ })
+  const from_ = vi.fn().mockReturnValue({ innerJoin: ijAcct_ })
   vi.mocked(db.select).mockReturnValueOnce({
     from: from_,
   } as unknown as ReturnType<typeof db.select>)
@@ -36,10 +36,10 @@ function mockQ1(rows: unknown[]) {
  */
 function mockQ2(rows: unknown[]) {
   const orderBy_ = vi.fn().mockResolvedValue(rows)
-  const where_   = vi.fn().mockReturnValue({ orderBy: orderBy_ })
+  const where_ = vi.fn().mockReturnValue({ orderBy: orderBy_ })
   const ijEntry_ = vi.fn().mockReturnValue({ where: where_ })
-  const ijAcct_  = vi.fn().mockReturnValue({ innerJoin: ijEntry_ })
-  const from_    = vi.fn().mockReturnValue({ innerJoin: ijAcct_ })
+  const ijAcct_ = vi.fn().mockReturnValue({ innerJoin: ijEntry_ })
+  const from_ = vi.fn().mockReturnValue({ innerJoin: ijAcct_ })
   vi.mocked(db.select).mockReturnValueOnce({
     from: from_,
   } as unknown as ReturnType<typeof db.select>)
@@ -49,15 +49,15 @@ function mockQ2(rows: unknown[]) {
 
 function makeAccountBalance(code: string, netBalance: number): AccountBalance {
   return {
-    accountId:        'id-' + code,
-    accountCode:      code,
-    accountName:      'Account ' + code,
-    accountType:      'asset',
-    accountSubtype:   'current_asset',
+    accountId: 'id-' + code,
+    accountCode: code,
+    accountName: 'Account ' + code,
+    accountType: 'asset',
+    accountSubtype: 'current_asset',
     cashFlowActivity: 'operating',
-    normalBalance:    'debit',
-    totalDebits:      netBalance,
-    totalCredits:     0,
+    normalBalance: 'debit',
+    totalDebits: netBalance,
+    totalCredits: 0,
     netBalance,
   }
 }
@@ -80,9 +80,16 @@ function makeAccountBalance(code: string, netBalance: number): AccountBalance {
 //   closingCash (ledger direct) = 1000
 
 type LineRow = {
-  lineId: string; entryId: string; entryDate: string; entryDesc: string | null
-  sourceType: string; debitAmount: string; creditAmount: string
-  accountCode: string; accountName: string; accountType: string
+  lineId: string
+  entryId: string
+  entryDate: string
+  entryDesc: string | null
+  sourceType: string
+  debitAmount: string
+  creditAmount: string
+  accountCode: string
+  accountName: string
+  accountType: string
   cashFlowActivity: string | null
 }
 
@@ -95,21 +102,117 @@ const ENTRY_IDS: { entryId: string }[] = [
 
 const ALL_LINES: LineRow[] = [
   // e1: Opening balance
-  { lineId: 'l1', entryId: 'e1', entryDate: '2026-01-01', entryDesc: null, sourceType: 'opening_balance', debitAmount: '1000', creditAmount: '0',    accountCode: '1001', accountName: 'Cash', accountType: 'asset',   cashFlowActivity: null },
-  { lineId: 'l2', entryId: 'e1', entryDate: '2026-01-01', entryDesc: null, sourceType: 'opening_balance', debitAmount: '0',    creditAmount: '1000', accountCode: '3001', accountName: 'Capital', accountType: 'equity', cashFlowActivity: 'financing' },
+  {
+    lineId: 'l1',
+    entryId: 'e1',
+    entryDate: '2026-01-01',
+    entryDesc: null,
+    sourceType: 'opening_balance',
+    debitAmount: '1000',
+    creditAmount: '0',
+    accountCode: '1001',
+    accountName: 'Cash',
+    accountType: 'asset',
+    cashFlowActivity: null,
+  },
+  {
+    lineId: 'l2',
+    entryId: 'e1',
+    entryDate: '2026-01-01',
+    entryDesc: null,
+    sourceType: 'opening_balance',
+    debitAmount: '0',
+    creditAmount: '1000',
+    accountCode: '3001',
+    accountName: 'Capital',
+    accountType: 'equity',
+    cashFlowActivity: 'financing',
+  },
   // e2: Sale
-  { lineId: 'l3', entryId: 'e2', entryDate: '2026-01-05', entryDesc: 'Customer Sale', sourceType: 'order', debitAmount: '500',  creditAmount: '0',   accountCode: '1001', accountName: 'Cash', accountType: 'asset',   cashFlowActivity: null },
-  { lineId: 'l4', entryId: 'e2', entryDate: '2026-01-05', entryDesc: 'Customer Sale', sourceType: 'order', debitAmount: '0',    creditAmount: '500', accountCode: '4001', accountName: 'Revenue', accountType: 'revenue', cashFlowActivity: 'operating' },
+  {
+    lineId: 'l3',
+    entryId: 'e2',
+    entryDate: '2026-01-05',
+    entryDesc: 'Customer Sale',
+    sourceType: 'order',
+    debitAmount: '500',
+    creditAmount: '0',
+    accountCode: '1001',
+    accountName: 'Cash',
+    accountType: 'asset',
+    cashFlowActivity: null,
+  },
+  {
+    lineId: 'l4',
+    entryId: 'e2',
+    entryDate: '2026-01-05',
+    entryDesc: 'Customer Sale',
+    sourceType: 'order',
+    debitAmount: '0',
+    creditAmount: '500',
+    accountCode: '4001',
+    accountName: 'Revenue',
+    accountType: 'revenue',
+    cashFlowActivity: 'operating',
+  },
   // e3: Expense (cash credit)
-  { lineId: 'l5', entryId: 'e3', entryDate: '2026-01-10', entryDesc: 'Office Supplies', sourceType: 'expense', debitAmount: '200',  creditAmount: '0',   accountCode: '6001', accountName: 'Expense', accountType: 'expense', cashFlowActivity: 'operating' },
-  { lineId: 'l6', entryId: 'e3', entryDate: '2026-01-10', entryDesc: 'Office Supplies', sourceType: 'expense', debitAmount: '0',    creditAmount: '200', accountCode: '1001', accountName: 'Cash', accountType: 'asset',   cashFlowActivity: null },
+  {
+    lineId: 'l5',
+    entryId: 'e3',
+    entryDate: '2026-01-10',
+    entryDesc: 'Office Supplies',
+    sourceType: 'expense',
+    debitAmount: '200',
+    creditAmount: '0',
+    accountCode: '6001',
+    accountName: 'Expense',
+    accountType: 'expense',
+    cashFlowActivity: 'operating',
+  },
+  {
+    lineId: 'l6',
+    entryId: 'e3',
+    entryDate: '2026-01-10',
+    entryDesc: 'Office Supplies',
+    sourceType: 'expense',
+    debitAmount: '0',
+    creditAmount: '200',
+    accountCode: '1001',
+    accountName: 'Cash',
+    accountType: 'asset',
+    cashFlowActivity: null,
+  },
   // e4: Capital purchase
-  { lineId: 'l7', entryId: 'e4', entryDate: '2026-01-15', entryDesc: null, sourceType: 'manual', debitAmount: '300',  creditAmount: '0',   accountCode: '1500', accountName: 'Fixed Assets', accountType: 'asset', cashFlowActivity: 'investing' },
-  { lineId: 'l8', entryId: 'e4', entryDate: '2026-01-15', entryDesc: null, sourceType: 'manual', debitAmount: '0',    creditAmount: '300', accountCode: '1001', accountName: 'Cash', accountType: 'asset',   cashFlowActivity: null },
+  {
+    lineId: 'l7',
+    entryId: 'e4',
+    entryDate: '2026-01-15',
+    entryDesc: null,
+    sourceType: 'manual',
+    debitAmount: '300',
+    creditAmount: '0',
+    accountCode: '1500',
+    accountName: 'Fixed Assets',
+    accountType: 'asset',
+    cashFlowActivity: 'investing',
+  },
+  {
+    lineId: 'l8',
+    entryId: 'e4',
+    entryDate: '2026-01-15',
+    entryDesc: null,
+    sourceType: 'manual',
+    debitAmount: '0',
+    creditAmount: '300',
+    accountCode: '1001',
+    accountName: 'Cash',
+    accountType: 'asset',
+    cashFlowActivity: null,
+  },
 ]
 
 const PERIOD = { type: 'range' as const, from: '2026-01-01', to: '2026-01-31' }
-const BIZ    = 'biz-1'
+const BIZ = 'biz-1'
 
 beforeEach(() => vi.resetAllMocks())
 
@@ -120,8 +223,8 @@ describe('getCashFlowStatement', () => {
     mockQ1(ENTRY_IDS)
     mockQ2(ALL_LINES)
     vi.mocked(getAccountBalances)
-      .mockResolvedValueOnce([makeAccountBalance('1001', 0)])     // opening
-      .mockResolvedValueOnce([makeAccountBalance('1001', 1000)])  // closing
+      .mockResolvedValueOnce([makeAccountBalance('1001', 0)]) // opening
+      .mockResolvedValueOnce([makeAccountBalance('1001', 1000)]) // closing
 
     const cf = await getCashFlowStatement(BIZ, PERIOD)
 
@@ -175,17 +278,45 @@ describe('getCashFlowStatement', () => {
     const entryIdsWithE5 = [...ENTRY_IDS, { entryId: 'e5' }]
     const allLinesWithE5: LineRow[] = [
       ...ALL_LINES,
-      { lineId: 'l9',  entryId: 'e5', entryDate: '2026-01-20', entryDesc: null, sourceType: 'manual', debitAmount: '100', creditAmount: '0',   accountCode: '1001', accountName: 'Cash',      accountType: 'asset', cashFlowActivity: null },
-      { lineId: 'l10', entryId: 'e5', entryDate: '2026-01-20', entryDesc: null, sourceType: 'manual', debitAmount: '0',   creditAmount: '100', accountCode: '9999', accountName: 'Misc Acct', accountType: 'asset', cashFlowActivity: null },
+      {
+        lineId: 'l9',
+        entryId: 'e5',
+        entryDate: '2026-01-20',
+        entryDesc: null,
+        sourceType: 'manual',
+        debitAmount: '100',
+        creditAmount: '0',
+        accountCode: '1001',
+        accountName: 'Cash',
+        accountType: 'asset',
+        cashFlowActivity: null,
+      },
+      {
+        lineId: 'l10',
+        entryId: 'e5',
+        entryDate: '2026-01-20',
+        entryDesc: null,
+        sourceType: 'manual',
+        debitAmount: '0',
+        creditAmount: '100',
+        accountCode: '9999',
+        accountName: 'Misc Acct',
+        accountType: 'asset',
+        cashFlowActivity: null,
+      },
     ]
 
     mockQ1(entryIdsWithE5)
     mockQ2(allLinesWithE5)
     vi.mocked(getAccountBalances)
-      .mockResolvedValueOnce([makeAccountBalance('1001', 0)])     // opening: 0
-      .mockResolvedValueOnce([makeAccountBalance('1001', 1100)])  // closing ledger: 1100 (includes e5)
+      .mockResolvedValueOnce([makeAccountBalance('1001', 0)]) // opening: 0
+      .mockResolvedValueOnce([makeAccountBalance('1001', 1100)]) // closing ledger: 1100 (includes e5)
 
-    const cf = await getCashFlowStatement(BIZ, { type: 'range', from: '2026-01-01', to: '2026-01-31' })
+    const cf = await getCashFlowStatement(BIZ, {
+      type: 'range',
+      from: '2026-01-01',
+      to: '2026-01-31',
+    })
 
     expect(cf.unclassifiedAmount).toBeGreaterThan(0)
     expect(cf.unclassifiedAmount).toBeCloseTo(100, 2)

@@ -96,14 +96,9 @@ export type PoWithLinesAndGrns = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function computeLines(
-  lines: CreatePoInput['lines'],
-  currency: 'GHS' | 'USD',
-  fxRate: number,
-) {
+function computeLines(lines: CreatePoInput['lines'], currency: 'GHS' | 'USD', fxRate: number) {
   return lines.map((l) => {
-    const unitCostGHS =
-      currency === 'USD' ? l.unitCost * fxRate : l.unitCost
+    const unitCostGHS = currency === 'USD' ? l.unitCost * fxRate : l.unitCost
     const lineTotal = l.quantity * unitCostGHS
     return {
       productId: l.productId ?? null,
@@ -117,9 +112,7 @@ function computeLines(
 
 // ─── Create Purchase Order ────────────────────────────────────────────────────
 
-export async function createPurchaseOrder(
-  input: CreatePoInput,
-): Promise<PoActionResult> {
+export async function createPurchaseOrder(input: CreatePoInput): Promise<PoActionResult> {
   const user = await requireRole(['owner', 'manager', 'accountant'])
   const { businessId, id: userId } = user
 
@@ -324,10 +317,7 @@ export async function markPoSent(id: string): Promise<PoActionResult> {
 
 // ─── Cancel Purchase Order ────────────────────────────────────────────────────
 
-export async function cancelPurchaseOrder(
-  id: string,
-  reason?: string,
-): Promise<void> {
+export async function cancelPurchaseOrder(id: string, reason?: string): Promise<void> {
   const user = await requireRole(['owner', 'manager'])
   const { businessId } = user
 
@@ -459,8 +449,7 @@ export async function getPurchaseOrderById(id: string): Promise<PoWithLinesAndGr
       quantity: purchaseOrderLines.quantity,
       unitCost: purchaseOrderLines.unitCost,
       lineTotal: purchaseOrderLines.lineTotal,
-      quantityReceived:
-        sql<string>`COALESCE(SUM(CASE WHEN ${goodsReceivedNotes.status} = 'confirmed' THEN ${grnLines.quantityReceived}::numeric ELSE 0 END), 0)`,
+      quantityReceived: sql<string>`COALESCE(SUM(CASE WHEN ${goodsReceivedNotes.status} = 'confirmed' THEN ${grnLines.quantityReceived}::numeric ELSE 0 END), 0)`,
     })
     .from(purchaseOrderLines)
     .leftJoin(grnLines, eq(grnLines.poLineId, purchaseOrderLines.id))
@@ -502,12 +491,7 @@ export async function getPurchaseOrderById(id: string): Promise<PoWithLinesAndGr
       totalCost: goodsReceivedNotes.totalCost,
     })
     .from(goodsReceivedNotes)
-    .where(
-      and(
-        eq(goodsReceivedNotes.poId, id),
-        eq(goodsReceivedNotes.businessId, businessId),
-      ),
-    )
+    .where(and(eq(goodsReceivedNotes.poId, id), eq(goodsReceivedNotes.businessId, businessId)))
     .orderBy(asc(goodsReceivedNotes.receivedDate))
 
   return {

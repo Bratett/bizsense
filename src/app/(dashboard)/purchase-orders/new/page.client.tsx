@@ -3,11 +3,7 @@
 import { useState, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  createPurchaseOrder,
-  markPoSent,
-  type CreatePoInput,
-} from '@/actions/purchaseOrders'
+import { createPurchaseOrder, markPoSent, type CreatePoInput } from '@/actions/purchaseOrders'
 import { recordFxRate } from '@/actions/fx'
 import type { SupplierListItem } from '@/actions/suppliers'
 import { generatePoNumber } from '@/lib/poNumber'
@@ -88,9 +84,7 @@ export default function NewPurchaseOrderForm({
   const total = computedLines.reduce((s, l) => s + l.lineTotal, 0)
 
   const fxDeviation =
-    latestUsdRate && fxRateNum > 0
-      ? Math.abs(fxRateNum - latestUsdRate) / latestUsdRate
-      : 0
+    latestUsdRate && fxRateNum > 0 ? Math.abs(fxRateNum - latestUsdRate) / latestUsdRate : 0
   const showFxWarning = currency === 'USD' && fxDeviation > 0.2
 
   // ─── Line handlers ───────────────────────────────────────────────────────────
@@ -116,9 +110,11 @@ export default function NewPurchaseOrderForm({
     if (!supplierId) errs['supplierId'] = 'Please select a supplier.'
     if (!orderDate) errs['orderDate'] = 'Order date is required.'
     if (currency === 'USD' && !fxRate) errs['fxRate'] = 'Exchange rate is required for USD orders.'
-    if (currency === 'USD' && fxRateNum <= 0) errs['fxRate'] = 'Exchange rate must be greater than 0.'
+    if (currency === 'USD' && fxRateNum <= 0)
+      errs['fxRate'] = 'Exchange rate must be greater than 0.'
     if (currency === 'USD' && showFxWarning && !fxRateConfirmed) {
-      errs['fxRate'] = 'Rate deviates >20% from last recorded rate. Tick the confirmation box to proceed.'
+      errs['fxRate'] =
+        'Rate deviates >20% from last recorded rate. Tick the confirmation box to proceed.'
     }
     setFieldErrors(errs)
     return Object.keys(errs).length === 0
@@ -177,14 +173,18 @@ export default function NewPurchaseOrderForm({
           const lineText = lines
             .map((l, i) => `${i + 1}. ${l.description} x${l.quantity} @ ${currency} ${l.unitCost}`)
             .join('\n')
-          const totalText = currency === 'USD'
-            ? `USD ${lines.reduce((s, l) => s + parseNum(l.quantity) * parseNum(l.unitCost), 0).toFixed(2)} (GHS ${total.toFixed(2)} at rate ${fxRateNum})`
-            : `GHS ${total.toFixed(2)}`
+          const totalText =
+            currency === 'USD'
+              ? `USD ${lines.reduce((s, l) => s + parseNum(l.quantity) * parseNum(l.unitCost), 0).toFixed(2)} (GHS ${total.toFixed(2)} at rate ${fxRateNum})`
+              : `GHS ${total.toFixed(2)}`
           const expectedText = expectedDate ? `\nExpected by: ${expectedDate}` : ''
           const msg = encodeURIComponent(
             `Hi ${selectedSupplier.name}, please find our Purchase Order ${poNumber} below:\n\n${lineText}\n\nTotal: ${totalText}${expectedText}`,
           )
-          window.open(`https://wa.me/${selectedSupplier.phone.replace(/\D/g, '')}?text=${msg}`, '_blank')
+          window.open(
+            `https://wa.me/${selectedSupplier.phone.replace(/\D/g, '')}?text=${msg}`,
+            '_blank',
+          )
         }
       }
 
@@ -193,8 +193,8 @@ export default function NewPurchaseOrderForm({
   }
 
   // ─── Supplier filter ─────────────────────────────────────────────────────────
-  const filteredSuppliers = suppliers.filter((s) =>
-    !supplierSearch || s.name.toLowerCase().includes(supplierSearch.toLowerCase()),
+  const filteredSuppliers = suppliers.filter(
+    (s) => !supplierSearch || s.name.toLowerCase().includes(supplierSearch.toLowerCase()),
   )
 
   // ─── Render ──────────────────────────────────────────────────────────────────
@@ -206,7 +206,13 @@ export default function NewPurchaseOrderForm({
           href="/purchase-orders"
           className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
@@ -222,8 +228,8 @@ export default function NewPurchaseOrderForm({
                 i === currentStep
                   ? 'bg-green-700 text-white'
                   : i < currentStep
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-400'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-400'
               }`}
             >
               {i + 1}
@@ -355,8 +361,8 @@ export default function NewPurchaseOrderForm({
               {showFxWarning && (
                 <div className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
                   <p>
-                    This rate deviates {(fxDeviation * 100).toFixed(1)}% from the last recorded
-                    rate ({latestUsdRate?.toFixed(4)}).
+                    This rate deviates {(fxDeviation * 100).toFixed(1)}% from the last recorded rate
+                    ({latestUsdRate?.toFixed(4)}).
                   </p>
                   <label className="mt-2 flex items-center gap-2">
                     <input
@@ -370,9 +376,7 @@ export default function NewPurchaseOrderForm({
                 </div>
               )}
               {fxRateNum > 0 && !showFxWarning && (
-                <p className="mt-1 text-xs text-gray-500">
-                  USD 1 = GHS {fxRateNum.toFixed(4)}
-                </p>
+                <p className="mt-1 text-xs text-gray-500">USD 1 = GHS {fxRateNum.toFixed(4)}</p>
               )}
             </div>
           )}
@@ -417,7 +421,13 @@ export default function NewPurchaseOrderForm({
                     onClick={() => removeLine(line.key)}
                     className="rounded p-1 text-gray-400 hover:text-red-500"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -433,7 +443,9 @@ export default function NewPurchaseOrderForm({
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-100"
                   />
                   {fieldErrors[`line_${idx}_description`] && (
-                    <p className="mt-0.5 text-xs text-red-600">{fieldErrors[`line_${idx}_description`]}</p>
+                    <p className="mt-0.5 text-xs text-red-600">
+                      {fieldErrors[`line_${idx}_description`]}
+                    </p>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -448,7 +460,9 @@ export default function NewPurchaseOrderForm({
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-100"
                     />
                     {fieldErrors[`line_${idx}_quantity`] && (
-                      <p className="mt-0.5 text-xs text-red-600">{fieldErrors[`line_${idx}_quantity`]}</p>
+                      <p className="mt-0.5 text-xs text-red-600">
+                        {fieldErrors[`line_${idx}_quantity`]}
+                      </p>
                     )}
                   </div>
                   <div className="flex-1">
@@ -478,7 +492,13 @@ export default function NewPurchaseOrderForm({
             onClick={addLine}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-3 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Add Item
@@ -543,7 +563,9 @@ export default function NewPurchaseOrderForm({
               )}
               <div className="flex justify-between">
                 <dt className="text-gray-500">Items</dt>
-                <dd className="text-gray-900">{lines.length} line{lines.length !== 1 ? 's' : ''}</dd>
+                <dd className="text-gray-900">
+                  {lines.length} line{lines.length !== 1 ? 's' : ''}
+                </dd>
               </div>
               <div className="flex justify-between border-t border-gray-100 pt-2">
                 <dt className="font-medium text-gray-900">Total</dt>
@@ -595,9 +617,7 @@ export default function NewPurchaseOrderForm({
               {selectedSupplier?.phone ? 'Send via WhatsApp' : 'Send'}
             </button>
           </div>
-          {isPending && (
-            <p className="text-center text-sm text-gray-500">Saving...</p>
-          )}
+          {isPending && <p className="text-center text-sm text-gray-500">Saving...</p>}
         </div>
       )}
     </div>

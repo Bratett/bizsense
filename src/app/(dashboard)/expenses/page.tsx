@@ -22,11 +22,7 @@ export default async function ExpensesPage() {
     <>
       <PullToRefresh>
         <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-          <ExpenseList
-            initialExpenses={expenses}
-            summary={summary}
-            userRole={role}
-          />
+          <ExpenseList initialExpenses={expenses} summary={summary} userRole={role} />
         </main>
       </PullToRefresh>
       <Fab href="/expenses/new" label="New Expense" />

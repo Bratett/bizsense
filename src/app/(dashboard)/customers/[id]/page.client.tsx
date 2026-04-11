@@ -46,7 +46,13 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
             className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
             aria-label="Back to customers"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
@@ -75,7 +81,9 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
         {/* Balance Card */}
         <div className={`mt-4 rounded-xl border p-4 ${balanceColor}`}>
           <p className="text-xs font-medium opacity-70">Outstanding Balance</p>
-          <p className="mt-1 text-2xl font-semibold">GHS {formatGHS(customer.outstandingBalance)}</p>
+          <p className="mt-1 text-2xl font-semibold">
+            GHS {formatGHS(customer.outstandingBalance)}
+          </p>
         </div>
 
         {/* Profile */}
@@ -135,8 +143,8 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
               <h3 className="text-lg font-semibold text-gray-900">Deactivate Customer?</h3>
               <p className="mt-2 text-sm text-gray-500">
-                {customer.name} will be hidden from your customer list. You can reactivate
-                them later from settings.
+                {customer.name} will be hidden from your customer list. You can reactivate them
+                later from settings.
               </p>
               <div className="mt-6 flex gap-3">
                 <button

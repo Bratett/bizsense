@@ -12,7 +12,7 @@ import type { PaymentMethod } from './orders'
 
 export type RecordPaymentInput = {
   orderId: string
-  amount: number           // GHS amount received
+  amount: number // GHS amount received
   paymentMethod: string
   paymentDate: string
   momoReference?: string
@@ -36,9 +36,7 @@ export type PaymentListItem = {
   createdAt: Date
 }
 
-export async function listPaymentsForOrder(
-  orderId: string,
-): Promise<PaymentListItem[]> {
+export async function listPaymentsForOrder(orderId: string): Promise<PaymentListItem[]> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -53,12 +51,7 @@ export async function listPaymentsForOrder(
       createdAt: paymentsReceived.createdAt,
     })
     .from(paymentsReceived)
-    .where(
-      and(
-        eq(paymentsReceived.orderId, orderId),
-        eq(paymentsReceived.businessId, businessId),
-      ),
-    )
+    .where(and(eq(paymentsReceived.orderId, orderId), eq(paymentsReceived.businessId, businessId)))
     .orderBy(paymentsReceived.paymentDate)
 
   return rows
@@ -95,10 +88,7 @@ export async function recordPaymentReceived(
   if (!VALID_PAYMENT_METHODS.includes(input.paymentMethod as PaymentMethod)) {
     return { success: false, error: 'Invalid payment method.' }
   }
-  if (
-    (input.paymentMethod as string).startsWith('momo_') &&
-    !input.momoReference?.trim()
-  ) {
+  if ((input.paymentMethod as string).startsWith('momo_') && !input.momoReference?.trim()) {
     fieldErrors.momoReference = 'MoMo reference is required for mobile money payments'
   }
   if (input.paymentMethod === 'bank' && !input.bankReference?.trim()) {
@@ -142,8 +132,7 @@ export async function recordPaymentReceived(
 
   // 5. Compute new payment status
   const newAmountPaid = Math.round((alreadyPaid + input.amount) * 100) / 100
-  const newPaymentStatus =
-    newAmountPaid >= totalAmount - 0.001 ? 'paid' : 'partial'
+  const newPaymentStatus = newAmountPaid >= totalAmount - 0.001 ? 'paid' : 'partial'
 
   // 6. FX gain/loss (MVP: all amounts stored in GHS so fxDifference = 0)
   // v2: when customer pays foreign currency at current rate that differs from
@@ -158,9 +147,7 @@ export async function recordPaymentReceived(
   const accountRows = await db
     .select({ id: accounts.id, code: accounts.code })
     .from(accounts)
-    .where(
-      and(eq(accounts.businessId, businessId), inArray(accounts.code, neededCodes)),
-    )
+    .where(and(eq(accounts.businessId, businessId), inArray(accounts.code, neededCodes)))
   const accountMap = Object.fromEntries(accountRows.map((a) => [a.code, a.id]))
 
   const paymentAccountId = accountMap[paymentAccountCode]

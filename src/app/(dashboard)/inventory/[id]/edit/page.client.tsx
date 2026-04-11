@@ -64,7 +64,13 @@ export default function EditProductForm({
       {/* Header */}
       <div className="flex items-center gap-2">
         <Link href={`/inventory/${product.id}`} className="text-gray-600 hover:text-gray-900">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </Link>
@@ -92,9 +98,7 @@ export default function EditProductForm({
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             required
           />
-          {fieldErrors.name && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>
-          )}
+          {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
         </div>
 
         {/* SKU — read-only */}
@@ -231,9 +235,7 @@ export default function EditProductForm({
             <label htmlFor="reorderLevel" className="block text-sm font-medium text-gray-700">
               Reorder Level
             </label>
-            <p className="text-xs text-gray-500">
-              Alert me when stock falls below this quantity
-            </p>
+            <p className="text-xs text-gray-500">Alert me when stock falls below this quantity</p>
             <input
               id="reorderLevel"
               type="text"

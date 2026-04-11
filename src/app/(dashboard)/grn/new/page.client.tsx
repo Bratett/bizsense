@@ -221,9 +221,7 @@ export default function WalkInGrnForm({
 
           {/* Date */}
           <div className="rounded-xl bg-white p-4 shadow-sm">
-            <label className="block text-sm font-medium text-gray-700">
-              Date Received
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Date Received</label>
             <input
               type="date"
               value={receivedDate}
@@ -248,7 +246,8 @@ export default function WalkInGrnForm({
                       <option value="">Select product…</option>
                       {products.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name}{p.sku ? ` (${p.sku})` : ''}
+                          {p.name}
+                          {p.sku ? ` (${p.sku})` : ''}
                         </option>
                       ))}
                     </select>

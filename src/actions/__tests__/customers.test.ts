@@ -173,9 +173,7 @@ describe('deactivateCustomer', () => {
 
     expect(result.success).toBe(true)
     expect(db.update).toHaveBeenCalled()
-    expect(setMock).toHaveBeenCalledWith(
-      expect.objectContaining({ isActive: false }),
-    )
+    expect(setMock).toHaveBeenCalledWith(expect.objectContaining({ isActive: false }))
   })
 
   it('Test 5 — blocks deactivation when unpaid orders exist', async () => {

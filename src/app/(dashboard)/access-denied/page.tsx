@@ -25,8 +25,8 @@ export default async function AccessDeniedPage() {
           </svg>
           <h1 className="text-xl font-semibold text-gray-900">Access Denied</h1>
           <p className="mt-2 text-sm text-gray-500">
-            You don&apos;t have permission to view this report.
-            Financial statements are restricted to owners, managers, and accountants.
+            You don&apos;t have permission to view this report. Financial statements are restricted
+            to owners, managers, and accountants.
           </p>
           <Link
             href="/dashboard"

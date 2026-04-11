@@ -2,11 +2,7 @@ import { notFound } from 'next/navigation'
 import { getProductById } from '@/actions/products'
 import AdjustStockForm from './page.client'
 
-export default async function AdjustStockPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function AdjustStockPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const product = await getProductById(id)
 

@@ -138,10 +138,34 @@ function mockTaxBreakdown(supplyAmount: number) {
   return {
     supplyAmount,
     breakdown: [
-      { componentCode: 'NHIL', componentName: 'NHIL', baseAmount: supplyAmount, rate: 0.025, taxAmount: nhil },
-      { componentCode: 'GETFUND', componentName: 'GETFund', baseAmount: supplyAmount, rate: 0.025, taxAmount: getfund },
-      { componentCode: 'COVID', componentName: 'COVID-19 Levy', baseAmount: supplyAmount, rate: 0.01, taxAmount: covid },
-      { componentCode: 'VAT', componentName: 'VAT', baseAmount: vatBase, rate: 0.15, taxAmount: vat },
+      {
+        componentCode: 'NHIL',
+        componentName: 'NHIL',
+        baseAmount: supplyAmount,
+        rate: 0.025,
+        taxAmount: nhil,
+      },
+      {
+        componentCode: 'GETFUND',
+        componentName: 'GETFund',
+        baseAmount: supplyAmount,
+        rate: 0.025,
+        taxAmount: getfund,
+      },
+      {
+        componentCode: 'COVID',
+        componentName: 'COVID-19 Levy',
+        baseAmount: supplyAmount,
+        rate: 0.01,
+        taxAmount: covid,
+      },
+      {
+        componentCode: 'VAT',
+        componentName: 'VAT',
+        baseAmount: vatBase,
+        rate: 0.15,
+        taxAmount: vat,
+      },
     ],
     totalTaxAmount: total,
     totalAmount: supplyAmount + total,
@@ -215,7 +239,12 @@ describe('getInvoiceData', () => {
   it('returns INVOICE label for non-VAT-registered business', async () => {
     mockSession()
 
-    const nonVatOrder = { ...mockOrder, taxAmount: '0.00', totalAmount: '500.00', amountPaid: '500.00' }
+    const nonVatOrder = {
+      ...mockOrder,
+      taxAmount: '0.00',
+      totalAmount: '500.00',
+      amountPaid: '500.00',
+    }
     vi.mocked(getOrderById).mockResolvedValue(nonVatOrder as never)
 
     const nonVatBiz = { ...mockBusiness, vatRegistered: false, vatNumber: null }
@@ -267,7 +296,13 @@ describe('getInvoiceData', () => {
   it('sets customer to null for walk-in orders', async () => {
     mockSession()
 
-    const walkInOrder = { ...mockOrder, customer: null, taxAmount: '0.00', totalAmount: '500.00', amountPaid: '500.00' }
+    const walkInOrder = {
+      ...mockOrder,
+      customer: null,
+      taxAmount: '0.00',
+      totalAmount: '500.00',
+      amountPaid: '500.00',
+    }
     vi.mocked(getOrderById).mockResolvedValue(walkInOrder as never)
 
     const nonVatBiz = { ...mockBusiness, vatRegistered: false }
@@ -282,7 +317,14 @@ describe('getInvoiceData', () => {
     mockSession()
 
     // Order was created with tax = 100, but current rates produce 110
-    const orderWithOldTax = { ...mockOrder, subtotal: '500.00', discountAmount: '0.00', taxAmount: '100.00', totalAmount: '600.00', amountPaid: '600.00' }
+    const orderWithOldTax = {
+      ...mockOrder,
+      subtotal: '500.00',
+      discountAmount: '0.00',
+      taxAmount: '100.00',
+      totalAmount: '600.00',
+      amountPaid: '600.00',
+    }
     vi.mocked(getOrderById).mockResolvedValue(orderWithOldTax as never)
     vi.mocked(db.select)
       .mockReturnValueOnce(makeChain([mockBusiness]) as never)
@@ -292,9 +334,27 @@ describe('getInvoiceData', () => {
     vi.mocked(calculateTax).mockResolvedValue({
       supplyAmount: 500,
       breakdown: [
-        { componentCode: 'NHIL', componentName: 'NHIL', baseAmount: 500, rate: 0.025, taxAmount: 12.5 },
-        { componentCode: 'GETFUND', componentName: 'GETFund', baseAmount: 500, rate: 0.025, taxAmount: 12.5 },
-        { componentCode: 'COVID', componentName: 'COVID-19 Levy', baseAmount: 500, rate: 0.01, taxAmount: 5 },
+        {
+          componentCode: 'NHIL',
+          componentName: 'NHIL',
+          baseAmount: 500,
+          rate: 0.025,
+          taxAmount: 12.5,
+        },
+        {
+          componentCode: 'GETFUND',
+          componentName: 'GETFund',
+          baseAmount: 500,
+          rate: 0.025,
+          taxAmount: 12.5,
+        },
+        {
+          componentCode: 'COVID',
+          componentName: 'COVID-19 Levy',
+          baseAmount: 500,
+          rate: 0.01,
+          taxAmount: 5,
+        },
         { componentCode: 'VAT', componentName: 'VAT', baseAmount: 530, rate: 0.15, taxAmount: 80 },
       ],
       totalTaxAmount: 110,

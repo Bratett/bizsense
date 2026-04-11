@@ -3,7 +3,12 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState, useTransition } from 'react'
 import type { PeriodParams } from '@/lib/reports/periods'
-import { currentMonthPeriod, priorMonthPeriod, yearToDatePeriod, quarterPeriod } from '@/lib/reports/periods'
+import {
+  currentMonthPeriod,
+  priorMonthPeriod,
+  yearToDatePeriod,
+  quarterPeriod,
+} from '@/lib/reports/periods'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -79,11 +84,11 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
     const prevQuarterYear = currentQuarter === 1 ? currentYear - 1 : currentYear
 
     const periods: Record<Exclude<Preset, 'custom'>, PeriodParams> = {
-      this_month:   currentMonthPeriod(),
-      last_month:   priorMonthPeriod(),
+      this_month: currentMonthPeriod(),
+      last_month: priorMonthPeriod(),
       this_quarter: quarterPeriod(currentYear, currentQuarter),
       last_quarter: quarterPeriod(prevQuarterYear, prevQuarter),
-      ytd:          yearToDatePeriod(1),
+      ytd: yearToDatePeriod(1),
     }
 
     navigate(periods[preset as Exclude<Preset, 'custom'>])
@@ -91,12 +96,9 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
 
   const activePreset = getActivePreset(value)
 
-  const btnBase =
-    'px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors'
-  const btnActive =
-    `${btnBase} bg-green-700 text-white border-green-700`
-  const btnInactive =
-    `${btnBase} bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:text-green-700`
+  const btnBase = 'px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors'
+  const btnActive = `${btnBase} bg-green-700 text-white border-green-700`
+  const btnInactive = `${btnBase} bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:text-green-700`
 
   // ── Render: range mode ─────────────────────────────────────────────────────
 
@@ -105,28 +107,28 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
 
     return (
       <div className={`flex flex-wrap items-center gap-2 ${isPending ? 'opacity-60' : ''}`}>
-        {(['this_month', 'last_month', 'this_quarter', 'last_quarter', 'ytd', 'custom'] as Preset[]).map(
-          (preset) => {
-            const labels: Record<Preset, string> = {
-              this_month:   'This Month',
-              last_month:   'Last Month',
-              this_quarter: 'This Quarter',
-              last_quarter: 'Last Quarter',
-              ytd:          'Year to Date',
-              custom:       'Custom',
-            }
-            const isActive = preset === 'custom' ? showCustom : activePreset === preset
-            return (
-              <button
-                key={preset}
-                onClick={() => applyPreset(preset)}
-                className={isActive ? btnActive : btnInactive}
-              >
-                {labels[preset]}
-              </button>
-            )
-          },
-        )}
+        {(
+          ['this_month', 'last_month', 'this_quarter', 'last_quarter', 'ytd', 'custom'] as Preset[]
+        ).map((preset) => {
+          const labels: Record<Preset, string> = {
+            this_month: 'This Month',
+            last_month: 'Last Month',
+            this_quarter: 'This Quarter',
+            last_quarter: 'Last Quarter',
+            ytd: 'Year to Date',
+            custom: 'Custom',
+          }
+          const isActive = preset === 'custom' ? showCustom : activePreset === preset
+          return (
+            <button
+              key={preset}
+              onClick={() => applyPreset(preset)}
+              className={isActive ? btnActive : btnInactive}
+            >
+              {labels[preset]}
+            </button>
+          )
+        })}
 
         {showCustom && (
           <div className="flex items-center gap-2 mt-1 w-full sm:w-auto sm:mt-0">
@@ -154,9 +156,7 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
           </div>
         )}
 
-        {isPending && (
-          <span className="text-xs text-gray-400 ml-1">Loading…</span>
-        )}
+        {isPending && <span className="text-xs text-gray-400 ml-1">Loading…</span>}
       </div>
     )
   }
@@ -187,7 +187,7 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
   // ── Render: both mode ──────────────────────────────────────────────────────
 
   const rangeValue = value.type === 'range' ? value : { from: '', to: '' }
-  const asOfValue  = value.type === 'asOf'  ? value.date : new Date().toISOString().slice(0, 10)
+  const asOfValue = value.type === 'asOf' ? value.date : new Date().toISOString().slice(0, 10)
 
   return (
     <div className={`flex flex-wrap items-center gap-3 ${isPending ? 'opacity-60' : ''}`}>
@@ -195,7 +195,9 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
         <button
           onClick={() => setPeriodType('range')}
           className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-            periodType === 'range' ? 'bg-green-700 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+            periodType === 'range'
+              ? 'bg-green-700 text-white'
+              : 'bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
           Period
@@ -203,7 +205,9 @@ export default function PeriodSelector({ value, onChange, mode = 'range' }: Prop
         <button
           onClick={() => setPeriodType('asOf')}
           className={`px-3 py-1.5 text-xs font-medium transition-colors border-l border-gray-200 ${
-            periodType === 'asOf' ? 'bg-green-700 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+            periodType === 'asOf'
+              ? 'bg-green-700 text-white'
+              : 'bg-white text-gray-600 hover:bg-gray-50'
           }`}
         >
           As at date

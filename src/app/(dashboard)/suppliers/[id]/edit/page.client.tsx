@@ -3,7 +3,11 @@
 import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { updateSupplier, type SupplierActionResult, type SupplierWithBalance } from '@/actions/suppliers'
+import {
+  updateSupplier,
+  type SupplierActionResult,
+  type SupplierWithBalance,
+} from '@/actions/suppliers'
 
 const initialState: SupplierActionResult = { success: false, error: '' }
 
@@ -28,7 +32,13 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
           className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           aria-label="Back to supplier"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
@@ -64,9 +74,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
                 : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
             }`}
           />
-          {fieldErrors?.name && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
-          )}
+          {fieldErrors?.name && <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>}
         </div>
 
         {/* Phone */}
@@ -88,9 +96,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
             }`}
             placeholder="e.g. 0241234567"
           />
-          {fieldErrors?.phone && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
-          )}
+          {fieldErrors?.phone && <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>}
         </div>
 
         {/* Email */}

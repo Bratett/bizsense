@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { getReceivablesAging, type ReceivablesAgingData } from '@/actions/sales'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -75,11 +67,7 @@ const BUCKET_BORDER_COLORS: Record<string, string> = {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export default function ReceivablesAging({
-  initialData,
-}: {
-  initialData: ReceivablesAgingData
-}) {
+export default function ReceivablesAging({ initialData }: { initialData: ReceivablesAgingData }) {
   const [data, setData] = useState(initialData)
   const [search, setSearch] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -196,13 +184,17 @@ export default function ReceivablesAging({
               onClick={() => window.history.back()}
               className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Receivables Aging
-            </h1>
+            <h1 className="text-2xl font-semibold text-gray-900">Receivables Aging</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -216,8 +208,18 @@ export default function ReceivablesAging({
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                />
               </svg>
               PDF
             </button>
@@ -225,8 +227,18 @@ export default function ReceivablesAging({
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 0v1.5c0 .621-.504 1.125-1.125 1.125" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 0v1.5c0 .621-.504 1.125-1.125 1.125"
+                />
               </svg>
               CSV
             </button>
@@ -240,7 +252,10 @@ export default function ReceivablesAging({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Total Receivables
             </p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p
+              className="mt-2 text-2xl font-semibold text-gray-900"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               GHS {formatGHSFull(data.totalReceivables)}
             </p>
           </div>
@@ -250,7 +265,10 @@ export default function ReceivablesAging({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Avg. Collection Period
             </p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p
+              className="mt-2 text-2xl font-semibold text-gray-900"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               {data.avgCollectionPeriodDays} Days
             </p>
             {data.avgCollectionPeriodDays > 30 && (
@@ -265,20 +283,19 @@ export default function ReceivablesAging({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Total Overdue
             </p>
-            <p className="mt-2 text-2xl font-semibold text-red-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p
+              className="mt-2 text-2xl font-semibold text-red-600"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               GHS {formatGHSFull(data.totalOverdue)}
             </p>
-            <p className="mt-1 text-xs text-gray-500">
-              {data.overduePercentage}% of total balance
-            </p>
+            <p className="mt-1 text-xs text-gray-500">{data.overduePercentage}% of total balance</p>
           </div>
         </div>
 
         {/* Aging Distribution */}
         <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Aging Distribution
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">Aging Distribution</h2>
           <p className="mb-4 text-sm text-gray-500">
             Analysis of outstanding balances by time period
           </p>
@@ -330,7 +347,10 @@ export default function ReceivablesAging({
                     <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
                       {b.label}
                     </p>
-                    <p className="mt-1 text-base font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <p
+                      className="mt-1 text-base font-semibold text-gray-900"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
                       GHS {formatGHS(data.agingDistribution[b.key])}
                     </p>
                   </div>
@@ -338,18 +358,14 @@ export default function ReceivablesAging({
               </div>
             </>
           ) : (
-            <div className="py-8 text-center text-sm text-gray-400">
-              No outstanding receivables
-            </div>
+            <div className="py-8 text-center text-sm text-gray-400">No outstanding receivables</div>
           )}
         </div>
 
         {/* Detailed Ledger */}
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="flex flex-col gap-3 border-b border-gray-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Detailed Ledger
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Detailed Ledger</h2>
             <div className="relative sm:w-64">
               <svg
                 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
@@ -425,22 +441,40 @@ export default function ReceivablesAging({
                           </span>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-sm font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <td
+                        className="whitespace-nowrap px-4 py-3.5 text-right text-sm font-semibold text-gray-900"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         GHS {formatGHSFull(customer.totalBalance)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <td
+                        className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         {customer.current > 0 ? formatGHSFull(customer.current) : '—'}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <td
+                        className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         {customer.days1_30 > 0 ? formatGHSFull(customer.days1_30) : '—'}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <td
+                        className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         {customer.days31_60 > 0 ? formatGHSFull(customer.days31_60) : '—'}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <td
+                        className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         {customer.days61_90 > 0 ? formatGHSFull(customer.days61_90) : '—'}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right text-sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <td
+                        className="whitespace-nowrap px-4 py-3.5 text-right text-sm"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         {customer.days90Plus > 0 ? (
                           <span className="font-semibold text-red-600">
                             {formatGHSFull(customer.days90Plus)}

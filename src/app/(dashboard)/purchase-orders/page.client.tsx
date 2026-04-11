@@ -63,8 +63,7 @@ export default function PurchaseOrderList({
     if (search) {
       const term = search.toLowerCase()
       return (
-        po.poNumber.toLowerCase().includes(term) ||
-        po.supplierName.toLowerCase().includes(term)
+        po.poNumber.toLowerCase().includes(term) || po.supplierName.toLowerCase().includes(term)
       )
     }
     return true

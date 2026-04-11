@@ -105,52 +105,46 @@ function mockAtomicWrite() {
   capturedTxInserts = []
   capturedTxUpdates = []
 
-  vi.mocked(atomicTransactionWrite).mockImplementation(
-    async (journalInput, writeSourceRecord) => {
-      capturedJournalInput = journalInput
+  vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, writeSourceRecord) => {
+    capturedJournalInput = journalInput
 
-      const mockTx = {
-        insert: vi.fn(() => ({
-          values: vi.fn((data: unknown) => {
-            capturedTxInserts.push({ data })
-            const rows = Array.isArray(data) ? data : [data]
-            const returnData = rows.map((r: Record<string, unknown>) => ({
-              ...r,
-            }))
-            return {
-              returning: vi.fn().mockResolvedValue(returnData),
-              then: (
-                onfulfilled?: ((v: unknown) => unknown) | null,
-                onrejected?: ((e: unknown) => unknown) | null,
-              ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
-              catch: (f?: ((e: unknown) => unknown) | null) =>
-                Promise.resolve(returnData).catch(f),
-              finally: (f?: (() => void) | null) =>
-                Promise.resolve(returnData).finally(f),
-            }
-          }),
-        })),
-        update: vi.fn(() => ({
-          set: vi.fn((data: unknown) => {
-            capturedTxUpdates.push({ data })
-            return {
-              where: vi.fn().mockResolvedValue(undefined),
-              then: (
-                onfulfilled?: ((v: unknown) => unknown) | null,
-                onrejected?: ((e: unknown) => unknown) | null,
-              ) => Promise.resolve(undefined).then(onfulfilled, onrejected),
-              catch: (f?: ((e: unknown) => unknown) | null) =>
-                Promise.resolve(undefined).catch(f),
-              finally: (f?: (() => void) | null) =>
-                Promise.resolve(undefined).finally(f),
-            }
-          }),
-        })),
-      }
+    const mockTx = {
+      insert: vi.fn(() => ({
+        values: vi.fn((data: unknown) => {
+          capturedTxInserts.push({ data })
+          const rows = Array.isArray(data) ? data : [data]
+          const returnData = rows.map((r: Record<string, unknown>) => ({
+            ...r,
+          }))
+          return {
+            returning: vi.fn().mockResolvedValue(returnData),
+            then: (
+              onfulfilled?: ((v: unknown) => unknown) | null,
+              onrejected?: ((e: unknown) => unknown) | null,
+            ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
+            catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
+            finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
+          }
+        }),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn((data: unknown) => {
+          capturedTxUpdates.push({ data })
+          return {
+            where: vi.fn().mockResolvedValue(undefined),
+            then: (
+              onfulfilled?: ((v: unknown) => unknown) | null,
+              onrejected?: ((e: unknown) => unknown) | null,
+            ) => Promise.resolve(undefined).then(onfulfilled, onrejected),
+            catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(undefined).catch(f),
+            finally: (f?: (() => void) | null) => Promise.resolve(undefined).finally(f),
+          }
+        }),
+      })),
+    }
 
-      return writeSourceRecord(mockTx as never, 'journal-entry-001')
-    },
-  )
+    return writeSourceRecord(mockTx as never, 'journal-entry-001')
+  })
 }
 
 function mockAccountLookup() {
@@ -323,9 +317,7 @@ describe('createExpense', () => {
     expect(expenseLine!.debitAmount).toBeCloseTo(100.0, 2)
 
     // Dr Input VAT Recoverable (1101) = 21.90
-    const vatLine = journal.lines.find(
-      (l) => l.debitAmount > 0 && l.accountId === 'acct-input-vat',
-    )
+    const vatLine = journal.lines.find((l) => l.debitAmount > 0 && l.accountId === 'acct-input-vat')
     expect(vatLine).toBeDefined()
     expect(vatLine!.debitAmount).toBeCloseTo(21.9, 2)
 
@@ -583,13 +575,9 @@ describe('createExpense — atomic failure', () => {
     mockSession('owner')
     mockAccountLookup()
 
-    vi.mocked(atomicTransactionWrite).mockRejectedValue(
-      new Error('Journal entry does not balance'),
-    )
+    vi.mocked(atomicTransactionWrite).mockRejectedValue(new Error('Journal entry does not balance'))
 
-    await expect(createExpense(baseInput())).rejects.toThrow(
-      'Journal entry does not balance',
-    )
+    await expect(createExpense(baseInput())).rejects.toThrow('Journal entry does not balance')
 
     expect(atomicTransactionWrite).toHaveBeenCalledTimes(1)
   })

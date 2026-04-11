@@ -17,12 +17,7 @@ import {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type PaymentMethod =
-  | 'cash'
-  | 'momo_mtn'
-  | 'momo_telecel'
-  | 'momo_airtel'
-  | 'bank'
+export type PaymentMethod = 'cash' | 'momo_mtn' | 'momo_telecel' | 'momo_airtel' | 'bank'
 
 export type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly'
 
@@ -177,9 +172,7 @@ function buildExpenseJournalLines(
 
 // ─── Create Expense ─────────────────────────────────────────────────────────
 
-export async function createExpense(
-  input: CreateExpenseInput,
-): Promise<ExpenseActionResult> {
+export async function createExpense(input: CreateExpenseInput): Promise<ExpenseActionResult> {
   const session = await getServerSession()
   const { businessId, role } = session.user
   const userId = session.user.id
@@ -366,9 +359,7 @@ export async function createExpense(
 
 // ─── Approve Expense ────────────────────────────────────────────────────────
 
-export async function approveExpense(
-  expenseId: string,
-): Promise<ExpenseActionResult> {
+export async function approveExpense(expenseId: string): Promise<ExpenseActionResult> {
   const user = await requireRole(['owner', 'manager'])
   const { businessId } = user
 
@@ -390,11 +381,11 @@ export async function approveExpense(
   // Resolve accounts
   const expenseAccountCode = expense.isCapitalExpense
     ? FIXED_ASSETS_ACCOUNT_CODE
-    : (await db
+    : await db
         .select({ code: accounts.code })
         .from(accounts)
         .where(eq(accounts.id, expense.accountId))
-        .then((rows) => rows[0]?.code ?? null))
+        .then((rows) => rows[0]?.code ?? null)
 
   if (!expenseAccountCode) {
     return { success: false, error: 'Expense account not found' }
@@ -498,12 +489,8 @@ export async function rejectExpense(
   }
 
   const existingNotes = expense.notes ?? ''
-  const rejectionNote = reason
-    ? `Rejected: ${reason}`
-    : 'Rejected'
-  const updatedNotes = existingNotes
-    ? `${existingNotes}\n${rejectionNote}`
-    : rejectionNote
+  const rejectionNote = reason ? `Rejected: ${reason}` : 'Rejected'
+  const updatedNotes = existingNotes ? `${existingNotes}\n${rejectionNote}` : rejectionNote
 
   await db
     .update(expenses)
@@ -550,19 +537,11 @@ export async function reverseExpense(
   }
 
   await db.transaction(async (tx) => {
-    await reverseJournalEntry(
-      tx,
-      expense.journalEntryId!,
-      businessId,
-      user.id,
-      reason.trim(),
-    )
+    await reverseJournalEntry(tx, expense.journalEntryId!, businessId, user.id, reason.trim())
 
     const existingNotes = expense.notes ?? ''
     const reversalNote = `Reversed: ${reason.trim()}`
-    const updatedNotes = existingNotes
-      ? `${existingNotes}\n${reversalNote}`
-      : reversalNote
+    const updatedNotes = existingNotes ? `${existingNotes}\n${reversalNote}` : reversalNote
 
     await tx
       .update(expenses)
@@ -612,9 +591,7 @@ type ExpenseListFilters = {
   approvalStatus?: string
 }
 
-export async function listExpenses(
-  filters?: ExpenseListFilters,
-): Promise<ExpenseListItem[]> {
+export async function listExpenses(filters?: ExpenseListFilters): Promise<ExpenseListItem[]> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -663,9 +640,7 @@ export async function listExpenses(
 
 // ─── Get Expense By ID ──────────────────────────────────────────────────────
 
-export async function getExpenseById(
-  expenseId: string,
-): Promise<ExpenseDetail> {
+export async function getExpenseById(expenseId: string): Promise<ExpenseDetail> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -702,10 +677,7 @@ export async function getExpenseById(
 
 // ─── Get Expense Summary ────────────────────────────────────────────────────
 
-export async function getExpenseSummary(
-  dateFrom: string,
-  dateTo: string,
-): Promise<ExpenseSummary> {
+export async function getExpenseSummary(dateFrom: string, dateTo: string): Promise<ExpenseSummary> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -741,10 +713,7 @@ export async function getExpenseSummary(
     })
     .from(expenses)
     .where(
-      and(
-        eq(expenses.businessId, businessId),
-        eq(expenses.approvalStatus, 'pending_approval'),
-      ),
+      and(eq(expenses.businessId, businessId), eq(expenses.approvalStatus, 'pending_approval')),
     )
 
   return {

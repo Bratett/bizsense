@@ -20,10 +20,10 @@ import { formatGhs } from '../../format'
 function mockEngine(rows: unknown[]) {
   const orderBy = vi.fn().mockResolvedValue(rows)
   const groupBy = vi.fn().mockReturnValue({ orderBy })
-  const where   = vi.fn().mockReturnValue({ groupBy })
-  const join2   = vi.fn().mockReturnValue({ where })
-  const join1   = vi.fn().mockReturnValue({ leftJoin: join2 })
-  const from_   = vi.fn().mockReturnValue({ leftJoin: join1 })
+  const where = vi.fn().mockReturnValue({ groupBy })
+  const join2 = vi.fn().mockReturnValue({ where })
+  const join1 = vi.fn().mockReturnValue({ leftJoin: join2 })
+  const from_ = vi.fn().mockReturnValue({ leftJoin: join1 })
 
   vi.mocked(db.select).mockReturnValueOnce({
     from: from_,
@@ -41,14 +41,14 @@ function makeRow(overrides: {
   accountCode?: string
 }) {
   return {
-    accountId:        'uuid-1',
-    accountCode:      overrides.accountCode ?? '1001',
-    accountName:      'Test Account',
-    accountType:      overrides.accountType,
-    accountSubtype:   null,
+    accountId: 'uuid-1',
+    accountCode: overrides.accountCode ?? '1001',
+    accountName: 'Test Account',
+    accountType: overrides.accountType,
+    accountSubtype: null,
     cashFlowActivity: 'operating',
-    totalDebits:      overrides.totalDebits  ?? '0',
-    totalCredits:     overrides.totalCredits ?? '0',
+    totalDebits: overrides.totalDebits ?? '0',
+    totalCredits: overrides.totalCredits ?? '0',
   }
 }
 
@@ -64,7 +64,14 @@ beforeEach(() => {
 
 describe('getAccountBalances — sign convention', () => {
   it('Test 1 — revenue account (4001): credit-normal, netBalance = credits - debits', async () => {
-    mockEngine([makeRow({ accountType: 'revenue', accountCode: '4001', totalCredits: '500', totalDebits: '0' })])
+    mockEngine([
+      makeRow({
+        accountType: 'revenue',
+        accountCode: '4001',
+        totalCredits: '500',
+        totalDebits: '0',
+      }),
+    ])
 
     const result = await getAccountBalances('biz-1', JAN_RANGE)
 
@@ -76,7 +83,14 @@ describe('getAccountBalances — sign convention', () => {
   })
 
   it('Test 2 — expense account (6003): debit-normal, netBalance = debits - credits', async () => {
-    mockEngine([makeRow({ accountType: 'expense', accountCode: '6003', totalDebits: '80', totalCredits: '0' })])
+    mockEngine([
+      makeRow({
+        accountType: 'expense',
+        accountCode: '6003',
+        totalDebits: '80',
+        totalCredits: '0',
+      }),
+    ])
 
     const result = await getAccountBalances('biz-1', JAN_RANGE)
 
@@ -88,7 +102,14 @@ describe('getAccountBalances — sign convention', () => {
 
   it('Test 3 — asset account (1001) range: net movement = debits - credits', async () => {
     // 500 from sale (Dr Cash), 80 paid out (Cr Cash): net = 420
-    mockEngine([makeRow({ accountType: 'asset', accountCode: '1001', totalDebits: '500', totalCredits: '80' })])
+    mockEngine([
+      makeRow({
+        accountType: 'asset',
+        accountCode: '1001',
+        totalDebits: '500',
+        totalCredits: '80',
+      }),
+    ])
 
     const result = await getAccountBalances('biz-1', JAN_RANGE)
 
@@ -100,7 +121,14 @@ describe('getAccountBalances — sign convention', () => {
 
   it('Test 4 — asset account (1001) asOf mode: cumulative balance = 1000 + 500 - 80 = 1420', async () => {
     // Opening balance 1000, sale 500, utility 80
-    mockEngine([makeRow({ accountType: 'asset', accountCode: '1001', totalDebits: '1500', totalCredits: '80' })])
+    mockEngine([
+      makeRow({
+        accountType: 'asset',
+        accountCode: '1001',
+        totalDebits: '1500',
+        totalCredits: '80',
+      }),
+    ])
 
     const result = await getAccountBalances('biz-1', AS_OF_JAN)
 
@@ -111,7 +139,7 @@ describe('getAccountBalances — sign convention', () => {
 describe('getAccountBalances — zero balances and filtering', () => {
   it('Test 5 — period with no entries: rows still returned, netBalance = 0', async () => {
     mockEngine([
-      makeRow({ accountType: 'asset',   accountCode: '1001', totalDebits: '0', totalCredits: '0' }),
+      makeRow({ accountType: 'asset', accountCode: '1001', totalDebits: '0', totalCredits: '0' }),
       makeRow({ accountType: 'revenue', accountCode: '4001', totalDebits: '0', totalCredits: '0' }),
     ])
 
@@ -124,8 +152,18 @@ describe('getAccountBalances — zero balances and filtering', () => {
 
   it('Test 6 — accountCodes filter: returns exactly the rows the DB provides', async () => {
     mockEngine([
-      makeRow({ accountType: 'asset',   accountCode: '1001', totalDebits: '1000', totalCredits: '0' }),
-      makeRow({ accountType: 'revenue', accountCode: '4001', totalDebits: '0',    totalCredits: '500' }),
+      makeRow({
+        accountType: 'asset',
+        accountCode: '1001',
+        totalDebits: '1000',
+        totalCredits: '0',
+      }),
+      makeRow({
+        accountType: 'revenue',
+        accountCode: '4001',
+        totalDebits: '0',
+        totalCredits: '500',
+      }),
     ])
 
     const result = await getAccountBalances('biz-1', JAN_RANGE, ['1001', '4001'])
@@ -137,7 +175,14 @@ describe('getAccountBalances — zero balances and filtering', () => {
 
 describe('getSingleAccountBalance', () => {
   it('Test 7a — returns correct netBalance for existing account', async () => {
-    mockEngine([makeRow({ accountType: 'asset', accountCode: '1001', totalDebits: '750', totalCredits: '200' })])
+    mockEngine([
+      makeRow({
+        accountType: 'asset',
+        accountCode: '1001',
+        totalDebits: '750',
+        totalCredits: '200',
+      }),
+    ])
 
     const balance = await getSingleAccountBalance('biz-1', '1001', JAN_RANGE)
 

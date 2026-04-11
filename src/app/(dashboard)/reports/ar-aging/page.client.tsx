@@ -21,14 +21,30 @@ const BUCKET_LABELS = {
   current: 'Current (0–30 days)',
   '31-60': '31–60 days',
   '61-90': '61–90 days',
-  over90:  '90+ days',
+  over90: '90+ days',
 } as const
 
 const BUCKET_COLORS = {
-  current: { card: 'border-t-4 border-t-green-400',  text: 'text-green-700',  badge: 'bg-green-100 text-green-700' },
-  '31-60': { card: 'border-t-4 border-t-amber-400',  text: 'text-amber-700',  badge: 'bg-amber-100 text-amber-700' },
-  '61-90': { card: 'border-t-4 border-t-orange-400', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-700' },
-  over90:  { card: 'border-t-4 border-t-red-500',    text: 'text-red-700',    badge: 'bg-red-100 text-red-700' },
+  current: {
+    card: 'border-t-4 border-t-green-400',
+    text: 'text-green-700',
+    badge: 'bg-green-100 text-green-700',
+  },
+  '31-60': {
+    card: 'border-t-4 border-t-amber-400',
+    text: 'text-amber-700',
+    badge: 'bg-amber-100 text-amber-700',
+  },
+  '61-90': {
+    card: 'border-t-4 border-t-orange-400',
+    text: 'text-orange-700',
+    badge: 'bg-orange-100 text-orange-700',
+  },
+  over90: {
+    card: 'border-t-4 border-t-red-500',
+    text: 'text-red-700',
+    badge: 'bg-red-100 text-red-700',
+  },
 } as const
 
 function AgeBadge({ bucket }: { bucket: ArAgingLine['bucket'] }) {
@@ -40,10 +56,16 @@ function AgeBadge({ bucket }: { bucket: ArAgingLine['bucket'] }) {
   )
 }
 
-function buildWhatsAppLink(phone: string | null, name: string, orderNumber: string, outstanding: number, dueDate: string): string {
+function buildWhatsAppLink(
+  phone: string | null,
+  name: string,
+  orderNumber: string,
+  outstanding: number,
+  dueDate: string,
+): string {
   if (!phone) return '#'
   const text = encodeURIComponent(
-    `Hello ${name}, your invoice ${orderNumber} for GHS ${outstanding.toFixed(2)} was due on ${dueDate}. Please arrange payment. Thank you.`
+    `Hello ${name}, your invoice ${orderNumber} for GHS ${outstanding.toFixed(2)} was due on ${dueDate}. Please arrange payment. Thank you.`,
   )
   const digits = phone.replace(/\D/g, '')
   return `https://wa.me/${digits.startsWith('0') ? '233' + digits.slice(1) : digits}?text=${text}`
@@ -77,16 +99,28 @@ function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
             {/* Aging bar */}
             <div className="mt-1.5 flex h-1.5 w-full max-w-xs rounded overflow-hidden gap-px">
               {t.current > 0 && (
-                <div className="bg-green-400 rounded-l" style={{ width: `${(t.current / totalWidth) * 100}%` }} />
+                <div
+                  className="bg-green-400 rounded-l"
+                  style={{ width: `${(t.current / totalWidth) * 100}%` }}
+                />
               )}
               {t.days31to60 > 0 && (
-                <div className="bg-amber-400" style={{ width: `${(t.days31to60 / totalWidth) * 100}%` }} />
+                <div
+                  className="bg-amber-400"
+                  style={{ width: `${(t.days31to60 / totalWidth) * 100}%` }}
+                />
               )}
               {t.days61to90 > 0 && (
-                <div className="bg-orange-400" style={{ width: `${(t.days61to90 / totalWidth) * 100}%` }} />
+                <div
+                  className="bg-orange-400"
+                  style={{ width: `${(t.days61to90 / totalWidth) * 100}%` }}
+                />
               )}
               {t.over90 > 0 && (
-                <div className="bg-red-500 rounded-r" style={{ width: `${(t.over90 / totalWidth) * 100}%` }} />
+                <div
+                  className="bg-red-500 rounded-r"
+                  style={{ width: `${(t.over90 / totalWidth) * 100}%` }}
+                />
               )}
             </div>
           </div>
@@ -131,13 +165,27 @@ function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="py-2 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Order #</th>
-                  <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Date</th>
-                  <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Due</th>
-                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Original</th>
-                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Paid</th>
-                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Outstanding</th>
-                  <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
+                  <th className="py-2 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Order #
+                  </th>
+                  <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Date
+                  </th>
+                  <th className="py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Due
+                  </th>
+                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Original
+                  </th>
+                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Paid
+                  </th>
+                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Outstanding
+                  </th>
+                  <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -146,9 +194,15 @@ function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
                     <td className="py-2 pl-4 font-mono text-xs text-gray-600">{inv.orderNumber}</td>
                     <td className="py-2 text-xs text-gray-500">{formatDate(inv.orderDate)}</td>
                     <td className="py-2 text-xs text-gray-500">{formatDate(inv.dueDate)}</td>
-                    <td className="py-2 text-right text-xs tabular-nums text-gray-700">{formatGhs(inv.originalAmount)}</td>
-                    <td className="py-2 text-right text-xs tabular-nums text-gray-500">{formatGhs(inv.amountPaid)}</td>
-                    <td className="py-2 text-right text-xs tabular-nums font-semibold text-gray-900">{formatGhs(inv.outstanding)}</td>
+                    <td className="py-2 text-right text-xs tabular-nums text-gray-700">
+                      {formatGhs(inv.originalAmount)}
+                    </td>
+                    <td className="py-2 text-right text-xs tabular-nums text-gray-500">
+                      {formatGhs(inv.amountPaid)}
+                    </td>
+                    <td className="py-2 text-right text-xs tabular-nums font-semibold text-gray-900">
+                      {formatGhs(inv.outstanding)}
+                    </td>
                     <td className="py-2 pr-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <AgeBadge bucket={inv.bucket} />
@@ -165,7 +219,9 @@ function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
               </tbody>
               <tfoot>
                 <tr className="border-t border-gray-200 bg-white">
-                  <td colSpan={5} className="py-2 pl-4 text-xs font-semibold text-gray-500">Subtotal</td>
+                  <td colSpan={5} className="py-2 pl-4 text-xs font-semibold text-gray-500">
+                    Subtotal
+                  </td>
                   <td className="py-2 text-right text-xs tabular-nums font-bold text-gray-900">
                     {formatGhs(t.total)}
                   </td>
@@ -196,16 +252,16 @@ export default function ArAgingClient({
     for (const c of report.customers) {
       for (const inv of c.invoices) {
         rows.push({
-          'Customer':       c.customerName,
-          'Phone':          c.customerPhone ?? '',
-          'Order #':        inv.orderNumber,
-          'Order Date':     inv.orderDate,
-          'Due Date':       inv.dueDate,
+          Customer: c.customerName,
+          Phone: c.customerPhone ?? '',
+          'Order #': inv.orderNumber,
+          'Order Date': inv.orderDate,
+          'Due Date': inv.dueDate,
           'Original (GHS)': inv.originalAmount.toFixed(2),
-          'Paid (GHS)':     inv.amountPaid.toFixed(2),
+          'Paid (GHS)': inv.amountPaid.toFixed(2),
           'Outstanding (GHS)': inv.outstanding.toFixed(2),
-          'Age (Days)':     inv.ageDays,
-          'Bucket':         inv.bucket,
+          'Age (Days)': inv.ageDays,
+          Bucket: inv.bucket,
         })
       }
     }
@@ -216,9 +272,9 @@ export default function ArAgingClient({
     setPdfLoading(true)
     try {
       const blob = await generateReportPdf(ArAgingDocument, report)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
       a.download = `ar-aging-${report.asOfDate}.pdf`
       a.click()
       URL.revokeObjectURL(url)
@@ -228,10 +284,10 @@ export default function ArAgingClient({
   }
 
   const buckets: Array<{ key: keyof typeof gt; label: string; amount: number }> = [
-    { key: 'current',    label: BUCKET_LABELS['current'], amount: gt.current },
-    { key: 'days31to60', label: BUCKET_LABELS['31-60'],   amount: gt.days31to60 },
-    { key: 'days61to90', label: BUCKET_LABELS['61-90'],   amount: gt.days61to90 },
-    { key: 'over90',     label: BUCKET_LABELS['over90'],  amount: gt.over90 },
+    { key: 'current', label: BUCKET_LABELS['current'], amount: gt.current },
+    { key: 'days31to60', label: BUCKET_LABELS['31-60'], amount: gt.days31to60 },
+    { key: 'days61to90', label: BUCKET_LABELS['61-90'], amount: gt.days61to90 },
+    { key: 'over90', label: BUCKET_LABELS['over90'], amount: gt.over90 },
   ]
   const bucketColorKeys = ['current', '31-60', '61-90', 'over90'] as const
 
@@ -240,11 +296,13 @@ export default function ArAgingClient({
       {/* Reconciliation banner */}
       {isReconciled ? (
         <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
-          ✓ Reconciled — AR Ledger {formatGhs(arLedgerBalance)} matches aging total {formatGhs(gt.total)}
+          ✓ Reconciled — AR Ledger {formatGhs(arLedgerBalance)} matches aging total{' '}
+          {formatGhs(gt.total)}
         </div>
       ) : (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          ⚠ {formatGhs(reconciliationDiff)} discrepancy — AR Ledger {formatGhs(arLedgerBalance)} | Aging {formatGhs(gt.total)}
+          ⚠ {formatGhs(reconciliationDiff)} discrepancy — AR Ledger {formatGhs(arLedgerBalance)} |
+          Aging {formatGhs(gt.total)}
         </div>
       )}
 
@@ -254,7 +312,10 @@ export default function ArAgingClient({
           const colorKey = bucketColorKeys[i]
           const color = BUCKET_COLORS[colorKey]
           return (
-            <div key={b.key} className={`rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${color.card}`}>
+            <div
+              key={b.key}
+              className={`rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${color.card}`}
+            >
               <p className="text-xs font-medium text-gray-500">{b.label}</p>
               <p className={`mt-2 text-lg font-semibold tabular-nums ${color.text}`}>
                 {formatGhs(b.amount)}
@@ -268,9 +329,12 @@ export default function ArAgingClient({
       <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
         <div>
           <span className="text-sm text-gray-500">Grand Total</span>
-          <span className="ml-3 text-xl font-bold tabular-nums text-gray-900">{formatGhs(gt.total)}</span>
+          <span className="ml-3 text-xl font-bold tabular-nums text-gray-900">
+            {formatGhs(gt.total)}
+          </span>
           <span className="ml-2 text-sm text-gray-400">
-            across {report.totalCustomersWithBalance} customer{report.totalCustomersWithBalance !== 1 ? 's' : ''}
+            across {report.totalCustomersWithBalance} customer
+            {report.totalCustomersWithBalance !== 1 ? 's' : ''}
           </span>
         </div>
         <div className="flex gap-2">
@@ -293,7 +357,9 @@ export default function ArAgingClient({
       {/* Customer list */}
       {report.customers.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
-          <p className="text-sm text-gray-500">No outstanding receivables as at {report.asOfDate}.</p>
+          <p className="text-sm text-gray-500">
+            No outstanding receivables as at {report.asOfDate}.
+          </p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">

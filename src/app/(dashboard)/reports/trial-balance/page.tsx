@@ -17,10 +17,10 @@ export default async function TrialBalancePage({ searchParams }: PageProps) {
   if (!ALLOWED.includes(session.user.role)) redirect('/access-denied')
   const { businessId } = session.user
 
-  const params    = await searchParams
-  const asOfDate  = params.date ?? new Date().toISOString().slice(0, 10)
+  const params = await searchParams
+  const asOfDate = params.date ?? new Date().toISOString().slice(0, 10)
 
-  const tb     = await getTrialBalance(businessId, asOfDate)
+  const tb = await getTrialBalance(businessId, asOfDate)
   const period = { type: 'asOf' as const, date: asOfDate }
 
   return (
@@ -34,9 +34,7 @@ export default async function TrialBalancePage({ searchParams }: PageProps) {
         </div>
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Trial Balance</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Cumulative ledger check as at {asOfDate}
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Cumulative ledger check as at {asOfDate}</p>
         </div>
 
         {/* Period selector */}

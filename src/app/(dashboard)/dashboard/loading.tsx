@@ -26,7 +26,10 @@ export default function DashboardLoading() {
         {/* Quick Actions */}
         <div className="grid grid-cols-4 gap-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+            <div
+              key={i}
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 bg-white p-3 shadow-sm"
+            >
               <Skeleton className="h-10 w-10 rounded-lg" />
               <Skeleton className="h-3 w-12" />
             </div>

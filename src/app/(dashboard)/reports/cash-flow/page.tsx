@@ -11,7 +11,7 @@ export const metadata = { title: 'Cash Flow Statement | BizSense' }
 interface PageProps {
   searchParams: Promise<{
     dateFrom?: string
-    dateTo?:   string
+    dateTo?: string
   }>
 }
 
@@ -26,10 +26,10 @@ export default async function CashFlowPage({ searchParams }: PageProps) {
   // Fall back to current month
   const defaultPeriod = currentMonthPeriod()
   const from = params.dateFrom ?? (defaultPeriod.type === 'range' ? defaultPeriod.from : '')
-  const to   = params.dateTo   ?? (defaultPeriod.type === 'range' ? defaultPeriod.to   : '')
+  const to = params.dateTo ?? (defaultPeriod.type === 'range' ? defaultPeriod.to : '')
 
   const period = { type: 'range' as const, from, to }
-  const cf     = await getCashFlowStatement(businessId, period)
+  const cf = await getCashFlowStatement(businessId, period)
 
   return (
     <main className="min-h-screen bg-gray-50">

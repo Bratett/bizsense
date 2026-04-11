@@ -29,8 +29,7 @@ export default function SyncIndicator() {
         ? 'bg-amber-500 animate-pulse'
         : 'bg-gray-400'
 
-  const label =
-    status === 'synced' ? 'Synced' : status === 'syncing' ? 'Syncing...' : 'Offline'
+  const label = status === 'synced' ? 'Synced' : status === 'syncing' ? 'Syncing...' : 'Offline'
 
   return (
     <div className="flex items-center gap-1.5" title={label}>

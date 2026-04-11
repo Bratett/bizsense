@@ -86,9 +86,7 @@ export default function ExpenseList({
       const result = await approveExpense(expenseId)
       if (result.success) {
         setExpenses((prev) =>
-          prev.map((e) =>
-            e.id === expenseId ? { ...e, approvalStatus: 'approved' } : e,
-          ),
+          prev.map((e) => (e.id === expenseId ? { ...e, approvalStatus: 'approved' } : e)),
         )
       } else {
         setActionError(result.error)
@@ -102,9 +100,7 @@ export default function ExpenseList({
       const result = await rejectExpense(expenseId)
       if (result.success) {
         setExpenses((prev) =>
-          prev.map((e) =>
-            e.id === expenseId ? { ...e, approvalStatus: 'rejected' } : e,
-          ),
+          prev.map((e) => (e.id === expenseId ? { ...e, approvalStatus: 'rejected' } : e)),
         )
       } else {
         setActionError(result.error)
@@ -166,9 +162,7 @@ export default function ExpenseList({
             <p className="text-sm font-semibold text-amber-800">
               {pendingExpenses.length} expense{pendingExpenses.length > 1 ? 's' : ''} awaiting
               approval &mdash; GHS{' '}
-              {formatGHS(
-                pendingExpenses.reduce((s, e) => s + parseFloat(e.amount), 0),
-              )}
+              {formatGHS(pendingExpenses.reduce((s, e) => s + parseFloat(e.amount), 0))}
             </p>
 
             <div className="mt-3 space-y-2">
@@ -279,7 +273,9 @@ export default function ExpenseList({
                     </div>
                     <p className="mt-0.5 text-xs text-gray-500">
                       {formatDate(expense.expenseDate)} &middot;{' '}
-                      {getCategoryLabel(expense.category ?? '') ?? expense.category ?? 'Uncategorized'}{' '}
+                      {getCategoryLabel(expense.category ?? '') ??
+                        expense.category ??
+                        'Uncategorized'}{' '}
                       &middot; {PAYMENT_LABELS[expense.paymentMethod] ?? expense.paymentMethod}
                     </p>
                   </div>

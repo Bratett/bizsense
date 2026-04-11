@@ -32,14 +32,9 @@ function formatDate(dateStr: string): string {
 }
 
 function StatusBadge({ label, variant }: { label: string; variant: 'green' | 'gray' }) {
-  const colors =
-    variant === 'green'
-      ? 'bg-green-100 text-green-700'
-      : 'bg-gray-100 text-gray-600'
+  const colors = variant === 'green' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
   return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors}`}
-    >
+    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors}`}>
       {label}
     </span>
   )
@@ -56,19 +51,30 @@ function PaymentStatusBadge({
 }) {
   const outstanding = Math.max(0, Number(totalAmount ?? 0) - Number(amountPaid))
   if (paymentStatus === 'paid') {
-    return <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-700">Paid</span>
+    return (
+      <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-700">
+        Paid
+      </span>
+    )
   }
   if (paymentStatus === 'unpaid') {
-    return <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">Unpaid · GHS {outstanding.toFixed(2)}</span>
+    return (
+      <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">
+        Unpaid · GHS {outstanding.toFixed(2)}
+      </span>
+    )
   }
-  return <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700">Partial · GHS {outstanding.toFixed(2)} due</span>
+  return (
+    <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700">
+      Partial · GHS {outstanding.toFixed(2)} due
+    </span>
+  )
 }
 
 export default function OrderDetailView({ order }: { order: OrderDetail }) {
   const router = useRouter()
   const remaining = Math.max(0, Number(order.totalAmount ?? 0) - Number(order.amountPaid))
-  const isUnpaidOrPartial =
-    order.status === 'fulfilled' && order.paymentStatus !== 'paid'
+  const isUnpaidOrPartial = order.status === 'fulfilled' && order.paymentStatus !== 'paid'
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -87,17 +93,11 @@ export default function OrderDetailView({ order }: { order: OrderDetail }) {
               strokeWidth={2}
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 19l-7-7 7-7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
           <div className="flex-1">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {order.orderNumber}
-            </h1>
+            <h1 className="text-xl font-semibold text-gray-900">{order.orderNumber}</h1>
             <p className="text-sm text-gray-500">{formatDate(order.orderDate)}</p>
           </div>
           <div className="flex flex-col items-end gap-1">
@@ -128,20 +128,15 @@ export default function OrderDetailView({ order }: { order: OrderDetail }) {
         {/* Line items */}
         <div className="mt-4 rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-100 px-4 py-3">
-            <p className="text-xs font-medium text-gray-500">
-              Items ({order.lines.length})
-            </p>
+            <p className="text-xs font-medium text-gray-500">Items ({order.lines.length})</p>
           </div>
           <div className="divide-y divide-gray-100">
             {order.lines.map((line) => (
               <div key={line.id} className="flex items-center justify-between px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-gray-900">
-                    {line.description}
-                  </p>
+                  <p className="truncate text-sm font-medium text-gray-900">{line.description}</p>
                   <p className="text-xs text-gray-500">
-                    {Number(line.quantity)} x{' '}
-                    {line.unitPriceCurrency === 'USD' ? 'USD' : 'GHS'}{' '}
+                    {Number(line.quantity)} x {line.unitPriceCurrency === 'USD' ? 'USD' : 'GHS'}{' '}
                     {Number(line.unitPrice).toFixed(2)}
                   </p>
                 </div>
@@ -207,24 +202,18 @@ export default function OrderDetailView({ order }: { order: OrderDetail }) {
               {order.payment.momoReference && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">MoMo Ref</span>
-                  <span className="font-mono text-gray-900">
-                    {order.payment.momoReference}
-                  </span>
+                  <span className="font-mono text-gray-900">{order.payment.momoReference}</span>
                 </div>
               )}
               {order.payment.bankReference && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Bank Ref</span>
-                  <span className="font-mono text-gray-900">
-                    {order.payment.bankReference}
-                  </span>
+                  <span className="font-mono text-gray-900">{order.payment.bankReference}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Amount Paid</span>
-                <span className="font-medium text-green-700">
-                  {formatGHS(order.amountPaid)}
-                </span>
+                <span className="font-medium text-green-700">{formatGHS(order.amountPaid)}</span>
               </div>
             </div>
           </div>

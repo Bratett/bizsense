@@ -31,13 +31,9 @@ type UploadResult =
   | { success: true; path: string; signedUrl: string }
   | { success: false; error: string }
 
-type SignedUrlResult =
-  | { success: true; signedUrl: string }
-  | { success: false; error: string }
+type SignedUrlResult = { success: true; signedUrl: string } | { success: false; error: string }
 
-type DeleteResult =
-  | { success: true }
-  | { success: false; error: string }
+type DeleteResult = { success: true } | { success: false; error: string }
 
 // ─── Upload Receipt ──────────────────────────────────────────────────────────
 

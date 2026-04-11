@@ -13,8 +13,8 @@ const VALID_GROUP_BY: SalesGroupBy[] = ['product', 'customer', 'day', 'week', 'm
 interface PageProps {
   searchParams: Promise<{
     dateFrom?: string
-    dateTo?:   string
-    groupBy?:  string
+    dateTo?: string
+    groupBy?: string
   }>
 }
 
@@ -26,7 +26,7 @@ export default async function SalesReportPage({ searchParams }: PageProps) {
 
   const defaultPeriod = currentMonthPeriod()
   const from = params.dateFrom ?? (defaultPeriod.type === 'range' ? defaultPeriod.from : '')
-  const to   = params.dateTo   ?? (defaultPeriod.type === 'range' ? defaultPeriod.to   : '')
+  const to = params.dateTo ?? (defaultPeriod.type === 'range' ? defaultPeriod.to : '')
 
   const groupBy: SalesGroupBy = VALID_GROUP_BY.includes(params.groupBy as SalesGroupBy)
     ? (params.groupBy as SalesGroupBy)

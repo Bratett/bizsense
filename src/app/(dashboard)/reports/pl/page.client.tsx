@@ -9,14 +9,25 @@ import type { ProfitAndLoss, PLLine } from '@/lib/reports/pl'
 // ─── PDF document ─────────────────────────────────────────────────────────────
 
 const pdfStyles = StyleSheet.create({
-  page:        { padding: 32, fontFamily: 'Helvetica', fontSize: 10 },
-  title:       { fontSize: 16, marginBottom: 4 },
-  subtitle:    { fontSize: 9, color: '#6B7280', marginBottom: 16 },
-  sectionHead: { fontSize: 10, fontFamily: 'Helvetica-Bold', marginTop: 10, marginBottom: 2, color: '#111827' },
-  row:         { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
-  bold:        { fontFamily: 'Helvetica-Bold' },
-  separator:   { borderBottom: '1pt solid #E5E7EB', marginVertical: 4 },
-  total:       { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, marginTop: 2 },
+  page: { padding: 32, fontFamily: 'Helvetica', fontSize: 10 },
+  title: { fontSize: 16, marginBottom: 4 },
+  subtitle: { fontSize: 9, color: '#6B7280', marginBottom: 16 },
+  sectionHead: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    marginTop: 10,
+    marginBottom: 2,
+    color: '#111827',
+  },
+  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
+  bold: { fontFamily: 'Helvetica-Bold' },
+  separator: { borderBottom: '1pt solid #E5E7EB', marginVertical: 4 },
+  total: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 3,
+    marginTop: 2,
+  },
 })
 
 function PLDocument({ data }: { data: ProfitAndLoss }) {
@@ -29,7 +40,7 @@ function PLDocument({ data }: { data: ProfitAndLoss }) {
         </Text>
 
         <Text style={pdfStyles.sectionHead}>REVENUE</Text>
-        {data.revenue.lines.map(l => (
+        {data.revenue.lines.map((l) => (
           <View key={l.accountId} style={pdfStyles.row}>
             <Text>{l.accountName}</Text>
             <Text>{formatGhs(l.netBalance)}</Text>
@@ -42,7 +53,7 @@ function PLDocument({ data }: { data: ProfitAndLoss }) {
         </View>
 
         <Text style={pdfStyles.sectionHead}>COST OF GOODS SOLD</Text>
-        {data.cogs.lines.map(l => (
+        {data.cogs.lines.map((l) => (
           <View key={l.accountId} style={pdfStyles.row}>
             <Text>{l.accountName}</Text>
             <Text>{formatGhs(l.netBalance)}</Text>
@@ -55,7 +66,7 @@ function PLDocument({ data }: { data: ProfitAndLoss }) {
         </View>
 
         <Text style={pdfStyles.sectionHead}>OPERATING EXPENSES</Text>
-        {data.expenses.lines.map(l => (
+        {data.expenses.lines.map((l) => (
           <View key={l.accountId} style={pdfStyles.row}>
             <Text>{l.accountName}</Text>
             <Text>{formatGhs(l.netBalance)}</Text>
@@ -89,7 +100,7 @@ function LineRow({
   hasPrior,
   showZero,
 }: {
-  line:     PLLine
+  line: PLLine
   hasPrior: boolean
   showZero: boolean
 }) {
@@ -122,27 +133,32 @@ function Section({
   hasPrior,
   showZero,
 }: {
-  title:      string
-  lines:      PLLine[]
-  total:      number
+  title: string
+  lines: PLLine[]
+  total: number
   priorTotal?: number
-  hasPrior:   boolean
-  showZero:   boolean
+  hasPrior: boolean
+  showZero: boolean
 }) {
   return (
     <>
       <tr className="bg-gray-50">
-        <td colSpan={hasPrior ? 4 : 3} className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <td
+          colSpan={hasPrior ? 4 : 3}
+          className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500"
+        >
           {title}
         </td>
       </tr>
-      {lines.map(line => (
+      {lines.map((line) => (
         <LineRow key={line.accountId} line={line} hasPrior={hasPrior} showZero={showZero} />
       ))}
       <tr className="border-t border-gray-200 font-semibold">
         <td className="py-2 pl-4 text-sm text-gray-500"></td>
         <td className="py-2 text-sm text-gray-700">Total {title}</td>
-        <td className="py-2 pr-4 text-right text-sm tabular-nums text-gray-900">{formatGhs(total)}</td>
+        <td className="py-2 pr-4 text-right text-sm tabular-nums text-gray-900">
+          {formatGhs(total)}
+        </td>
         {hasPrior && (
           <td className="py-2 pr-4 text-right text-sm tabular-nums text-amber-600">
             {priorTotal !== undefined ? formatGhs(priorTotal) : '—'}
@@ -156,8 +172,8 @@ function Section({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function PLReport({ data }: { data: ProfitAndLoss }) {
-  const [showZero, setShowZero]       = useState(false)
-  const [pdfLoading, setPdfLoading]   = useState(false)
+  const [showZero, setShowZero] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   const hasPrior = data.hasPrior
 
@@ -166,24 +182,48 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
     const rows: Record<string, string | number>[] = []
 
     const addSection = (title: string, lines: PLLine[]) => {
-      rows.push({ Section: title, 'Account Code': '', Account: '', 'This Period (GHS)': '', 'Prior Period (GHS)': '' })
+      rows.push({
+        Section: title,
+        'Account Code': '',
+        Account: '',
+        'This Period (GHS)': '',
+        'Prior Period (GHS)': '',
+      })
       for (const l of lines) {
         rows.push({
-          Section:              '',
-          'Account Code':       l.accountCode,
-          Account:              l.accountName,
-          'This Period (GHS)':  l.netBalance.toFixed(2),
+          Section: '',
+          'Account Code': l.accountCode,
+          Account: l.accountName,
+          'This Period (GHS)': l.netBalance.toFixed(2),
           'Prior Period (GHS)': hasPrior ? (l.priorNetBalance ?? 0).toFixed(2) : '',
         })
       }
     }
 
     addSection('Revenue', data.revenue.lines)
-    rows.push({ Section: 'Total Revenue', 'Account Code': '', Account: '', 'This Period (GHS)': data.revenue.total.toFixed(2), 'Prior Period (GHS)': hasPrior ? (data.revenue.priorTotal ?? 0).toFixed(2) : '' })
+    rows.push({
+      Section: 'Total Revenue',
+      'Account Code': '',
+      Account: '',
+      'This Period (GHS)': data.revenue.total.toFixed(2),
+      'Prior Period (GHS)': hasPrior ? (data.revenue.priorTotal ?? 0).toFixed(2) : '',
+    })
     addSection('Cost of Goods Sold', data.cogs.lines)
-    rows.push({ Section: 'Gross Profit', 'Account Code': '', Account: '', 'This Period (GHS)': data.grossProfit.toFixed(2), 'Prior Period (GHS)': hasPrior ? (data.priorGrossProfit ?? 0).toFixed(2) : '' })
+    rows.push({
+      Section: 'Gross Profit',
+      'Account Code': '',
+      Account: '',
+      'This Period (GHS)': data.grossProfit.toFixed(2),
+      'Prior Period (GHS)': hasPrior ? (data.priorGrossProfit ?? 0).toFixed(2) : '',
+    })
     addSection('Operating Expenses', data.expenses.lines)
-    rows.push({ Section: 'Net Profit / (Loss)', 'Account Code': '', Account: '', 'This Period (GHS)': data.netProfit.toFixed(2), 'Prior Period (GHS)': hasPrior ? (data.priorNetProfit ?? 0).toFixed(2) : '' })
+    rows.push({
+      Section: 'Net Profit / (Loss)',
+      'Account Code': '',
+      Account: '',
+      'This Period (GHS)': data.netProfit.toFixed(2),
+      'Prior Period (GHS)': hasPrior ? (data.priorNetProfit ?? 0).toFixed(2) : '',
+    })
 
     downloadCsv(`pl-${data.period.from}-to-${data.period.to}.csv`, rows)
   }
@@ -193,9 +233,9 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
     setPdfLoading(true)
     try {
       const blob = await generateReportPdf(PLDocument, data)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
       a.download = `pl-${data.period.from}-to-${data.period.to}.pdf`
       a.click()
       URL.revokeObjectURL(url)
@@ -209,7 +249,8 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
       {/* Net loss banner */}
       {data.netProfit < 0 && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          This period shows a net loss of {formatGhs(Math.abs(data.netProfit))}. Review your expenses and sales mix.
+          This period shows a net loss of {formatGhs(Math.abs(data.netProfit))}. Review your
+          expenses and sales mix.
         </div>
       )}
 
@@ -219,7 +260,7 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
           <input
             type="checkbox"
             checked={showZero}
-            onChange={e => setShowZero(e.target.checked)}
+            onChange={(e) => setShowZero(e.target.checked)}
             className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
           />
           Show zero-balance accounts
@@ -246,8 +287,12 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-16">Code</th>
-              <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Account</th>
+              <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-16">
+                Code
+              </th>
+              <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Account
+              </th>
               <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
                 {hasPrior ? 'This Period' : 'Amount (GHS)'}
               </th>
@@ -283,7 +328,9 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
             <tr className="bg-green-50 font-semibold">
               <td className="py-2.5 pl-4 text-sm"></td>
               <td className="py-2.5 text-sm text-gray-900">Gross Profit</td>
-              <td className={`py-2.5 pr-4 text-right text-sm tabular-nums ${data.grossProfit < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <td
+                className={`py-2.5 pr-4 text-right text-sm tabular-nums ${data.grossProfit < 0 ? 'text-red-600' : 'text-gray-900'}`}
+              >
                 {formatGhs(data.grossProfit)}
               </td>
               {hasPrior && (
@@ -302,7 +349,10 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
               {hasPrior && (
                 <td className="pb-2 pr-4 text-right text-xs tabular-nums text-amber-500">
                   {data.priorGrossProfit !== undefined && data.revenue.priorTotal
-                    ? pct(Math.round((data.priorGrossProfit / data.revenue.priorTotal) * 10_000) / 100)
+                    ? pct(
+                        Math.round((data.priorGrossProfit / data.revenue.priorTotal) * 10_000) /
+                          100,
+                      )
                     : '—'}
                 </td>
               )}
@@ -324,13 +374,17 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
               <td className="py-3 text-sm font-bold text-gray-900">
                 Net {data.netProfit >= 0 ? 'Profit' : 'Loss'}
               </td>
-              <td className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${data.netProfit < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <td
+                className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${data.netProfit < 0 ? 'text-red-600' : 'text-gray-900'}`}
+              >
                 {formatGhs(data.netProfit)}
               </td>
               {hasPrior && (
-                <td className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
-                  (data.priorNetProfit ?? 0) < 0 ? 'text-red-500' : 'text-amber-600'
-                }`}>
+                <td
+                  className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
+                    (data.priorNetProfit ?? 0) < 0 ? 'text-red-500' : 'text-amber-600'
+                  }`}
+                >
                   {data.priorNetProfit !== undefined ? formatGhs(data.priorNetProfit) : '—'}
                 </td>
               )}

@@ -21,10 +21,7 @@ export type ReportSection = {
  * Uses BOM prefix (\uFEFF) for correct Excel display of GHS amounts.
  * Called from client component event handlers only — never on the server.
  */
-export function downloadCsv(
-  filename: string,
-  rows: Record<string, string | number>[],
-): void {
+export function downloadCsv(filename: string, rows: Record<string, string | number>[]): void {
   if (rows.length === 0) return
 
   const headers = Object.keys(rows[0])
@@ -61,9 +58,8 @@ export async function generateReportPdf<T>(
   DocumentComponent: React.ComponentType<{ data: T }>,
   data: T,
 ): Promise<Blob> {
-  const doc = React.createElement(
-    DocumentComponent,
-    { data },
-  ) as unknown as ReactElement<DocumentProps>
+  const doc = React.createElement(DocumentComponent, {
+    data,
+  }) as unknown as ReactElement<DocumentProps>
   return pdf(doc).toBlob()
 }

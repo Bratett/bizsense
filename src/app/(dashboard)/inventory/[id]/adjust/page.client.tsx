@@ -65,7 +65,13 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
       {/* Header */}
       <div className="flex items-center gap-2">
         <Link href={`/inventory/${product.id}`} className="text-gray-600 hover:text-gray-900">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </Link>
@@ -73,8 +79,7 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
       </div>
 
       <p className="mt-2 text-sm text-gray-600">
-        Adjust stock for{' '}
-        <span className="font-medium text-gray-900">{product.name}</span>
+        Adjust stock for <span className="font-medium text-gray-900">{product.name}</span>
       </p>
 
       {/* Current Stock Card */}
@@ -185,9 +190,7 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
               </option>
             ))}
           </select>
-          {fieldErrors.reason && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.reason}</p>
-          )}
+          {fieldErrors.reason && <p className="mt-1 text-xs text-red-600">{fieldErrors.reason}</p>}
         </div>
 
         {/* Notes */}
@@ -210,10 +213,7 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
             <p className="text-xs text-gray-500">Total Value Added</p>
             <p className="mt-0.5 text-lg font-semibold tabular-nums text-gray-900">
-              GHS{' '}
-              {formatGHS(
-                (parseFloat(quantity) || 0) * (parseFloat(String(unitCost)) || 0),
-              )}
+              GHS {formatGHS((parseFloat(quantity) || 0) * (parseFloat(String(unitCost)) || 0))}
             </p>
           </div>
         )}
@@ -221,8 +221,8 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
         {adjustmentType === 'remove' && quantity && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs text-amber-700">
-              Removing {quantity} {product.unit ?? 'units'} from stock.
-              The write-off value will be calculated using FIFO costing.
+              Removing {quantity} {product.unit ?? 'units'} from stock. The write-off value will be
+              calculated using FIFO costing.
             </p>
           </div>
         )}
@@ -238,11 +238,7 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
                 : 'bg-red-600 hover:bg-red-700'
             }`}
           >
-            {isPending
-              ? 'Saving...'
-              : adjustmentType === 'add'
-                ? 'Add Stock'
-                : 'Remove Stock'}
+            {isPending ? 'Saving...' : adjustmentType === 'add' ? 'Add Stock' : 'Remove Stock'}
           </button>
           <Link
             href={`/inventory/${product.id}`}

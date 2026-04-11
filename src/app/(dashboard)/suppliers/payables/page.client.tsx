@@ -3,7 +3,11 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import type { PayablesAgingReport, SupplierAgingRow, AllocatedGrn } from '@/lib/suppliers/payablesAging'
+import type {
+  PayablesAgingReport,
+  SupplierAgingRow,
+  AllocatedGrn,
+} from '@/lib/suppliers/payablesAging'
 import { recordSupplierPayment, type PaymentMethod } from '@/actions/supplierPayments'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -113,11 +117,15 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Record Payment</h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
-          >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100">
+            <svg
+              width="18"
+              height="18"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -125,7 +133,9 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
 
         <p className="mb-4 text-sm text-gray-600">
           Supplier: <span className="font-medium text-gray-900">{supplier.supplierName}</span>
-          <span className="ml-2 text-xs text-gray-500">Outstanding: GHS {formatGHS(outstanding)}</span>
+          <span className="ml-2 text-xs text-gray-500">
+            Outstanding: GHS {formatGHS(outstanding)}
+          </span>
         </p>
 
         {warning && (
@@ -147,7 +157,11 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
               step="0.01"
               min="0.01"
               value={amount}
-              onChange={(e) => { setAmount(e.target.value); setAwaitingConfirm(false); setWarning(null) }}
+              onChange={(e) => {
+                setAmount(e.target.value)
+                setAwaitingConfirm(false)
+                setWarning(null)
+              }}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
               placeholder="0.00"
             />
@@ -161,7 +175,9 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             >
               {Object.entries(PAYMENT_METHOD_LABELS).map(([val, label]) => (
-                <option key={val} value={val}>{label}</option>
+                <option key={val} value={val}>
+                  {label}
+                </option>
               ))}
             </select>
           </div>
@@ -254,7 +270,9 @@ function GrnRow({ grn }: { grn: AllocatedGrn }) {
         GHS {formatGHS(grn.outstanding)}
       </td>
       <td className="py-2.5 pl-3 pr-4 text-right">
-        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeClass}`}>
+        <span
+          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeClass}`}
+        >
           {grn.ageInDays === 0 ? 'Current' : `${grn.ageInDays}d`}
         </span>
       </td>
@@ -300,7 +318,9 @@ function SupplierRow({
               <p className="text-sm font-medium text-gray-900">{row.supplierName}</p>
               {row.phone && <p className="text-xs text-gray-400">{row.phone}</p>}
             </div>
-            <span className={`ml-1 h-2 w-2 rounded-full ${isCritical ? 'bg-red-500' : 'bg-green-500'}`} />
+            <span
+              className={`ml-1 h-2 w-2 rounded-full ${isCritical ? 'bg-red-500' : 'bg-green-500'}`}
+            />
           </div>
         </td>
         <td className="px-3 py-3 text-sm font-medium text-right text-gray-900">
@@ -320,16 +340,32 @@ function SupplierRow({
             <span className="rounded-md bg-red-50 px-2 py-0.5">
               GHS {formatGHS(row.totals.over90)}
             </span>
-          ) : '—'}
+          ) : (
+            '—'
+          )}
         </td>
         <td className="py-3 pl-3 pr-4">
           <div className="flex justify-end gap-2">
             <button
-              onClick={(e) => { e.stopPropagation(); onRecordPayment(row) }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onRecordPayment(row)
+              }}
               className="inline-flex items-center gap-1.5 rounded-lg bg-green-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-800"
             >
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+                />
               </svg>
               Pay
             </button>
@@ -338,17 +374,26 @@ function SupplierRow({
               onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
             >
-              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              <svg
+                width="12"
+                height="12"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                />
               </svg>
               Statement
             </a>
           </div>
         </td>
       </tr>
-      {expanded && row.grns.map((grn) => (
-        <GrnRow key={grn.grnId} grn={grn} />
-      ))}
+      {expanded && row.grns.map((grn) => <GrnRow key={grn.grnId} grn={grn} />)}
     </>
   )
 }
@@ -389,8 +434,17 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
       <div className="mx-auto max-w-6xl px-4 py-6 md:px-8">
         {/* ─── Header ─────────────────────────────────────────────── */}
         <nav className="mb-4 flex items-center gap-1.5 text-xs text-gray-500">
-          <Link href="/suppliers" className="hover:text-gray-700">Reports</Link>
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <Link href="/suppliers" className="hover:text-gray-700">
+            Reports
+          </Link>
+          <svg
+            width="12"
+            height="12"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
           <span className="font-medium text-gray-800">Payables Aging</span>
@@ -400,19 +454,42 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
           <div>
             <h1 className="text-2xl font-bold text-green-800">Payables Aging Report</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Comprehensive breakdown of outstanding vendor obligations, categorized by duration to manage cash flow effectively.
+              Comprehensive breakdown of outstanding vendor obligations, categorized by duration to
+              manage cash flow effectively.
             </p>
           </div>
           <div className="flex gap-2">
             <button className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"
+                />
               </svg>
               Filter Dates
             </button>
             <button className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                />
               </svg>
               Export PDF
             </button>
@@ -424,9 +501,7 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
           {/* Total Owed */}
           <div className="col-span-2 md:col-span-1 rounded-xl bg-green-800 p-4 text-white shadow-sm">
             <p className="text-xs font-medium text-green-200">TOTAL OWED</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">
-              GHS {formatGHS(gt.total)}
-            </p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">GHS {formatGHS(gt.total)}</p>
             {gt.over90 > 0 && (
               <p className="mt-2 text-xs text-green-300">
                 ▲ {((gt.over90 / totalForPct) * 100).toFixed(1)}% overdue 90+
@@ -462,9 +537,17 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
           />
 
           {/* Over 90 Days */}
-          <div className={`rounded-xl border p-4 shadow-sm ${gt.over90 > 0 ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'}`}>
-            <p className={`text-xs font-medium ${gt.over90 > 0 ? 'text-red-500' : 'text-gray-500'}`}>OVER 90 DAYS</p>
-            <p className={`mt-1 text-2xl font-bold tabular-nums ${gt.over90 > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+          <div
+            className={`rounded-xl border p-4 shadow-sm ${gt.over90 > 0 ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'}`}
+          >
+            <p
+              className={`text-xs font-medium ${gt.over90 > 0 ? 'text-red-500' : 'text-gray-500'}`}
+            >
+              OVER 90 DAYS
+            </p>
+            <p
+              className={`mt-1 text-2xl font-bold tabular-nums ${gt.over90 > 0 ? 'text-red-600' : 'text-gray-900'}`}
+            >
               GHS {formatGHS(gt.over90)}
             </p>
             <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
@@ -482,8 +565,18 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
         {/* ─── Supplier Breakdown Table ────────────────────────────── */}
         {report.suppliers.length === 0 ? (
           <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-            <svg className="mx-auto mb-3 h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="mx-auto mb-3 h-10 w-10 text-gray-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <p className="text-sm font-medium text-gray-700">No outstanding payables</p>
             <p className="mt-1 text-xs text-gray-400">All supplier balances are settled.</p>
@@ -533,16 +626,14 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
                 </thead>
                 <tbody>
                   {report.suppliers.map((s) => (
-                    <SupplierRow
-                      key={s.supplierId}
-                      row={s}
-                      onRecordPayment={setPaymentTarget}
-                    />
+                    <SupplierRow key={s.supplierId} row={s} onRecordPayment={setPaymentTarget} />
                   ))}
 
                   {/* Total Summary Row */}
                   <tr className="border-t-2 border-gray-200 bg-gray-50">
-                    <td className="py-3 pl-4 pr-3 text-sm font-semibold text-gray-900">Total Summary</td>
+                    <td className="py-3 pl-4 pr-3 text-sm font-semibold text-gray-900">
+                      Total Summary
+                    </td>
                     <td className="px-3 py-3 text-right text-sm font-bold text-gray-900">
                       GHS {formatGHS(gt.total)}
                     </td>
@@ -575,9 +666,13 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
               <>
                 <p className="text-sm text-gray-600">
                   Your &ldquo;Over 90 Days&rdquo; payables have{' '}
-                  {((criticalSupplier.totals.over90 / totalForPct) * 100).toFixed(0)}% concentration with{' '}
-                  <span className="font-semibold text-gray-900">{criticalSupplier.supplierName}</span>. We recommend
-                  prioritising settlement to maintain your service level agreement and avoid late penalties.
+                  {((criticalSupplier.totals.over90 / totalForPct) * 100).toFixed(0)}% concentration
+                  with{' '}
+                  <span className="font-semibold text-gray-900">
+                    {criticalSupplier.supplierName}
+                  </span>
+                  . We recommend prioritising settlement to maintain your service level agreement
+                  and avoid late penalties.
                 </p>
                 <div className="mt-4 flex gap-3">
                   <button
@@ -607,8 +702,20 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
             </p>
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-start gap-2">
-                <svg width="16" height="16" className="mt-0.5 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5m-9-6h.008v.008H12V10.5zm0 3h.008v.008H12v-.008zm0 3h.008v.008H12v-.008zM9 10.5h.008v.008H9V10.5zm0 3h.008v.008H9v-.008zm0 3h.008v.008H9v-.008zm3 0h.008v.008H12v-.008zm0 3h.008v.008H12V18zm3-6h.008v.008H15v-.008zm0 3h.008v.008H15v-.008z" />
+                <svg
+                  width="16"
+                  height="16"
+                  className="mt-0.5 flex-shrink-0 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5m-9-6h.008v.008H12V10.5zm0 3h.008v.008H12v-.008zm0 3h.008v.008H12v-.008zM9 10.5h.008v.008H9V10.5zm0 3h.008v.008H9v-.008zm0 3h.008v.008H9v-.008zm3 0h.008v.008H12v-.008zm0 3h.008v.008H12V18zm3-6h.008v.008H15v-.008zm0 3h.008v.008H15v-.008z"
+                  />
                 </svg>
                 <div>
                   <p className="font-medium text-gray-800">VAT Filing Deadline</p>
@@ -616,8 +723,20 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <svg width="16" height="16" className="mt-0.5 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                <svg
+                  width="16"
+                  height="16"
+                  className="mt-0.5 flex-shrink-0 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                  />
                 </svg>
                 <div>
                   <p className="font-medium text-gray-800">Tax Compliance Cert</p>
@@ -653,9 +772,7 @@ function SummaryBucket({
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className={`mt-1 text-xl font-bold tabular-nums ${valueColor}`}>
-        GHS {formatGHS(amount)}
-      </p>
+      <p className={`mt-1 text-xl font-bold tabular-nums ${valueColor}`}>GHS {formatGHS(amount)}</p>
       <div className="mt-2 h-1 w-full rounded-full bg-gray-100">
         <div
           className={`h-1 rounded-full ${barColor}`}

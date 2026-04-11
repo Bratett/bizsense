@@ -5,7 +5,9 @@ import type { InvoiceData } from './types'
 
 export async function generateInvoicePdf(data: InvoiceData): Promise<Blob> {
   // InvoiceDocument renders a <Document> at runtime — cast is safe
-  const doc = React.createElement(InvoiceDocument, { data }) as unknown as ReactElement<DocumentProps>
+  const doc = React.createElement(InvoiceDocument, {
+    data,
+  }) as unknown as ReactElement<DocumentProps>
   const blob = await pdf(doc).toBlob()
   return blob
 }

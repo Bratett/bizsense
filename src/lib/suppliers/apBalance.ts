@@ -33,10 +33,7 @@ export async function getSupplierApBalance(
     })
     .from(supplierPayments)
     .where(
-      and(
-        eq(supplierPayments.supplierId, supplierId),
-        eq(supplierPayments.businessId, businessId),
-      ),
+      and(eq(supplierPayments.supplierId, supplierId), eq(supplierPayments.businessId, businessId)),
     )
 
   const totalOwed = Number(owedResult?.totalOwed ?? '0')

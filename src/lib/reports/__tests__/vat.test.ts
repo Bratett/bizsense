@@ -5,12 +5,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { mockOrderBy, mockGroupBy, mockWhere, mockInnerJoin, mockFrom, mockSelect } = vi.hoisted(
   () => {
-    const mockOrderBy   = vi.fn()
-    const mockGroupBy   = vi.fn()
-    const mockWhere     = vi.fn(() => ({ orderBy: mockOrderBy, groupBy: mockGroupBy }))
+    const mockOrderBy = vi.fn()
+    const mockGroupBy = vi.fn()
+    const mockWhere = vi.fn(() => ({ orderBy: mockOrderBy, groupBy: mockGroupBy }))
     const mockInnerJoin = vi.fn(() => ({ where: mockWhere }))
-    const mockFrom      = vi.fn(() => ({ innerJoin: mockInnerJoin, where: mockWhere }))
-    const mockSelect    = vi.fn(() => ({ from: mockFrom }))
+    const mockFrom = vi.fn(() => ({ innerJoin: mockInnerJoin, where: mockWhere }))
+    const mockSelect = vi.fn(() => ({ from: mockFrom }))
     return { mockOrderBy, mockGroupBy, mockWhere, mockInnerJoin, mockFrom, mockSelect }
   },
 )
@@ -20,19 +20,19 @@ vi.mock('@/db', () => ({
 }))
 
 vi.mock('@/db/schema', () => ({
-  businesses:     {},
-  accounts:       {},
-  journalLines:   {},
+  businesses: {},
+  accounts: {},
+  journalLines: {},
   journalEntries: {},
 }))
 
 vi.mock('drizzle-orm', () => ({
-  and:     vi.fn(),
-  eq:      vi.fn(),
-  gte:     vi.fn(),
-  lte:     vi.fn(),
+  and: vi.fn(),
+  eq: vi.fn(),
+  gte: vi.fn(),
+  lte: vi.fn(),
   inArray: vi.fn(),
-  sql:     vi.fn(() => ''),
+  sql: vi.fn(() => ''),
 }))
 
 import { getVatReport } from '../vat'
@@ -40,27 +40,39 @@ import { getVatReport } from '../vat'
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const BASE_BUSINESS = { id: 'biz-1', vatRegistered: true, vatNumber: 'VAT12345678' }
-const ACCT_2100    = { id: 'acct-2100', code: '2100', type: 'liability', businessId: 'biz-1' }
-const ACCT_1101    = { id: 'acct-1101', code: '1101', type: 'asset',     businessId: 'biz-1' }
+const ACCT_2100 = { id: 'acct-2100', code: '2100', type: 'liability', businessId: 'biz-1' }
+const ACCT_1101 = { id: 'acct-1101', code: '1101', type: 'asset', businessId: 'biz-1' }
 
 // Q1 2026 — two VAT-bearing sales
 const OUTPUT_LINE_1 = {
-  entryId: 'entry-1', entryDate: '2026-01-15', reference: 'ORD-001',
-  description: 'Sale to Customer A', sourceType: 'order', vatAmount: '219.00',
+  entryId: 'entry-1',
+  entryDate: '2026-01-15',
+  reference: 'ORD-001',
+  description: 'Sale to Customer A',
+  sourceType: 'order',
+  vatAmount: '219.00',
 }
 const OUTPUT_LINE_2 = {
-  entryId: 'entry-2', entryDate: '2026-02-10', reference: 'ORD-002',
-  description: 'Sale to Customer B', sourceType: 'order', vatAmount: '109.50',
+  entryId: 'entry-2',
+  entryDate: '2026-02-10',
+  reference: 'ORD-002',
+  description: 'Sale to Customer B',
+  sourceType: 'order',
+  vatAmount: '109.50',
 }
 
 // One VAT-bearing expense (fuel): gross 121.90 = net 100 + VAT 21.90
 const INPUT_LINE_1 = {
-  entryId: 'entry-3', entryDate: '2026-01-20', reference: 'EXP-001',
-  description: 'Fuel expense', sourceType: 'expense', vatAmount: '21.90',
+  entryId: 'entry-3',
+  entryDate: '2026-01-20',
+  reference: 'EXP-001',
+  description: 'Fuel expense',
+  sourceType: 'expense',
+  vatAmount: '21.90',
 }
 
-const NET_SUPPLY_1   = { entryId: 'entry-1', netAmount: '1000.00' }
-const NET_SUPPLY_2   = { entryId: 'entry-2', netAmount: '500.00' }
+const NET_SUPPLY_1 = { entryId: 'entry-1', netAmount: '1000.00' }
+const NET_SUPPLY_2 = { entryId: 'entry-2', netAmount: '500.00' }
 const NET_PURCHASE_1 = { entryId: 'entry-3', netAmount: '100.00' }
 
 const Q1: { from: string; to: string } = { from: '2026-01-01', to: '2026-03-31' }
@@ -111,7 +123,7 @@ describe('getVatReport', () => {
     const report = await getVatReport('biz-1', Q1)
 
     expect(report).not.toBeNull()
-    expect(report!.outputVat.totalVat).toBe(328.50)
+    expect(report!.outputVat.totalVat).toBe(328.5)
   })
 
   it('Test 3 — non-VAT sale is not included in output VAT lines', async () => {
@@ -130,7 +142,7 @@ describe('getVatReport', () => {
 
     const report = await getVatReport('biz-1', Q1)
 
-    expect(report!.inputVat.totalVat).toBe(21.90)
+    expect(report!.inputVat.totalVat).toBe(21.9)
   })
 
   it('Test 5 — netVatPayable = 328.50 − 21.90 = 306.60', async () => {
@@ -138,7 +150,7 @@ describe('getVatReport', () => {
 
     const report = await getVatReport('biz-1', Q1)
 
-    expect(report!.netVatPayable).toBe(306.60)
+    expect(report!.netVatPayable).toBe(306.6)
   })
 
   it('Test 6 — outputVat.lines.length = 2 (two VAT-bearing sales)', async () => {
@@ -158,7 +170,7 @@ describe('getVatReport', () => {
 
     expect(report!.inputVat.lines).toHaveLength(1)
     expect(report!.inputVat.lines[0].reference).toBe('EXP-001')
-    expect(report!.inputVat.lines[0].vatAmount).toBe(21.90)
+    expect(report!.inputVat.lines[0].vatAmount).toBe(21.9)
   })
 
   it('Test 8 — Q2 period with no Q2 data returns zero lines and zero totals', async () => {

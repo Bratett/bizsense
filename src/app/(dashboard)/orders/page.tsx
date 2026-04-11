@@ -12,13 +12,16 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   await getServerSession()
   const { tab, search } = await searchParams
 
-  const paymentStatus = tab === 'unpaid' ? 'unpaid' as const : undefined
+  const paymentStatus = tab === 'unpaid' ? ('unpaid' as const) : undefined
 
   const dateRange =
-    tab === 'today' ? 'today' as const
-    : tab === 'this_week' ? 'this_week' as const
-    : tab === 'this_month' ? 'this_month' as const
-    : undefined
+    tab === 'today'
+      ? ('today' as const)
+      : tab === 'this_week'
+        ? ('this_week' as const)
+        : tab === 'this_month'
+          ? ('this_month' as const)
+          : undefined
 
   const orders = await listOrders({
     paymentStatus,

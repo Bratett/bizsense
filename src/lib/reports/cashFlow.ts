@@ -9,13 +9,13 @@ import type { PeriodParams } from './engine'
 const CASH_CODES = ['1001', '1002', '1003', '1004', '1005']
 
 const SOURCE_TYPE_LABELS: Record<string, string> = {
-  order:           'Sale',
-  expense:         'Expense',
-  payment:         'Payment Received',
-  payroll:         'Payroll',
-  manual:          'Journal Entry',
-  ai_recorded:     'AI Entry',
-  reversal:        'Reversal',
+  order: 'Sale',
+  expense: 'Expense',
+  payment: 'Payment Received',
+  payroll: 'Payroll',
+  manual: 'Journal Entry',
+  ai_recorded: 'AI Entry',
+  reversal: 'Reversal',
   opening_balance: 'Opening Balance',
 }
 
@@ -27,30 +27,30 @@ function sourceTypeLabel(st: string): string {
 
 export type CashFlowLine = {
   description: string
-  amount:      number    // positive = inflow, negative = outflow
+  amount: number // positive = inflow, negative = outflow
 }
 
 export type CashFlowSection = {
-  label:     string
-  lines:     CashFlowLine[]
+  label: string
+  lines: CashFlowLine[]
   netAmount: number
 }
 
 export type CashFlowStatement = {
-  period:                 { from: string; to: string }
-  operating:              CashFlowSection
-  investing:              CashFlowSection
-  financing:              CashFlowSection
-  netChange:              number
-  openingCashBalance:     number
+  period: { from: string; to: string }
+  operating: CashFlowSection
+  investing: CashFlowSection
+  financing: CashFlowSection
+  netChange: number
+  openingCashBalance: number
   /** openingCash + netChange — statement arithmetic */
-  closingCashBalance:     number
+  closingCashBalance: number
   /** Direct ledger query — the authoritative figure shown on the Balance Sheet */
-  closingCashCrossCheck:  number
+  closingCashCrossCheck: number
   /** |closingCashBalance - closingCashCrossCheck| < 0.01 */
-  isReconciled:           boolean
+  isReconciled: boolean
   /** Cash movements where every offsetting account has null or 'none' cash_flow_activity */
-  unclassifiedAmount:     number
+  unclassifiedAmount: number
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -87,7 +87,6 @@ export async function getCashFlowStatement(
   businessId: string,
   period: Extract<PeriodParams, { type: 'range' }>,
 ): Promise<CashFlowStatement> {
-
   // ── Step 1: Find journal entry IDs that touch a cash account in this period ─
   const cashEntryRows = await db
     .select({ entryId: journalLines.journalEntryId })
@@ -103,59 +102,58 @@ export async function getCashFlowStatement(
       ),
     )
 
-  const entryIds = [...new Set(cashEntryRows.map(r => r.entryId))]
+  const entryIds = [...new Set(cashEntryRows.map((r) => r.entryId))]
 
   // ── Step 2: Opening & closing cash from the ledger ────────────────────────
-  const dayBefore = new Date(
-    new Date(period.from + 'T00:00:00Z').getTime() - 86_400_000,
-  ).toISOString().slice(0, 10)
+  const dayBefore = new Date(new Date(period.from + 'T00:00:00Z').getTime() - 86_400_000)
+    .toISOString()
+    .slice(0, 10)
 
   const [openingBals, closingBals] = await Promise.all([
     getAccountBalances(businessId, { type: 'asOf', date: dayBefore }, CASH_CODES),
-    getAccountBalances(businessId, { type: 'asOf', date: period.to  }, CASH_CODES),
+    getAccountBalances(businessId, { type: 'asOf', date: period.to }, CASH_CODES),
   ])
 
   // openingCashFromLedger = direct ledger balance of cash accounts as of the day before
   // the period. opening_balance source entries dated within the period will be added to
   // this figure separately (they represent the starting position, not period cash flows).
-  const openingCashFromLedger  = roundCents(openingBals.reduce((s, a) => s + a.netBalance, 0))
-  const closingCashCrossCheck  = roundCents(closingBals.reduce((s, a) => s + a.netBalance, 0))
+  const openingCashFromLedger = roundCents(openingBals.reduce((s, a) => s + a.netBalance, 0))
+  const closingCashCrossCheck = roundCents(closingBals.reduce((s, a) => s + a.netBalance, 0))
 
   // ── Early return for periods with no cash-touching entries ────────────────
-  const emptySection = (label: string): CashFlowSection =>
-    makeSection(label, [])
+  const emptySection = (label: string): CashFlowSection => makeSection(label, [])
 
   if (entryIds.length === 0) {
-    const netChange          = 0
+    const netChange = 0
     const openingCashBalance = openingCashFromLedger
     const closingCashBalance = roundCents(openingCashBalance + netChange)
     return {
-      period:       { from: period.from, to: period.to },
-      operating:    emptySection('Operating Activities'),
-      investing:    emptySection('Investing Activities'),
-      financing:    emptySection('Financing Activities'),
+      period: { from: period.from, to: period.to },
+      operating: emptySection('Operating Activities'),
+      investing: emptySection('Investing Activities'),
+      financing: emptySection('Financing Activities'),
       netChange,
       openingCashBalance,
       closingCashBalance,
       closingCashCrossCheck,
-      isReconciled:        Math.abs(closingCashBalance - closingCashCrossCheck) < 0.01,
-      unclassifiedAmount:  0,
+      isReconciled: Math.abs(closingCashBalance - closingCashCrossCheck) < 0.01,
+      unclassifiedAmount: 0,
     }
   }
 
   // ── Step 3: Fetch ALL lines for those entries ─────────────────────────────
   const allLines = await db
     .select({
-      lineId:           journalLines.id,
-      entryId:          journalLines.journalEntryId,
-      entryDate:        journalEntries.entryDate,
-      entryDesc:        journalEntries.description,
-      sourceType:       journalEntries.sourceType,
-      debitAmount:      journalLines.debitAmount,
-      creditAmount:     journalLines.creditAmount,
-      accountCode:      accounts.code,
-      accountName:      accounts.name,
-      accountType:      accounts.type,
+      lineId: journalLines.id,
+      entryId: journalLines.journalEntryId,
+      entryDate: journalEntries.entryDate,
+      entryDesc: journalEntries.description,
+      sourceType: journalEntries.sourceType,
+      debitAmount: journalLines.debitAmount,
+      creditAmount: journalLines.creditAmount,
+      accountCode: accounts.code,
+      accountName: accounts.name,
+      accountType: accounts.type,
       cashFlowActivity: accounts.cashFlowActivity,
     })
     .from(journalLines)
@@ -167,7 +165,7 @@ export async function getCashFlowStatement(
   // ── Step 4: Classify each entry's cash movement ───────────────────────────
 
   // Group rows by entryId
-  type LineRow = typeof allLines[number]
+  type LineRow = (typeof allLines)[number]
   const byEntry = new Map<string, LineRow[]>()
   for (const row of allLines) {
     const existing = byEntry.get(row.entryId)
@@ -189,24 +187,20 @@ export async function getCashFlowStatement(
 
   const sectionMap: Record<string, CashFlowLine[]> = {
     operating: operatingLines,
-    investing:  investingLines,
-    financing:  financingLines,
+    investing: investingLines,
+    financing: financingLines,
   }
 
   for (const [, lines] of byEntry) {
-    const cashLines    = lines.filter(l => CASH_CODES.includes(l.accountCode))
-    const nonCashLines = lines.filter(l => !CASH_CODES.includes(l.accountCode))
+    const cashLines = lines.filter((l) => CASH_CODES.includes(l.accountCode))
+    const nonCashLines = lines.filter((l) => !CASH_CODES.includes(l.accountCode))
 
     // Net cash movement: positive = inflow (more debits than credits on cash accounts)
     const cashMovement = roundCents(
-      cashLines.reduce(
-        (s, l) => s + (Number(l.debitAmount) - Number(l.creditAmount)),
-        0,
-      ),
+      cashLines.reduce((s, l) => s + (Number(l.debitAmount) - Number(l.creditAmount)), 0),
     )
 
-    const description =
-      lines[0].entryDesc ?? sourceTypeLabel(lines[0].sourceType)
+    const description = lines[0].entryDesc ?? sourceTypeLabel(lines[0].sourceType)
 
     // Opening balance entries represent the starting cash position, not period cash flows.
     // Accumulate their net cash movement and add to openingCashFromLedger below.
@@ -217,11 +211,11 @@ export async function getCashFlowStatement(
 
     // Classify by non-cash accounts' cash_flow_activity
     const classifiedActivities = nonCashLines
-      .map(l => l.cashFlowActivity)
+      .map((l) => l.cashFlowActivity)
       .filter((a): a is string => !!a && a !== 'none')
     const uniqueActs = [...new Set(classifiedActivities)]
     const hasUnclassified = nonCashLines.some(
-      l => !l.cashFlowActivity || l.cashFlowActivity === 'none',
+      (l) => !l.cashFlowActivity || l.cashFlowActivity === 'none',
     )
 
     if (uniqueActs.length === 0) {
@@ -235,7 +229,7 @@ export async function getCashFlowStatement(
       if (hasUnclassified) {
         console.warn(
           `[cashFlow] Entry has mixed classified/unclassified non-cash accounts. ` +
-          `Assigning entire cash movement to '${uniqueActs[0]}'.`,
+            `Assigning entire cash movement to '${uniqueActs[0]}'.`,
         )
       }
       const target = sectionMap[uniqueActs[0]]
@@ -246,7 +240,7 @@ export async function getCashFlowStatement(
     // Multiple distinct activities — proportional allocation by non-cash amount
     console.warn(
       `[cashFlow] Entry has multiple cash_flow_activity values (${uniqueActs.join(', ')}). ` +
-      `Applying proportional allocation.`,
+        `Applying proportional allocation.`,
     )
 
     const totalNonCashAbs = nonCashLines.reduce(
@@ -255,16 +249,13 @@ export async function getCashFlowStatement(
     )
 
     for (const act of uniqueActs) {
-      const actLines = nonCashLines.filter(
-        l => l.cashFlowActivity === act,
-      )
+      const actLines = nonCashLines.filter((l) => l.cashFlowActivity === act)
       const actWeight = actLines.reduce(
         (s, l) => s + Math.abs(Number(l.debitAmount) - Number(l.creditAmount)),
         0,
       )
-      const allocated = totalNonCashAbs > 0
-        ? roundCents(cashMovement * (actWeight / totalNonCashAbs))
-        : 0
+      const allocated =
+        totalNonCashAbs > 0 ? roundCents(cashMovement * (actWeight / totalNonCashAbs)) : 0
       const target = sectionMap[act]
       if (target && allocated !== 0) {
         target.push({ description: `${description} (${act})`, amount: allocated })
@@ -274,33 +265,34 @@ export async function getCashFlowStatement(
     // Unclassified portion within a mixed entry
     if (hasUnclassified) {
       const nullLines = nonCashLines.filter(
-        l => !l.cashFlowActivity || l.cashFlowActivity === 'none',
+        (l) => !l.cashFlowActivity || l.cashFlowActivity === 'none',
       )
       const nullWeight = nullLines.reduce(
         (s, l) => s + Math.abs(Number(l.debitAmount) - Number(l.creditAmount)),
         0,
       )
-      const unclassifiedPortion = totalNonCashAbs > 0
-        ? roundCents(Math.abs(cashMovement) * (nullWeight / totalNonCashAbs))
-        : 0
+      const unclassifiedPortion =
+        totalNonCashAbs > 0
+          ? roundCents(Math.abs(cashMovement) * (nullWeight / totalNonCashAbs))
+          : 0
       unclassifiedAmount = roundCents(unclassifiedAmount + unclassifiedPortion)
     }
   }
 
   // ── Step 5: Assemble result ────────────────────────────────────────────────
   const operating = makeSection('Operating Activities', operatingLines)
-  const investing  = makeSection('Investing Activities',  investingLines)
-  const financing  = makeSection('Financing Activities',  financingLines)
+  const investing = makeSection('Investing Activities', investingLines)
+  const financing = makeSection('Financing Activities', financingLines)
 
   // Opening cash = ledger balance before the period + any opening_balance entries
   // dated within the period (they set the starting position, not cash flows).
   const openingCashBalance = roundCents(openingCashFromLedger + openingBalanceCashMovement)
-  const netChange          = roundCents(operating.netAmount + investing.netAmount + financing.netAmount)
+  const netChange = roundCents(operating.netAmount + investing.netAmount + financing.netAmount)
   const closingCashBalance = roundCents(openingCashBalance + netChange)
-  const isReconciled       = Math.abs(closingCashBalance - closingCashCrossCheck) < 0.01
+  const isReconciled = Math.abs(closingCashBalance - closingCashCrossCheck) < 0.01
 
   return {
-    period:       { from: period.from, to: period.to },
+    period: { from: period.from, to: period.to },
     operating,
     investing,
     financing,

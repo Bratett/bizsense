@@ -24,12 +24,7 @@ import { getAllowNegativeStock } from '@/lib/inventory/settings'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type PaymentMethod =
-  | 'cash'
-  | 'momo_mtn'
-  | 'momo_telecel'
-  | 'momo_airtel'
-  | 'bank'
+export type PaymentMethod = 'cash' | 'momo_mtn' | 'momo_telecel' | 'momo_airtel' | 'bank'
 
 export type OrderLineInput = {
   productId?: string
@@ -45,9 +40,9 @@ export type CreateOrderInput = {
   customerId?: string
   orderDate: string
   lines: OrderLineInput[]
-  paymentStatus?: 'paid' | 'unpaid' | 'partial'  // defaults to 'paid' if omitted (backward compat)
-  paymentMethod?: PaymentMethod        // required when paymentStatus = 'paid' or 'partial'
-  amountPaid?: number                  // required when paymentStatus = 'partial'
+  paymentStatus?: 'paid' | 'unpaid' | 'partial' // defaults to 'paid' if omitted (backward compat)
+  paymentMethod?: PaymentMethod // required when paymentStatus = 'paid' or 'partial'
+  amountPaid?: number // required when paymentStatus = 'partial'
   momoReference?: string
   bankReference?: string
   discountType?: 'percentage' | 'fixed'
@@ -140,9 +135,7 @@ const VALID_PAYMENT_METHODS: PaymentMethod[] = [
 
 // ─── Create Order (cash, credit, or partial) ─────────────────────────────────
 
-export async function createOrder(
-  input: CreateOrderInput,
-): Promise<OrderActionResult> {
+export async function createOrder(input: CreateOrderInput): Promise<OrderActionResult> {
   // 1. Session
   const session = await getServerSession()
   const { businessId } = session.user
@@ -217,8 +210,7 @@ export async function createOrder(
   const fxRate = hasUsdLine ? input.fxRate! : 1
 
   const computedLines = input.lines.map((line) => {
-    const unitPriceGhs =
-      line.unitPriceCurrency === 'USD' ? line.unitPrice * fxRate : line.unitPrice
+    const unitPriceGhs = line.unitPriceCurrency === 'USD' ? line.unitPrice * fxRate : line.unitPrice
     const gross = Math.round(unitPriceGhs * line.quantity * 100) / 100
     const discount = Math.round((line.discountAmount ?? 0) * 100) / 100
     const lineTotal = Math.round((gross - discount) * 100) / 100
@@ -307,9 +299,7 @@ export async function createOrder(
   const accountRows = await db
     .select({ id: accounts.id, code: accounts.code })
     .from(accounts)
-    .where(
-      and(eq(accounts.businessId, businessId), inArray(accounts.code, neededCodes)),
-    )
+    .where(and(eq(accounts.businessId, businessId), inArray(accounts.code, neededCodes)))
 
   const accountMap = Object.fromEntries(accountRows.map((a) => [a.code, a.id]))
 
@@ -371,9 +361,7 @@ export async function createOrder(
           unit: products.unit,
         })
         .from(products)
-        .where(
-          and(eq(products.id, line.productId!), eq(products.businessId, businessId)),
-        )
+        .where(and(eq(products.id, line.productId!), eq(products.businessId, businessId)))
 
       if (!prod || !prod.trackInventory) continue
 
@@ -510,83 +498,80 @@ export async function createOrder(
         : 0
 
   // 14. Atomic write — order + lines + optional payment + inventory all succeed or all roll back
-  const orderRow = await atomicTransactionWrite(
-    journalInput,
-    async (tx, journalEntryId) => {
-      // a. Insert order
-      const [created] = await tx
-        .insert(orders)
-        .values({
-          id: orderId,
-          businessId,
-          orderNumber: input.orderNumber,
-          localOrderNumber: input.orderNumber,
-          customerId: input.customerId ?? null,
-          orderDate: input.orderDate,
-          status: 'fulfilled',
-          paymentStatus: paymentStatus,
-          discountType: input.discountType ?? null,
-          discountValue: input.discountValue?.toFixed(2) ?? null,
-          subtotal: subtotal.toFixed(2),
-          discountAmount: discountAmount.toFixed(2),
-          taxAmount: taxAmount.toFixed(2),
-          totalAmount: totalAmount.toFixed(2),
-          amountPaid: paidNow.toFixed(2),
-          fxRate: hasUsdLine ? fxRate.toFixed(4) : null,
-          fxRateLockedAt: hasUsdLine ? new Date() : null,
-          notes: input.notes ?? null,
-          journalEntryId,
-          createdBy: userId,
-        })
-        .returning()
+  const orderRow = await atomicTransactionWrite(journalInput, async (tx, journalEntryId) => {
+    // a. Insert order
+    const [created] = await tx
+      .insert(orders)
+      .values({
+        id: orderId,
+        businessId,
+        orderNumber: input.orderNumber,
+        localOrderNumber: input.orderNumber,
+        customerId: input.customerId ?? null,
+        orderDate: input.orderDate,
+        status: 'fulfilled',
+        paymentStatus: paymentStatus,
+        discountType: input.discountType ?? null,
+        discountValue: input.discountValue?.toFixed(2) ?? null,
+        subtotal: subtotal.toFixed(2),
+        discountAmount: discountAmount.toFixed(2),
+        taxAmount: taxAmount.toFixed(2),
+        totalAmount: totalAmount.toFixed(2),
+        amountPaid: paidNow.toFixed(2),
+        fxRate: hasUsdLine ? fxRate.toFixed(4) : null,
+        fxRateLockedAt: hasUsdLine ? new Date() : null,
+        notes: input.notes ?? null,
+        journalEntryId,
+        createdBy: userId,
+      })
+      .returning()
 
-      // b. Insert order lines
-      await tx.insert(orderLines).values(
-        computedLines.map((cl) => ({
-          orderId,
-          productId: cl.productId ?? null,
-          description: cl.description,
-          quantity: cl.quantity.toFixed(2),
-          unitPrice: cl.unitPrice.toFixed(2),
-          unitPriceCurrency: cl.unitPriceCurrency,
-          discountAmount: (cl.discountAmount ?? 0).toFixed(2),
-          lineTotal: cl.lineTotal.toFixed(2),
-        })),
-      )
+    // b. Insert order lines
+    await tx.insert(orderLines).values(
+      computedLines.map((cl) => ({
+        orderId,
+        productId: cl.productId ?? null,
+        description: cl.description,
+        quantity: cl.quantity.toFixed(2),
+        unitPrice: cl.unitPrice.toFixed(2),
+        unitPriceCurrency: cl.unitPriceCurrency,
+        discountAmount: (cl.discountAmount ?? 0).toFixed(2),
+        lineTotal: cl.lineTotal.toFixed(2),
+      })),
+    )
 
-      // c. Insert payment received record (only if money was actually received)
-      if (paymentStatus !== 'unpaid') {
-        await tx.insert(paymentsReceived).values({
-          businessId,
-          orderId,
-          customerId: input.customerId ?? null,
-          amount: paidNow.toFixed(2),
-          paymentMethod: input.paymentMethod!,
-          paymentDate: input.orderDate,
-          momoReference: input.momoReference ?? null,
-          bankReference: input.bankReference ?? null,
-          createdBy: userId,
-        })
-      }
+    // c. Insert payment received record (only if money was actually received)
+    if (paymentStatus !== 'unpaid') {
+      await tx.insert(paymentsReceived).values({
+        businessId,
+        orderId,
+        customerId: input.customerId ?? null,
+        amount: paidNow.toFixed(2),
+        paymentMethod: input.paymentMethod!,
+        paymentDate: input.orderDate,
+        momoReference: input.momoReference ?? null,
+        bankReference: input.bankReference ?? null,
+        createdBy: userId,
+      })
+    }
 
-      // d. Insert inventory transactions for product-linked lines (COGS deduction)
-      for (const cl of cogsLines) {
-        await tx.insert(inventoryTransactions).values({
-          businessId,
-          productId: cl.productId,
-          transactionType: 'sale',
-          quantity: (-cl.quantity).toFixed(2),
-          unitCost: (cl.cogsTotal / cl.quantity).toFixed(2),
-          referenceId: orderId,
-          journalEntryId,
-          transactionDate: input.orderDate,
-          notes: `Sale — ${input.orderNumber}`,
-        })
-      }
+    // d. Insert inventory transactions for product-linked lines (COGS deduction)
+    for (const cl of cogsLines) {
+      await tx.insert(inventoryTransactions).values({
+        businessId,
+        productId: cl.productId,
+        transactionType: 'sale',
+        quantity: (-cl.quantity).toFixed(2),
+        unitCost: (cl.cogsTotal / cl.quantity).toFixed(2),
+        referenceId: orderId,
+        journalEntryId,
+        transactionDate: input.orderDate,
+        notes: `Sale — ${input.orderNumber}`,
+      })
+    }
 
-      return created
-    },
-  )
+    return created
+  })
 
   return {
     success: true,
@@ -704,9 +689,7 @@ type OrderListFilters = {
   dateRange?: 'today' | 'this_week' | 'this_month' | 'all'
 }
 
-export async function listOrders(
-  filters?: OrderListFilters,
-): Promise<OrderListItem[]> {
+export async function listOrders(filters?: OrderListFilters): Promise<OrderListItem[]> {
   const session = await getServerSession()
   const businessId = session.user.businessId
 
@@ -734,9 +717,7 @@ export async function listOrders(
               ilike(customers.name, `%${filters.search}%`),
             )
           : undefined,
-        filters?.paymentStatus
-          ? eq(orders.paymentStatus, filters.paymentStatus)
-          : undefined,
+        filters?.paymentStatus ? eq(orders.paymentStatus, filters.paymentStatus) : undefined,
         (() => {
           if (!filters?.dateRange || filters.dateRange === 'all') return undefined
           const today = new Date()
@@ -753,10 +734,7 @@ export async function listOrders(
           }
           if (filters.dateRange === 'this_month') {
             const startOfMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`
-            return and(
-              gte(orders.orderDate, startOfMonth),
-              lte(orders.orderDate, todayStr),
-            )
+            return and(gte(orders.orderDate, startOfMonth), lte(orders.orderDate, todayStr))
           }
           return undefined
         })(),
@@ -858,9 +836,7 @@ export async function getOrderById(id: string): Promise<OrderDetail> {
 
 // ─── Preview Order Tax ──────────────────────────────────────────────────────
 
-export async function previewOrderTax(
-  amount: number,
-): Promise<TaxCalculationResult> {
+export async function previewOrderTax(amount: number): Promise<TaxCalculationResult> {
   const session = await getServerSession()
   return calculateTax(session.user.businessId, amount)
 }

@@ -14,10 +14,7 @@ export async function POST(request: NextRequest) {
   const pdf = formData.get('pdf') as File
 
   if (!orderId || !pdf) {
-    return NextResponse.json(
-      { error: 'orderId and pdf are required' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'orderId and pdf are required' }, { status: 400 })
   }
 
   // Verify the order belongs to this business
@@ -35,18 +32,13 @@ export async function POST(request: NextRequest) {
   const path = `invoices/${businessId}/${orderId}.pdf`
   const buffer = Buffer.from(await pdf.arrayBuffer())
 
-  const { error: uploadError } = await supabase.storage
-    .from('documents')
-    .upload(path, buffer, {
-      contentType: 'application/pdf',
-      upsert: true,
-    })
+  const { error: uploadError } = await supabase.storage.from('documents').upload(path, buffer, {
+    contentType: 'application/pdf',
+    upsert: true,
+  })
 
   if (uploadError) {
-    return NextResponse.json(
-      { error: `Upload failed: ${uploadError.message}` },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: `Upload failed: ${uploadError.message}` }, { status: 500 })
   }
 
   // Generate signed URL with 7-day expiry

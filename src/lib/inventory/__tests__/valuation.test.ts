@@ -57,9 +57,30 @@ describe('computeInventoryValuation', () => {
       if (selectCallCount === 1) {
         // Fetch products
         return makeChain([
-          { id: 'p1', name: 'Widget A', sku: 'WDG-001', category: 'Parts', unit: 'pcs', reorderLevel: 10 },
-          { id: 'p2', name: 'Widget B', sku: 'WDG-002', category: 'Parts', unit: 'pcs', reorderLevel: 5 },
-          { id: 'p3', name: 'Widget C', sku: 'WDG-003', category: 'Tools', unit: 'pcs', reorderLevel: 0 },
+          {
+            id: 'p1',
+            name: 'Widget A',
+            sku: 'WDG-001',
+            category: 'Parts',
+            unit: 'pcs',
+            reorderLevel: 10,
+          },
+          {
+            id: 'p2',
+            name: 'Widget B',
+            sku: 'WDG-002',
+            category: 'Parts',
+            unit: 'pcs',
+            reorderLevel: 5,
+          },
+          {
+            id: 'p3',
+            name: 'Widget C',
+            sku: 'WDG-003',
+            category: 'Tools',
+            unit: 'pcs',
+            reorderLevel: 0,
+          },
         ]) as unknown as ReturnType<typeof db.select>
       }
       // GL balance query
@@ -72,8 +93,8 @@ describe('computeInventoryValuation', () => {
       .mockResolvedValueOnce([]) // p3
 
     vi.mocked(computeFifoInventoryValue)
-      .mockReturnValueOnce({ totalValue: 500, totalQuantity: 50, remainingLayers: [] })   // p1
-      .mockReturnValueOnce({ totalValue: 150, totalQuantity: 30, remainingLayers: [] })   // p2
+      .mockReturnValueOnce({ totalValue: 500, totalQuantity: 50, remainingLayers: [] }) // p1
+      .mockReturnValueOnce({ totalValue: 150, totalQuantity: 30, remainingLayers: [] }) // p2
       .mockReturnValueOnce({ totalValue: 1000, totalQuantity: 100, remainingLayers: [] }) // p3
 
     const report = await computeInventoryValuation(BUSINESS_ID)
@@ -89,7 +110,7 @@ describe('computeInventoryValuation', () => {
 
     // fifoUnitCost checks
     expect(report.lines[0].fifoUnitCost).toBe(10) // 500/50
-    expect(report.lines[1].fifoUnitCost).toBe(5)  // 150/30
+    expect(report.lines[1].fifoUnitCost).toBe(5) // 150/30
     expect(report.lines[2].fifoUnitCost).toBe(10) // 1000/100
   })
 
@@ -99,7 +120,14 @@ describe('computeInventoryValuation', () => {
       selectCallCount++
       if (selectCallCount === 1) {
         return makeChain([
-          { id: 'p1', name: 'Empty Widget', sku: 'EMP-001', category: null, unit: 'pcs', reorderLevel: 5 },
+          {
+            id: 'p1',
+            name: 'Empty Widget',
+            sku: 'EMP-001',
+            category: null,
+            unit: 'pcs',
+            reorderLevel: 5,
+          },
         ]) as unknown as ReturnType<typeof db.select>
       }
       return makeChain([{ balance: '0' }]) as unknown as ReturnType<typeof db.select>
@@ -127,7 +155,14 @@ describe('computeInventoryValuation', () => {
       selectCallCount++
       if (selectCallCount === 1) {
         return makeChain([
-          { id: 'p1', name: 'Widget', sku: 'W-001', category: 'Parts', unit: 'pcs', reorderLevel: 0 },
+          {
+            id: 'p1',
+            name: 'Widget',
+            sku: 'W-001',
+            category: 'Parts',
+            unit: 'pcs',
+            reorderLevel: 0,
+          },
         ]) as unknown as ReturnType<typeof db.select>
       }
       // GL balance = 750 which matches the FIFO value

@@ -41,12 +41,7 @@ export async function POST() {
         maxNum: sql<string | null>`MAX(${orders.orderNumber})`,
       })
       .from(orders)
-      .where(
-        and(
-          eq(orders.businessId, businessId),
-          sql`${orders.orderNumber} ~ '^ORD-\\d{4,}$'`,
-        ),
-      )
+      .where(and(eq(orders.businessId, businessId), sql`${orders.orderNumber} ~ '^ORD-\\d{4,}$'`))
 
     let nextSeq = 1
     if (maxRow?.maxNum) {
@@ -57,10 +52,7 @@ export async function POST() {
     // Assign sequential clean numbers
     for (const row of unassigned) {
       const newNumber = `ORD-${String(nextSeq).padStart(4, '0')}`
-      await tx
-        .update(orders)
-        .set({ orderNumber: newNumber })
-        .where(eq(orders.id, row.id))
+      await tx.update(orders).set({ orderNumber: newNumber }).where(eq(orders.id, row.id))
 
       assigned.push({ orderId: row.id, orderNumber: newNumber })
       nextSeq++

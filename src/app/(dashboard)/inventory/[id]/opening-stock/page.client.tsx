@@ -14,9 +14,7 @@ export default function OpeningStockForm({ product }: { product: ProductDetail }
 
   const [quantity, setQuantity] = useState('')
   const [unitCost, setUnitCost] = useState(product.costPrice ?? '')
-  const [transactionDate, setTransactionDate] = useState(
-    new Date().toISOString().split('T')[0],
-  )
+  const [transactionDate, setTransactionDate] = useState(new Date().toISOString().split('T')[0])
   const [notes, setNotes] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -49,7 +47,13 @@ export default function OpeningStockForm({ product }: { product: ProductDetail }
       {/* Header */}
       <div className="flex items-center gap-2">
         <Link href={`/inventory/${product.id}`} className="text-gray-600 hover:text-gray-900">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </Link>
@@ -150,12 +154,13 @@ export default function OpeningStockForm({ product }: { product: ProductDetail }
             <p className="text-xs text-gray-500">Total Opening Value</p>
             <p className="mt-0.5 text-lg font-semibold tabular-nums text-gray-900">
               GHS{' '}
-              {(
-                (parseFloat(quantity) || 0) * (parseFloat(String(unitCost)) || 0)
-              ).toLocaleString('en-GH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {((parseFloat(quantity) || 0) * (parseFloat(String(unitCost)) || 0)).toLocaleString(
+                'en-GH',
+                {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                },
+              )}
             </p>
           </div>
         )}

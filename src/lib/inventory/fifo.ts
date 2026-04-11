@@ -6,13 +6,7 @@
 
 export type FifoTransactionInput = {
   id: string
-  transactionType:
-    | 'purchase'
-    | 'sale'
-    | 'adjustment'
-    | 'opening'
-    | 'return_in'
-    | 'return_out'
+  transactionType: 'purchase' | 'sale' | 'adjustment' | 'opening' | 'return_in' | 'return_out'
   quantity: number // positive = stock in, negative = stock out
   unitCost: number
   transactionDate: string // 'YYYY-MM-DD'
@@ -71,9 +65,7 @@ function isOutbound(tx: FifoTransactionInput): boolean {
  * FIFO layer state. Each inbound transaction creates a layer; each outbound
  * transaction consumes from the oldest available layers.
  */
-export function buildFifoLayers(
-  transactions: FifoTransactionInput[],
-): InventoryLayer[] {
+export function buildFifoLayers(transactions: FifoTransactionInput[]): InventoryLayer[] {
   const sorted = [...transactions].sort((a, b) => {
     const dateDiff = a.transactionDate.localeCompare(b.transactionDate)
     if (dateDiff !== 0) return dateDiff
@@ -165,14 +157,8 @@ export function computeFifoInventoryValue(
   const layers = buildFifoLayers(transactions)
   const remainingLayers = layers.filter((l) => l.available > 0.0001)
 
-  const totalValue = remainingLayers.reduce(
-    (sum, l) => sum + l.available * l.unitCost,
-    0,
-  )
-  const totalQuantity = remainingLayers.reduce(
-    (sum, l) => sum + l.available,
-    0,
-  )
+  const totalValue = remainingLayers.reduce((sum, l) => sum + l.available * l.unitCost, 0)
+  const totalQuantity = remainingLayers.reduce((sum, l) => sum + l.available, 0)
 
   return {
     totalValue: Math.round(totalValue * 100) / 100,

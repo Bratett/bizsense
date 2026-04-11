@@ -24,9 +24,7 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
     setIsGeneratingPdf(true)
     try {
       const data = await getSupplierStatementData(supplier.id)
-      const worker = new Worker(
-        new URL('@/lib/pdf/supplierStatement.worker.ts', import.meta.url),
-      )
+      const worker = new Worker(new URL('@/lib/pdf/supplierStatement.worker.ts', import.meta.url))
       worker.onmessage = (e: MessageEvent) => {
         if (e.data.type === 'success') {
           const url = URL.createObjectURL(e.data.blob)
@@ -39,7 +37,10 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
         worker.terminate()
         setIsGeneratingPdf(false)
       }
-      worker.onerror = () => { worker.terminate(); setIsGeneratingPdf(false) }
+      worker.onerror = () => {
+        worker.terminate()
+        setIsGeneratingPdf(false)
+      }
       worker.postMessage({ type: 'generate', data })
     } catch {
       setIsGeneratingPdf(false)
@@ -74,7 +75,13 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
             className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
             aria-label="Back to suppliers"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
@@ -103,7 +110,9 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
         {/* Balance Card */}
         <div className={`mt-4 rounded-xl border p-4 ${balanceColor}`}>
           <p className="text-xs font-medium opacity-70">Outstanding Payable</p>
-          <p className="mt-1 text-2xl font-semibold">GHS {formatGHS(supplier.outstandingPayable)}</p>
+          <p className="mt-1 text-2xl font-semibold">
+            GHS {formatGHS(supplier.outstandingPayable)}
+          </p>
         </div>
 
         {/* Profile */}
@@ -178,8 +187,8 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
               <h3 className="text-lg font-semibold text-gray-900">Deactivate Supplier?</h3>
               <p className="mt-2 text-sm text-gray-500">
-                {supplier.name} will be hidden from your supplier list. You can reactivate
-                them later from settings.
+                {supplier.name} will be hidden from your supplier list. You can reactivate them
+                later from settings.
               </p>
               <div className="mt-6 flex gap-3">
                 <button

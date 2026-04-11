@@ -135,10 +135,7 @@ describe('ReceiptCapture', () => {
 
   it('renders View Receipt link for existing receipt', () => {
     render(
-      <ReceiptCapture
-        expenseId="exp-001"
-        existingReceiptPath="receipts/biz/2026/04/exp-001.jpg"
-      />,
+      <ReceiptCapture expenseId="exp-001" existingReceiptPath="receipts/biz/2026/04/exp-001.jpg" />,
     )
 
     expect(screen.getByText('View Receipt')).toBeTruthy()

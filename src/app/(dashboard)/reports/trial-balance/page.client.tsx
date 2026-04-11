@@ -10,18 +10,23 @@ import type { TrialBalanceReport, TrialBalanceLine } from '@/lib/reports/trialBa
 // ─── PDF document ─────────────────────────────────────────────────────────────
 
 const pdfStyles = StyleSheet.create({
-  page:     { padding: 32, fontFamily: 'Helvetica', fontSize: 9 },
-  title:    { fontSize: 16, marginBottom: 4 },
+  page: { padding: 32, fontFamily: 'Helvetica', fontSize: 9 },
+  title: { fontSize: 16, marginBottom: 4 },
   subtitle: { fontSize: 9, color: '#6B7280', marginBottom: 16 },
-  header:   { flexDirection: 'row', borderBottom: '1pt solid #E5E7EB', paddingBottom: 4, marginBottom: 4 },
-  row:      { flexDirection: 'row', paddingVertical: 2, borderBottom: '0.5pt solid #F3F4F6' },
-  col1:     { width: '10%' },
-  col2:     { width: '40%' },
-  col3:     { width: '20%' },
-  col4:     { width: '15%', textAlign: 'right' },
-  col5:     { width: '15%', textAlign: 'right' },
-  bold:     { fontFamily: 'Helvetica-Bold' },
-  totals:   { flexDirection: 'row', borderTop: '1pt solid #111827', paddingTop: 4, marginTop: 4 },
+  header: {
+    flexDirection: 'row',
+    borderBottom: '1pt solid #E5E7EB',
+    paddingBottom: 4,
+    marginBottom: 4,
+  },
+  row: { flexDirection: 'row', paddingVertical: 2, borderBottom: '0.5pt solid #F3F4F6' },
+  col1: { width: '10%' },
+  col2: { width: '40%' },
+  col3: { width: '20%' },
+  col4: { width: '15%', textAlign: 'right' },
+  col5: { width: '15%', textAlign: 'right' },
+  bold: { fontFamily: 'Helvetica-Bold' },
+  totals: { flexDirection: 'row', borderTop: '1pt solid #111827', paddingTop: 4, marginTop: 4 },
 })
 
 function TBDocument({ data }: { data: TrialBalanceReport }) {
@@ -39,13 +44,17 @@ function TBDocument({ data }: { data: TrialBalanceReport }) {
           <Text style={[pdfStyles.col5, pdfStyles.bold]}>Credits</Text>
         </View>
 
-        {data.lines.map(l => (
+        {data.lines.map((l) => (
           <View key={l.accountId} style={pdfStyles.row}>
             <Text style={pdfStyles.col1}>{l.accountCode}</Text>
             <Text style={pdfStyles.col2}>{l.accountName}</Text>
             <Text style={pdfStyles.col3}>{l.accountType}</Text>
-            <Text style={pdfStyles.col4}>{l.cumulativeDebits > 0 ? l.cumulativeDebits.toFixed(2) : ''}</Text>
-            <Text style={pdfStyles.col5}>{l.cumulativeCredits > 0 ? l.cumulativeCredits.toFixed(2) : ''}</Text>
+            <Text style={pdfStyles.col4}>
+              {l.cumulativeDebits > 0 ? l.cumulativeDebits.toFixed(2) : ''}
+            </Text>
+            <Text style={pdfStyles.col5}>
+              {l.cumulativeCredits > 0 ? l.cumulativeCredits.toFixed(2) : ''}
+            </Text>
           </View>
         ))}
 
@@ -68,17 +77,17 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
 
   const handleCsv = () => {
     const rows = data.lines.map((l: TrialBalanceLine) => ({
-      'Code':          l.accountCode,
-      'Account Name':  l.accountName,
-      'Type':          l.accountType,
-      'Debits (GHS)':  l.cumulativeDebits.toFixed(2),
+      Code: l.accountCode,
+      'Account Name': l.accountName,
+      Type: l.accountType,
+      'Debits (GHS)': l.cumulativeDebits.toFixed(2),
       'Credits (GHS)': l.cumulativeCredits.toFixed(2),
     }))
     rows.push({
-      'Code':          'TOTAL',
-      'Account Name':  '',
-      'Type':          '',
-      'Debits (GHS)':  data.totalDebits.toFixed(2),
+      Code: 'TOTAL',
+      'Account Name': '',
+      Type: '',
+      'Debits (GHS)': data.totalDebits.toFixed(2),
       'Credits (GHS)': data.totalCredits.toFixed(2),
     })
     downloadCsv(`trial-balance-${data.asOfDate}.csv`, rows)
@@ -88,9 +97,9 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
     setPdfLoading(true)
     try {
       const blob = await generateReportPdf(TBDocument, data)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
       a.download = `trial-balance-${data.asOfDate}.pdf`
       a.click()
       URL.revokeObjectURL(url)
@@ -113,9 +122,7 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
           <p className="text-sm font-bold text-red-700">
             ⚠ IMBALANCE DETECTED — {formatGhs(data.imbalanceAmount)} discrepancy
           </p>
-          <p className="mt-1 text-xs text-red-600">
-            Run the data integrity check immediately.
-          </p>
+          <p className="mt-1 text-xs text-red-600">Run the data integrity check immediately.</p>
           <Link
             href="/ledger?unbalanced=true"
             className="mt-2 inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
@@ -148,15 +155,25 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-20">Code</th>
-                <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Account Name</th>
-                <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Debits (GHS)</th>
-                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Credits (GHS)</th>
+                <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-20">
+                  Code
+                </th>
+                <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Account Name
+                </th>
+                <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Type
+                </th>
+                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Debits (GHS)
+                </th>
+                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Credits (GHS)
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {data.lines.map(line => (
+              {data.lines.map((line) => (
                 <tr key={line.accountId} className="hover:bg-gray-50">
                   <td className="py-2 pl-4 text-sm font-mono text-gray-500">{line.accountCode}</td>
                   <td className="py-2 text-sm text-gray-700">{line.accountName}</td>
@@ -171,14 +188,20 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
               ))}
             </tbody>
             <tfoot>
-              <tr className={`border-t-2 font-bold ${isBalanced ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
+              <tr
+                className={`border-t-2 font-bold ${isBalanced ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}
+              >
                 <td className="py-3 pl-4 text-sm"></td>
                 <td className="py-3 text-sm text-gray-900">TOTAL</td>
                 <td></td>
-                <td className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}>
+                <td
+                  className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
+                >
                   {data.totalDebits.toFixed(2)}
                 </td>
-                <td className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}>
+                <td
+                  className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
+                >
                   {data.totalCredits.toFixed(2)}
                 </td>
               </tr>

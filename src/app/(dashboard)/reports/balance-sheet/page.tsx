@@ -29,13 +29,13 @@ export default async function BalanceSheetPage({ searchParams }: PageProps) {
 
   // financialYearStart is stored as TEXT — could be '1', '4', or '04-01' style.
   // parseInt(raw.split('-')[0]) handles all formats safely.
-  const raw    = biz?.financialYearStart ?? null
+  const raw = biz?.financialYearStart ?? null
   const parsed = raw ? parseInt(raw.split('-')[0], 10) : NaN
   const fyMonth = isNaN(parsed) || parsed < 1 || parsed > 12 ? 1 : parsed
 
-  const params    = await searchParams
-  const asOfDate  = params.date ?? new Date().toISOString().slice(0, 10)
-  const period    = { type: 'asOf' as const, date: asOfDate }
+  const params = await searchParams
+  const asOfDate = params.date ?? new Date().toISOString().slice(0, 10)
+  const period = { type: 'asOf' as const, date: asOfDate }
 
   const bs = await getBalanceSheet(businessId, asOfDate, fyMonth)
 
@@ -50,9 +50,7 @@ export default async function BalanceSheetPage({ searchParams }: PageProps) {
         </div>
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Balance Sheet</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Financial position as at {asOfDate}
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Financial position as at {asOfDate}</p>
         </div>
 
         {/* Period selector */}

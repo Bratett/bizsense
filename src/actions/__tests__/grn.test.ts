@@ -36,12 +36,7 @@ import { db } from '@/db'
 import { atomicTransactionWrite } from '@/lib/atomic'
 import { getProductTransactions } from '@/lib/inventory/queries'
 import { computeFifoCogs } from '@/lib/inventory/fifo'
-import {
-  createGrn,
-  confirmGrn,
-  reverseGrn,
-  type CreateGrnInput,
-} from '../grn'
+import { createGrn, confirmGrn, reverseGrn, type CreateGrnInput } from '../grn'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -107,8 +102,7 @@ function makeMockTx(returnedGrnId = GRN_ID) {
         const returnData = rows.map((r: Record<string, unknown>) => ({ id: returnedGrnId, ...r }))
         return {
           returning: vi.fn().mockResolvedValue(returnData),
-          then: (f?: ((v: unknown) => unknown) | null) =>
-            Promise.resolve(returnData).then(f),
+          then: (f?: ((v: unknown) => unknown) | null) => Promise.resolve(returnData).then(f),
         }
       }),
     })),
@@ -223,12 +217,10 @@ describe('confirmGrn', () => {
     let capturedJournalInput: Record<string, unknown> | null = null
     const { tx, insertedValues, updatedValues } = makeMockTx()
 
-    vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput, cb) => {
-        capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx as never, JOURNAL_ENTRY_ID)
-      },
-    )
+    vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, cb) => {
+      capturedJournalInput = journalInput as Record<string, unknown>
+      return await cb(tx as never, JOURNAL_ENTRY_ID)
+    })
 
     const result = await confirmGrn({ grnId: GRN_ID })
 
@@ -311,12 +303,10 @@ describe('confirmGrn', () => {
     let capturedJournalInput: Record<string, unknown> | null = null
     const { tx } = makeMockTx()
 
-    vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput, cb) => {
-        capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx as never, JOURNAL_ENTRY_ID)
-      },
-    )
+    vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, cb) => {
+      capturedJournalInput = journalInput as Record<string, unknown>
+      return await cb(tx as never, JOURNAL_ENTRY_ID)
+    })
 
     const result = await confirmGrn({ grnId: GRN_ID, paymentMethod: 'momo_mtn' })
 
@@ -363,7 +353,8 @@ describe('confirmGrn', () => {
     const { tx, updatedValues } = makeMockTx()
 
     // updatePoStatusAfterGrn calls tx.select for PO lines and received sums
-    tx.select = vi.fn()
+    tx.select = vi
+      .fn()
       .mockReturnValueOnce(
         makeChain([{ id: PO_LINE_ID_1, quantity: '10' }]) as never, // PO lines
       )
@@ -371,11 +362,9 @@ describe('confirmGrn', () => {
         makeChain([{ poLineId: PO_LINE_ID_1, totalReceived: '10' }]) as never, // received sums (fully received)
       )
 
-    vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (_journalInput, cb) => {
-        return await cb(tx as never, JOURNAL_ENTRY_ID)
-      },
-    )
+    vi.mocked(atomicTransactionWrite).mockImplementation(async (_journalInput, cb) => {
+      return await cb(tx as never, JOURNAL_ENTRY_ID)
+    })
 
     const result = await confirmGrn({ grnId: GRN_ID })
 
@@ -417,7 +406,8 @@ describe('confirmGrn', () => {
     const { tx, updatedValues } = makeMockTx()
 
     // PO line ordered 10, only 5 received → outstanding = 5 → partially_received
-    tx.select = vi.fn()
+    tx.select = vi
+      .fn()
       .mockReturnValueOnce(
         makeChain([
           { id: PO_LINE_ID_1, quantity: '10' },
@@ -431,11 +421,9 @@ describe('confirmGrn', () => {
         ]) as never, // received sums
       )
 
-    vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (_journalInput, cb) => {
-        return await cb(tx as never, JOURNAL_ENTRY_ID)
-      },
-    )
+    vi.mocked(atomicTransactionWrite).mockImplementation(async (_journalInput, cb) => {
+      return await cb(tx as never, JOURNAL_ENTRY_ID)
+    })
 
     const result = await confirmGrn({ grnId: GRN_ID })
 
@@ -448,19 +436,18 @@ describe('confirmGrn', () => {
   })
 
   it('Test 6 — already confirmed: returns error without calling atomicTransactionWrite', async () => {
-    vi.mocked(db.select)
-      .mockReturnValueOnce(
-        makeChain([
-          {
-            id: GRN_ID,
-            grnNumber: VALID_GRN_NUMBER,
-            poId: null,
-            supplierId: SUPPLIER_ID,
-            receivedDate: '2026-04-11',
-            status: 'confirmed', // already confirmed
-          },
-        ]) as never,
-      )
+    vi.mocked(db.select).mockReturnValueOnce(
+      makeChain([
+        {
+          id: GRN_ID,
+          grnNumber: VALID_GRN_NUMBER,
+          poId: null,
+          supplierId: SUPPLIER_ID,
+          receivedDate: '2026-04-11',
+          status: 'confirmed', // already confirmed
+        },
+      ]) as never,
+    )
 
     const result = await confirmGrn({ grnId: GRN_ID })
 
@@ -507,18 +494,28 @@ describe('reverseGrn', () => {
     // FIFO costs for returning lines
     vi.mocked(getProductTransactions).mockResolvedValue([])
     vi.mocked(computeFifoCogs)
-      .mockReturnValueOnce({ cogsTotal: 500, layersConsumed: [], remainingQuantity: 0, insufficientStock: false, shortfall: 0 }) // line 1: 10 units @ 500 FIFO
-      .mockReturnValueOnce({ cogsTotal: 500, layersConsumed: [], remainingQuantity: 0, insufficientStock: false, shortfall: 0 }) // line 2: 5 units @ 500 FIFO
+      .mockReturnValueOnce({
+        cogsTotal: 500,
+        layersConsumed: [],
+        remainingQuantity: 0,
+        insufficientStock: false,
+        shortfall: 0,
+      }) // line 1: 10 units @ 500 FIFO
+      .mockReturnValueOnce({
+        cogsTotal: 500,
+        layersConsumed: [],
+        remainingQuantity: 0,
+        insufficientStock: false,
+        shortfall: 0,
+      }) // line 2: 5 units @ 500 FIFO
 
     let capturedJournalInput: Record<string, unknown> | null = null
     const { tx, insertedValues, updatedValues } = makeMockTx()
 
-    vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput, cb) => {
-        capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx as never, 'je-reversal-001')
-      },
-    )
+    vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, cb) => {
+      capturedJournalInput = journalInput as Record<string, unknown>
+      return await cb(tx as never, 'je-reversal-001')
+    })
 
     const result = await reverseGrn({
       grnId: GRN_ID,
@@ -567,8 +564,9 @@ describe('reverseGrn', () => {
 
     // Original GRN must NOT be updated (no update to goodsReceivedNotes)
     const grnStatusUpdate = updatedValues.find(
-      (v) => (v.set as Record<string, unknown>).status !== undefined &&
-              (v.set as Record<string, unknown>).status !== 'partially_received',
+      (v) =>
+        (v.set as Record<string, unknown>).status !== undefined &&
+        (v.set as Record<string, unknown>).status !== 'partially_received',
     )
     expect(grnStatusUpdate).toBeUndefined()
   })
@@ -610,12 +608,10 @@ describe('reverseGrn', () => {
     let capturedJournalInput: Record<string, unknown> | null = null
     const { tx } = makeMockTx()
 
-    vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput, cb) => {
-        capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx as never, 'je-partial-reversal')
-      },
-    )
+    vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, cb) => {
+      capturedJournalInput = journalInput as Record<string, unknown>
+      return await cb(tx as never, 'je-partial-reversal')
+    })
 
     const result = await reverseGrn({
       grnId: GRN_ID,
@@ -625,7 +621,10 @@ describe('reverseGrn', () => {
 
     expect(result.success).toBe(true)
 
-    const lines = capturedJournalInput!.lines as Array<{ debitAmount: number; creditAmount: number }>
+    const lines = capturedJournalInput!.lines as Array<{
+      debitAmount: number
+      creditAmount: number
+    }>
     const returnAmount = lines.reduce((s, l) => s + l.debitAmount, 0)
     // returnAmount = FIFO cost of 3 units = 150 (not full 1000)
     expect(returnAmount).toBe(150)

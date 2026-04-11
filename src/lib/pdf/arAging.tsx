@@ -4,36 +4,56 @@ import type { ArAgingReport, ArAgingCustomer } from '@/lib/reports/arAging'
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  page:      { padding: 28, fontFamily: 'Helvetica', fontSize: 8 },
-  title:     { fontSize: 14, marginBottom: 3 },
-  subtitle:  { fontSize: 8, color: '#6B7280', marginBottom: 14 },
+  page: { padding: 28, fontFamily: 'Helvetica', fontSize: 8 },
+  title: { fontSize: 14, marginBottom: 3 },
+  subtitle: { fontSize: 8, color: '#6B7280', marginBottom: 14 },
   // Summary totals row
-  summary:   { flexDirection: 'row', marginBottom: 14, gap: 8 },
+  summary: { flexDirection: 'row', marginBottom: 14, gap: 8 },
   summaryBox: {
-    flex: 1, borderRadius: 4, padding: 8,
-    backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB',
+    flex: 1,
+    borderRadius: 4,
+    padding: 8,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   summaryLabel: { fontSize: 7, color: '#6B7280', marginBottom: 2 },
   summaryValue: { fontSize: 10, fontFamily: 'Helvetica-Bold' },
   // Table
-  thead:     { flexDirection: 'row', borderBottom: '1pt solid #E5E7EB', paddingBottom: 3, marginBottom: 2 },
-  th:        { fontSize: 7, color: '#6B7280', fontFamily: 'Helvetica-Bold' },
+  thead: {
+    flexDirection: 'row',
+    borderBottom: '1pt solid #E5E7EB',
+    paddingBottom: 3,
+    marginBottom: 2,
+  },
+  th: { fontSize: 7, color: '#6B7280', fontFamily: 'Helvetica-Bold' },
   // Customer header
-  custHead:  { flexDirection: 'row', backgroundColor: '#F3F4F6', paddingVertical: 4, paddingHorizontal: 4, marginTop: 6 },
-  custName:  { fontSize: 8, fontFamily: 'Helvetica-Bold', flex: 3 },
-  custAmt:   { fontSize: 8, fontFamily: 'Helvetica-Bold', flex: 1, textAlign: 'right' },
+  custHead: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    marginTop: 6,
+  },
+  custName: { fontSize: 8, fontFamily: 'Helvetica-Bold', flex: 3 },
+  custAmt: { fontSize: 8, fontFamily: 'Helvetica-Bold', flex: 1, textAlign: 'right' },
   // Invoice row
-  invRow:    { flexDirection: 'row', paddingVertical: 2, paddingHorizontal: 4, borderBottom: '0.5pt solid #F3F4F6' },
-  col1:      { flex: 1.5, fontSize: 7 },
-  col2:      { flex: 1.2, fontSize: 7 },
-  col3:      { flex: 1.2, fontSize: 7 },
-  col4:      { flex: 1, fontSize: 7, textAlign: 'right' },
-  col5:      { flex: 1, fontSize: 7, textAlign: 'right' },
-  col6:      { flex: 1, fontSize: 7, textAlign: 'right' },
+  invRow: {
+    flexDirection: 'row',
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    borderBottom: '0.5pt solid #F3F4F6',
+  },
+  col1: { flex: 1.5, fontSize: 7 },
+  col2: { flex: 1.2, fontSize: 7 },
+  col3: { flex: 1.2, fontSize: 7 },
+  col4: { flex: 1, fontSize: 7, textAlign: 'right' },
+  col5: { flex: 1, fontSize: 7, textAlign: 'right' },
+  col6: { flex: 1, fontSize: 7, textAlign: 'right' },
   colBucket: { flex: 1, fontSize: 7, textAlign: 'right' },
   // Grand totals
-  gtRow:     { flexDirection: 'row', borderTop: '1pt solid #111827', paddingTop: 4, marginTop: 6 },
-  bold:      { fontFamily: 'Helvetica-Bold' },
+  gtRow: { flexDirection: 'row', borderTop: '1pt solid #111827', paddingTop: 4, marginTop: 6 },
+  bold: { fontFamily: 'Helvetica-Bold' },
 })
 
 // ─── Document component ───────────────────────────────────────────────────────
@@ -66,7 +86,9 @@ export function ArAgingDocument({ data }: { data: ArAgingReport }) {
     <Document>
       <Page size="A4" orientation="landscape" style={s.page}>
         <Text style={s.title}>Accounts Receivable — Aging Report</Text>
-        <Text style={s.subtitle}>As at {data.asOfDate} · {data.totalCustomersWithBalance} customer(s) with balance</Text>
+        <Text style={s.subtitle}>
+          As at {data.asOfDate} · {data.totalCustomersWithBalance} customer(s) with balance
+        </Text>
 
         {/* Summary buckets */}
         <View style={s.summary}>

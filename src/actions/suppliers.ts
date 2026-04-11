@@ -192,11 +192,7 @@ export async function updateSupplier(
     .select({ id: suppliers.id })
     .from(suppliers)
     .where(
-      and(
-        eq(suppliers.businessId, businessId),
-        eq(suppliers.phone, phone),
-        ne(suppliers.id, id),
-      ),
+      and(eq(suppliers.businessId, businessId), eq(suppliers.phone, phone), ne(suppliers.id, id)),
     )
     .limit(1)
 
@@ -285,9 +281,7 @@ export async function deactivateSupplier(id: string): Promise<SupplierActionResu
 
 // ─── List Suppliers ──────────────────────────────────────────────────────────
 
-export async function listSuppliers(
-  filters?: SupplierListFilters,
-): Promise<SupplierListItem[]> {
+export async function listSuppliers(filters?: SupplierListFilters): Promise<SupplierListItem[]> {
   const user = await requireRole(['owner', 'manager', 'accountant'])
   const businessId = user.businessId
 
@@ -298,9 +292,7 @@ export async function listSuppliers(
 
   if (filters?.search) {
     const term = `%${filters.search}%`
-    conditions.push(
-      or(ilike(suppliers.name, term), ilike(suppliers.phone, term))!,
-    )
+    conditions.push(or(ilike(suppliers.name, term), ilike(suppliers.phone, term))!)
   }
 
   // Fetch suppliers with outstanding payable and open PO count via subqueries

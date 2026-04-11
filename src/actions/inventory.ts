@@ -179,9 +179,7 @@ export async function recordOpeningStock(
 
 // ─── Adjust Stock ───────────────────────────────────────────────────────────
 
-export async function adjustStock(
-  input: AdjustStockInput,
-): Promise<InventoryActionResult> {
+export async function adjustStock(input: AdjustStockInput): Promise<InventoryActionResult> {
   const user = await requireRole(['owner', 'manager'])
   const { businessId } = user
 
@@ -268,9 +266,7 @@ export async function adjustStock(
   }
 
   // 5. Compute journal amounts
-  const journalAmount = isAdd
-    ? Math.round(input.quantity * input.unitCost! * 100) / 100
-    : cogsTotal
+  const journalAmount = isAdd ? Math.round(input.quantity * input.unitCost! * 100) / 100 : cogsTotal
 
   const notesText = input.reason + (input.notes?.trim() ? ': ' + input.notes.trim() : '')
 

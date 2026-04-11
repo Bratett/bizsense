@@ -48,10 +48,7 @@ function PaymentBadge({
   totalAmount: string | null
   amountPaid: string | null
 }) {
-  const outstanding = Math.max(
-    0,
-    Number(totalAmount ?? 0) - Number(amountPaid ?? 0),
-  )
+  const outstanding = Math.max(0, Number(totalAmount ?? 0) - Number(amountPaid ?? 0))
   if (paymentStatus === 'paid') {
     return (
       <span className="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
@@ -140,8 +137,8 @@ export default function OrderList({
         {/* Outstanding summary */}
         {showOutstandingSummary && initialOrders.length > 0 && (
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
-            GHS {totalOutstanding.toFixed(2)} outstanding across {initialOrders.length}{' '}
-            invoice{initialOrders.length !== 1 ? 's' : ''}
+            GHS {totalOutstanding.toFixed(2)} outstanding across {initialOrders.length} invoice
+            {initialOrders.length !== 1 ? 's' : ''}
           </div>
         )}
 
@@ -161,9 +158,7 @@ export default function OrderList({
           {filtered.length === 0 && initialOrders.length === 0 && (
             <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center">
               <p className="text-gray-500">No orders yet.</p>
-              <p className="mt-1 text-sm text-gray-400">
-                Record your first sale to get started.
-              </p>
+              <p className="mt-1 text-sm text-gray-400">Record your first sale to get started.</p>
               <Link
                 href="/orders/new"
                 className="mt-4 inline-block rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
@@ -197,9 +192,7 @@ export default function OrderList({
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {order.orderNumber}
-                      </p>
+                      <p className="text-sm font-semibold text-gray-900">{order.orderNumber}</p>
                       <PaymentBadge
                         paymentStatus={order.paymentStatus}
                         totalAmount={order.totalAmount}
@@ -207,8 +200,7 @@ export default function OrderList({
                       />
                     </div>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {order.customerName || 'Walk-in'} &middot;{' '}
-                      {formatDate(order.orderDate)}
+                      {order.customerName || 'Walk-in'} &middot; {formatDate(order.orderDate)}
                     </p>
                     {order.paymentMethod && (
                       <p className="mt-0.5 text-xs text-gray-400">
@@ -227,11 +219,7 @@ export default function OrderList({
                       strokeWidth={2}
                       stroke="currentColor"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 5l7 7-7 7"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
                 </div>

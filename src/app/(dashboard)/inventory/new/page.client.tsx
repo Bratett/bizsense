@@ -7,11 +7,7 @@ import { createProduct, type CreateProductInput } from '@/actions/products'
 
 const UNIT_PRESETS = ['pcs', 'kg', 'bags', 'litres', 'boxes', 'crates', 'cartons', 'bottles']
 
-export default function NewProductForm({
-  categories,
-}: {
-  categories: string[]
-}) {
+export default function NewProductForm({ categories }: { categories: string[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -65,7 +61,13 @@ export default function NewProductForm({
       <div>
         <div className="flex items-center gap-2">
           <Link href="/inventory" className="text-gray-600 hover:text-gray-900">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </Link>
@@ -73,8 +75,18 @@ export default function NewProductForm({
         </div>
 
         <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-6 text-center">
-          <svg className="mx-auto h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="mx-auto h-10 w-10 text-green-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <p className="mt-3 text-sm font-semibold text-green-800">Product saved</p>
           <p className="mt-1 text-sm text-green-700">Add opening stock?</p>
@@ -115,7 +127,13 @@ export default function NewProductForm({
       {/* Header */}
       <div className="flex items-center gap-2">
         <Link href="/inventory" className="text-gray-600 hover:text-gray-900">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </Link>
@@ -144,9 +162,7 @@ export default function NewProductForm({
             placeholder="e.g. Rice Bag 50kg"
             required
           />
-          {fieldErrors.name && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>
-          )}
+          {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
         </div>
 
         {/* SKU */}
@@ -162,9 +178,7 @@ export default function NewProductForm({
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             placeholder="Auto-generated if left blank"
           />
-          {fieldErrors.sku && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.sku}</p>
-          )}
+          {fieldErrors.sku && <p className="mt-1 text-xs text-red-600">{fieldErrors.sku}</p>}
         </div>
 
         {/* Category */}
@@ -293,8 +307,8 @@ export default function NewProductForm({
 
         {!trackInventory && (
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-            Stock levels will not be tracked for this product. Use this for services or
-            products you don&apos;t physically stock.
+            Stock levels will not be tracked for this product. Use this for services or products you
+            don&apos;t physically stock.
           </div>
         )}
 
@@ -304,9 +318,7 @@ export default function NewProductForm({
             <label htmlFor="reorderLevel" className="block text-sm font-medium text-gray-700">
               Reorder Level
             </label>
-            <p className="text-xs text-gray-500">
-              Alert me when stock falls below this quantity
-            </p>
+            <p className="text-xs text-gray-500">Alert me when stock falls below this quantity</p>
             <input
               id="reorderLevel"
               type="text"

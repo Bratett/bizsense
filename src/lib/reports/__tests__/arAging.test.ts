@@ -4,10 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // vi.hoisted ensures these are initialized before vi.mock factories run.
 
 const { mockWhere, mockLeftJoin, mockFrom, mockSelect } = vi.hoisted(() => {
-  const mockWhere    = vi.fn()
+  const mockWhere = vi.fn()
   const mockLeftJoin = vi.fn(() => ({ where: mockWhere }))
-  const mockFrom     = vi.fn(() => ({ leftJoin: mockLeftJoin }))
-  const mockSelect   = vi.fn(() => ({ from: mockFrom }))
+  const mockFrom = vi.fn(() => ({ leftJoin: mockLeftJoin }))
+  const mockSelect = vi.fn(() => ({ from: mockFrom }))
   return { mockWhere, mockLeftJoin, mockFrom, mockSelect }
 })
 
@@ -16,15 +16,15 @@ vi.mock('@/db', () => ({
 }))
 
 vi.mock('@/db/schema', () => ({
-  orders:    {},
+  orders: {},
   customers: {},
 }))
 
 vi.mock('drizzle-orm', () => ({
-  and:     vi.fn(),
-  eq:      vi.fn(),
+  and: vi.fn(),
+  eq: vi.fn(),
   inArray: vi.fn(),
-  lte:     vi.fn(),
+  lte: vi.fn(),
 }))
 
 import { getArAging, computeReconciliationStatus } from '../arAging'
@@ -45,16 +45,15 @@ type RawRow = {
 
 function makeRow(overrides: Partial<RawRow> & { orderId: string }): RawRow {
   return {
-    orderId:          overrides.orderId,
-    orderNumber:      overrides.orderNumber              ?? 'ORD-0001',
-    orderDate:        overrides.orderDate                ?? '2026-01-01',
-    totalAmount:      overrides.totalAmount              ?? '500.00',
-    amountPaid:       overrides.amountPaid               ?? '0.00',
-    customerId:       overrides.customerId   !== undefined ? overrides.customerId   : 'cust-a',
-    customerName:     overrides.customerName !== undefined ? overrides.customerName : 'Customer A',
-    customerPhone:    overrides.customerPhone !== undefined ? overrides.customerPhone : null,
-    paymentTermsDays: overrides.paymentTermsDays !== undefined
-      ? overrides.paymentTermsDays : 30,
+    orderId: overrides.orderId,
+    orderNumber: overrides.orderNumber ?? 'ORD-0001',
+    orderDate: overrides.orderDate ?? '2026-01-01',
+    totalAmount: overrides.totalAmount ?? '500.00',
+    amountPaid: overrides.amountPaid ?? '0.00',
+    customerId: overrides.customerId !== undefined ? overrides.customerId : 'cust-a',
+    customerName: overrides.customerName !== undefined ? overrides.customerName : 'Customer A',
+    customerPhone: overrides.customerPhone !== undefined ? overrides.customerPhone : null,
+    paymentTermsDays: overrides.paymentTermsDays !== undefined ? overrides.paymentTermsDays : 30,
   }
 }
 
@@ -94,8 +93,12 @@ describe('getArAging', () => {
     // dueDate = 40 days ago + 30 days = 10 days ago → ageDays = 10 → still 'current' (0–30)
     mockWhere.mockResolvedValueOnce([
       makeRow({
-        orderId: 'ord-b', customerId: 'cust-b', customerName: 'Customer B',
-        orderDate: daysAgo(40), totalAmount: '800.00', paymentTermsDays: 30,
+        orderId: 'ord-b',
+        customerId: 'cust-b',
+        customerName: 'Customer B',
+        orderDate: daysAgo(40),
+        totalAmount: '800.00',
+        paymentTermsDays: 30,
       }),
     ])
     const report = await getArAging('biz-1', TODAY)
@@ -109,8 +112,12 @@ describe('getArAging', () => {
     // outstanding = 1200 - 200 = 1000
     mockWhere.mockResolvedValueOnce([
       makeRow({
-        orderId: 'ord-c', customerId: 'cust-c', customerName: 'Customer C',
-        orderDate: daysAgo(70), totalAmount: '1200.00', amountPaid: '200.00',
+        orderId: 'ord-c',
+        customerId: 'cust-c',
+        customerName: 'Customer C',
+        orderDate: daysAgo(70),
+        totalAmount: '1200.00',
+        amountPaid: '200.00',
         paymentTermsDays: 0,
       }),
     ])
@@ -123,9 +130,31 @@ describe('getArAging', () => {
 
   it('Test 4 — grandTotals.total = 500 + 800 + 1000 = 2300 across 3 customers', async () => {
     mockWhere.mockResolvedValueOnce([
-      makeRow({ orderId: 'ord-a', customerId: 'cust-a', customerName: 'A', orderDate: TODAY,       totalAmount: '500.00',  paymentTermsDays: 30 }),
-      makeRow({ orderId: 'ord-b', customerId: 'cust-b', customerName: 'B', orderDate: daysAgo(40), totalAmount: '800.00',  paymentTermsDays: 30 }),
-      makeRow({ orderId: 'ord-c', customerId: 'cust-c', customerName: 'C', orderDate: daysAgo(70), totalAmount: '1200.00', amountPaid: '200.00', paymentTermsDays: 0 }),
+      makeRow({
+        orderId: 'ord-a',
+        customerId: 'cust-a',
+        customerName: 'A',
+        orderDate: TODAY,
+        totalAmount: '500.00',
+        paymentTermsDays: 30,
+      }),
+      makeRow({
+        orderId: 'ord-b',
+        customerId: 'cust-b',
+        customerName: 'B',
+        orderDate: daysAgo(40),
+        totalAmount: '800.00',
+        paymentTermsDays: 30,
+      }),
+      makeRow({
+        orderId: 'ord-c',
+        customerId: 'cust-c',
+        customerName: 'C',
+        orderDate: daysAgo(70),
+        totalAmount: '1200.00',
+        amountPaid: '200.00',
+        paymentTermsDays: 0,
+      }),
     ])
     const report = await getArAging('biz-1', TODAY)
     expect(report.grandTotals.total).toBe(2300)
@@ -157,8 +186,12 @@ describe('getArAging', () => {
   it('Test 8 — walk-in customer (no customerId) is grouped as "Walk-in"', async () => {
     mockWhere.mockResolvedValueOnce([
       makeRow({
-        orderId: 'ord-w', customerId: null, customerName: null,
-        orderDate: TODAY, totalAmount: '300.00', paymentTermsDays: 30,
+        orderId: 'ord-w',
+        customerId: null,
+        customerName: null,
+        orderDate: TODAY,
+        totalAmount: '300.00',
+        paymentTermsDays: 30,
       }),
     ])
     const report = await getArAging('biz-1', TODAY)
@@ -171,8 +204,11 @@ describe('getArAging', () => {
     // Order 50 days ago, terms null (defaults to 30) → dueDate = 20 days ago → ageDays = 20 → 'current'
     mockWhere.mockResolvedValueOnce([
       makeRow({
-        orderId: 'ord-x', customerId: null, customerName: null,
-        orderDate: daysAgo(50), totalAmount: '400.00',
+        orderId: 'ord-x',
+        customerId: null,
+        customerName: null,
+        orderDate: daysAgo(50),
+        totalAmount: '400.00',
         paymentTermsDays: null,
       }),
     ])

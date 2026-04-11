@@ -7,30 +7,22 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type PeriodParams =
-  | { type: 'range'; from: string; to: string }   // ISO dates, inclusive
-  | { type: 'asOf'; date: string }                // cumulative to this date
+  | { type: 'range'; from: string; to: string } // ISO dates, inclusive
+  | { type: 'asOf'; date: string } // cumulative to this date
 
 // ─── Period helpers ───────────────────────────────────────────────────────────
 
 export function currentMonthPeriod(): PeriodParams {
   const now = new Date()
-  const from = new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .slice(0, 10)
-  const to = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    .toISOString()
-    .slice(0, 10)
+  const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10)
   return { type: 'range', from, to }
 }
 
 export function priorMonthPeriod(): PeriodParams {
   const now = new Date()
-  const from = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    .toISOString()
-    .slice(0, 10)
-  const to = new Date(now.getFullYear(), now.getMonth(), 0)
-    .toISOString()
-    .slice(0, 10)
+  const from = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10)
+  const to = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10)
   return { type: 'range', from, to }
 }
 

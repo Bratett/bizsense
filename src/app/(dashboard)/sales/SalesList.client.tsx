@@ -119,7 +119,10 @@ export default function SalesList({
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab)
-    fetchSales({ paymentStatus: tab === 'all' ? undefined : (tab as SalesListFilters['paymentStatus']), page: 1 })
+    fetchSales({
+      paymentStatus: tab === 'all' ? undefined : (tab as SalesListFilters['paymentStatus']),
+      page: 1,
+    })
   }
 
   const handleSearch = (value: string) => {
@@ -170,9 +173,7 @@ export default function SalesList({
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Sales</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage and track all business transactions
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Manage and track all business transactions</p>
           </div>
           <div className="flex items-center gap-3">
             {/* Search */}
@@ -202,7 +203,13 @@ export default function SalesList({
               href="/orders/new"
               className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-green-800 transition-colors"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
               New Sale
@@ -217,7 +224,10 @@ export default function SalesList({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Total Sales This Month
             </p>
-            <p className="mt-2 text-2xl font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p
+              className="mt-2 text-2xl font-semibold text-gray-900"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               GHS {formatGHS(summary.totalSalesThisMonth)}
             </p>
           </div>
@@ -227,7 +237,10 @@ export default function SalesList({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Pending Payments
             </p>
-            <p className="mt-2 text-2xl font-semibold text-red-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <p
+              className="mt-2 text-2xl font-semibold text-red-600"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               GHS {formatGHS(summary.pendingPayments)}
             </p>
           </div>
@@ -239,7 +252,10 @@ export default function SalesList({
                 <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
                   Total Customers
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-gray-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <p
+                  className="mt-2 text-2xl font-semibold text-gray-900"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                >
                   {summary.totalCustomers.toLocaleString()}
                 </p>
               </div>
@@ -279,8 +295,18 @@ export default function SalesList({
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                />
               </svg>
               Export CSV
             </button>
@@ -357,10 +383,7 @@ export default function SalesList({
                     const overdue = isOverdue(item)
                     const displayStatus = overdue ? 'overdue' : item.paymentStatus
                     return (
-                      <tr
-                        key={item.id}
-                        className="group transition-colors hover:bg-gray-50"
-                      >
+                      <tr key={item.id} className="group transition-colors hover:bg-gray-50">
                         <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
                           {formatDate(item.orderDate)}
                         </td>
@@ -404,9 +427,23 @@ export default function SalesList({
                               className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                               title="View"
                             >
-                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
                               </svg>
                             </Link>
                             <Link
@@ -414,8 +451,18 @@ export default function SalesList({
                               className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                               title="Edit"
                             >
-                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z"
+                                />
                               </svg>
                             </Link>
                           </div>

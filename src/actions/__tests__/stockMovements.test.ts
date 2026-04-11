@@ -116,12 +116,9 @@ function makeInsertChain(returnData: unknown[] = []) {
   return {
     values: vi.fn(() => ({
       returning: vi.fn().mockResolvedValue(returnData),
-      then: (f?: ((v: unknown) => unknown) | null) =>
-        Promise.resolve(returnData).then(f),
-      catch: (f?: ((e: unknown) => unknown) | null) =>
-        Promise.resolve(returnData).catch(f),
-      finally: (f?: (() => void) | null) =>
-        Promise.resolve(returnData).finally(f),
+      then: (f?: ((v: unknown) => unknown) | null) => Promise.resolve(returnData).then(f),
+      catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
+      finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
     })),
   }
 }
@@ -146,12 +143,9 @@ function mockDbTransaction() {
             }))
             return {
               returning: vi.fn().mockResolvedValue(returnData),
-              then: (f?: ((v: unknown) => unknown) | null) =>
-                Promise.resolve(returnData).then(f),
-              catch: (f?: ((e: unknown) => unknown) | null) =>
-                Promise.resolve(returnData).catch(f),
-              finally: (f?: (() => void) | null) =>
-                Promise.resolve(returnData).finally(f),
+              then: (f?: ((v: unknown) => unknown) | null) => Promise.resolve(returnData).then(f),
+              catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
+              finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
             }
           }),
         }
@@ -163,12 +157,9 @@ function mockDbTransaction() {
           where: vi.fn(() => selectChain),
           limit: vi.fn(() => selectChain),
           orderBy: vi.fn(() => selectChain),
-          then: (f?: ((v: unknown) => unknown) | null) =>
-            Promise.resolve([]).then(f),
-          catch: (f?: ((e: unknown) => unknown) | null) =>
-            Promise.resolve([]).catch(f),
-          finally: (f?: (() => void) | null) =>
-            Promise.resolve([]).finally(f),
+          then: (f?: ((v: unknown) => unknown) | null) => Promise.resolve([]).then(f),
+          catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve([]).catch(f),
+          finally: (f?: (() => void) | null) => Promise.resolve([]).finally(f),
         }
         return selectChain
       }),
@@ -197,40 +188,36 @@ function mockAtomicWrite(orderId = 'order-001') {
   capturedJournalInput = null
   capturedAtomicTxInserts = []
 
-  vi.mocked(atomicTransactionWrite).mockImplementation(
-    async (journalInput, writeSourceRecord) => {
-      capturedJournalInput = journalInput
-      let insertCounter = 0
+  vi.mocked(atomicTransactionWrite).mockImplementation(async (journalInput, writeSourceRecord) => {
+    capturedJournalInput = journalInput
+    let insertCounter = 0
 
-      const mockTx = {
-        insert: vi.fn((table: unknown) => ({
-          values: vi.fn((data: unknown) => {
-            capturedAtomicTxInserts.push({ index: insertCounter, data })
-            insertCounter++
+    const mockTx = {
+      insert: vi.fn((table: unknown) => ({
+        values: vi.fn((data: unknown) => {
+          capturedAtomicTxInserts.push({ index: insertCounter, data })
+          insertCounter++
 
-            const rows = Array.isArray(data) ? data : [data]
-            const returnData = rows.map((r: Record<string, unknown>) => ({
-              id: orderId,
-              ...r,
-            }))
-            return {
-              returning: vi.fn().mockResolvedValue(returnData),
-              then: (
-                onfulfilled?: ((v: unknown) => unknown) | null,
-                onrejected?: ((e: unknown) => unknown) | null,
-              ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
-              catch: (f?: ((e: unknown) => unknown) | null) =>
-                Promise.resolve(returnData).catch(f),
-              finally: (f?: (() => void) | null) =>
-                Promise.resolve(returnData).finally(f),
-            }
-          }),
-        })),
-      }
+          const rows = Array.isArray(data) ? data : [data]
+          const returnData = rows.map((r: Record<string, unknown>) => ({
+            id: orderId,
+            ...r,
+          }))
+          return {
+            returning: vi.fn().mockResolvedValue(returnData),
+            then: (
+              onfulfilled?: ((v: unknown) => unknown) | null,
+              onrejected?: ((e: unknown) => unknown) | null,
+            ) => Promise.resolve(returnData).then(onfulfilled, onrejected),
+            catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
+            finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
+          }
+        }),
+      })),
+    }
 
-      return writeSourceRecord(mockTx as never, 'journal-entry-001')
-    },
-  )
+    return writeSourceRecord(mockTx as never, 'journal-entry-001')
+  })
 }
 
 // ─── Account lookup mock ────────────────────────────────────────────────────
@@ -258,7 +245,8 @@ function mockTaxResult(totalTaxAmount: number, supplyAmount: number) {
     breakdown: [],
     totalTaxAmount,
     totalAmount: supplyAmount + totalTaxAmount,
-    effectiveRate: totalTaxAmount > 0 ? Math.round((totalTaxAmount / supplyAmount) * 10000) / 10000 : 0,
+    effectiveRate:
+      totalTaxAmount > 0 ? Math.round((totalTaxAmount / supplyAmount) * 10000) / 10000 : 0,
   })
 }
 
@@ -354,8 +342,14 @@ describe('recordOpeningStock', () => {
     expect(crLine!.creditAmount).toBeCloseTo(500, 2)
 
     // Balanced
-    const totalDr = journalInput.lines.reduce((s: number, l: { debitAmount: number }) => s + l.debitAmount, 0)
-    const totalCr = journalInput.lines.reduce((s: number, l: { creditAmount: number }) => s + l.creditAmount, 0)
+    const totalDr = journalInput.lines.reduce(
+      (s: number, l: { debitAmount: number }) => s + l.debitAmount,
+      0,
+    )
+    const totalCr = journalInput.lines.reduce(
+      (s: number, l: { creditAmount: number }) => s + l.creditAmount,
+      0,
+    )
     expect(totalDr).toBeCloseTo(totalCr, 2)
   })
 
@@ -418,9 +412,7 @@ describe('createCashOrder with COGS', () => {
     expect(journal.lines.length).toBeGreaterThanOrEqual(4)
 
     // Dr 5001 COGS = 150 (3 × 50)
-    const cogsLine = journal.lines.find(
-      (l) => l.accountId === 'acct-cogs' && l.debitAmount > 0,
-    )
+    const cogsLine = journal.lines.find((l) => l.accountId === 'acct-cogs' && l.debitAmount > 0)
     expect(cogsLine).toBeDefined()
     expect(cogsLine!.debitAmount).toBeCloseTo(150, 2)
 
@@ -437,12 +429,10 @@ describe('createCashOrder with COGS', () => {
     expect(totalDebits).toBeCloseTo(totalCredits, 2)
 
     // Verify inventoryTransaction was inserted inside the callback
-    const invTxInsert = capturedAtomicTxInserts.find(
-      (ins) => {
-        const d = ins.data as Record<string, unknown>
-        return d.transactionType === 'sale'
-      },
-    )
+    const invTxInsert = capturedAtomicTxInserts.find((ins) => {
+      const d = ins.data as Record<string, unknown>
+      return d.transactionType === 'sale'
+    })
     expect(invTxInsert).toBeDefined()
     const invTxData = invTxInsert!.data as Record<string, unknown>
     expect(invTxData.productId).toBe(PRODUCT_ID)
@@ -476,12 +466,10 @@ describe('createCashOrder with COGS', () => {
     expect(cogsLine).toBeUndefined()
 
     // No inventoryTransaction inserted
-    const invTxInsert = capturedAtomicTxInserts.find(
-      (ins) => {
-        const d = ins.data as Record<string, unknown>
-        return d.transactionType === 'sale'
-      },
-    )
+    const invTxInsert = capturedAtomicTxInserts.find((ins) => {
+      const d = ins.data as Record<string, unknown>
+      return d.transactionType === 'sale'
+    })
     expect(invTxInsert).toBeUndefined()
   })
 
@@ -578,19 +566,15 @@ describe('createCashOrder with COGS', () => {
     }
 
     // Total COGS = 3×50 + 2×30 = 150 + 60 = 210
-    const cogsLine = journal.lines.find(
-      (l) => l.accountId === 'acct-cogs' && l.debitAmount > 0,
-    )
+    const cogsLine = journal.lines.find((l) => l.accountId === 'acct-cogs' && l.debitAmount > 0)
     expect(cogsLine).toBeDefined()
     expect(cogsLine!.debitAmount).toBeCloseTo(210, 2)
 
     // Two inventory transactions should have been inserted
-    const invTxInserts = capturedAtomicTxInserts.filter(
-      (ins) => {
-        const d = ins.data as Record<string, unknown>
-        return d.transactionType === 'sale'
-      },
-    )
+    const invTxInserts = capturedAtomicTxInserts.filter((ins) => {
+      const d = ins.data as Record<string, unknown>
+      return d.transactionType === 'sale'
+    })
     expect(invTxInserts).toHaveLength(2)
   })
 })

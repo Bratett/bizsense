@@ -1,6 +1,17 @@
 'use server'
 
-import { and, eq, desc, sql, ilike, or, inArray, gte, lte, count as drizzleCount } from 'drizzle-orm'
+import {
+  and,
+  eq,
+  desc,
+  sql,
+  ilike,
+  or,
+  inArray,
+  gte,
+  lte,
+  count as drizzleCount,
+} from 'drizzle-orm'
 import { db } from '@/db'
 import { orders, orderLines, paymentsReceived, customers, products } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
@@ -204,9 +215,7 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 
 const OVERDUE_DAYS = 30
 
-export async function listSales(
-  filters?: SalesListFilters,
-): Promise<SalesListResult> {
+export async function listSales(filters?: SalesListFilters): Promise<SalesListResult> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -215,9 +224,7 @@ export async function listSales(
   const offset = (page - 1) * pageSize
 
   const today = new Date().toISOString().split('T')[0]
-  const overdueDate = new Date(Date.now() - OVERDUE_DAYS * 86400000)
-    .toISOString()
-    .split('T')[0]
+  const overdueDate = new Date(Date.now() - OVERDUE_DAYS * 86400000).toISOString().split('T')[0]
 
   // Build WHERE conditions
   const conditions = [
@@ -295,9 +302,7 @@ export async function listSales(
 
 // ─── Sales Report ──────────────────────────────────────────────────────────
 
-export async function getSalesReport(
-  filters: SalesReportFilters,
-): Promise<SalesReportData> {
+export async function getSalesReport(filters: SalesReportFilters): Promise<SalesReportData> {
   const session = await getServerSession()
   const { businessId } = session.user
 
@@ -307,90 +312,68 @@ export async function getSalesReport(
   const fromDate = new Date(dateFrom)
   const toDate = new Date(dateTo)
   const periodMs = toDate.getTime() - fromDate.getTime()
-  const prevFrom = new Date(fromDate.getTime() - periodMs - 86400000)
-    .toISOString()
-    .split('T')[0]
-  const prevTo = new Date(fromDate.getTime() - 86400000)
-    .toISOString()
-    .split('T')[0]
+  const prevFrom = new Date(fromDate.getTime() - periodMs - 86400000).toISOString().split('T')[0]
+  const prevTo = new Date(fromDate.getTime() - 86400000).toISOString().split('T')[0]
 
-  const baseConditions = [
-    eq(orders.businessId, businessId),
-    eq(orders.status, 'fulfilled'),
-  ]
+  const baseConditions = [eq(orders.businessId, businessId), eq(orders.status, 'fulfilled')]
 
-  const [revenueRow, prevRevenueRow, categoryRows, recentRows] =
-    await Promise.all([
-      // Current period revenue + count
-      db
-        .select({
-          total: sql<string>`COALESCE(SUM(CAST(${orders.totalAmount} AS numeric)), 0)`,
-          count: sql<string>`COUNT(*)`,
-        })
-        .from(orders)
-        .where(
-          and(
-            ...baseConditions,
-            gte(orders.orderDate, dateFrom),
-            lte(orders.orderDate, dateTo),
-          ),
+  const [revenueRow, prevRevenueRow, categoryRows, recentRows] = await Promise.all([
+    // Current period revenue + count
+    db
+      .select({
+        total: sql<string>`COALESCE(SUM(CAST(${orders.totalAmount} AS numeric)), 0)`,
+        count: sql<string>`COUNT(*)`,
+      })
+      .from(orders)
+      .where(
+        and(...baseConditions, gte(orders.orderDate, dateFrom), lte(orders.orderDate, dateTo)),
+      ),
+
+    // Previous period revenue
+    db
+      .select({
+        total: sql<string>`COALESCE(SUM(CAST(${orders.totalAmount} AS numeric)), 0)`,
+      })
+      .from(orders)
+      .where(
+        and(...baseConditions, gte(orders.orderDate, prevFrom), lte(orders.orderDate, prevTo)),
+      ),
+
+    // Revenue by product category
+    db
+      .select({
+        category: sql<string>`COALESCE(${products.category}, 'Uncategorized')`,
+        total: sql<string>`SUM(CAST(${orderLines.lineTotal} AS numeric))`,
+      })
+      .from(orderLines)
+      .innerJoin(orders, eq(orderLines.orderId, orders.id))
+      .leftJoin(products, eq(orderLines.productId, products.id))
+      .where(
+        and(
+          eq(orders.businessId, businessId),
+          eq(orders.status, 'fulfilled'),
+          gte(orders.orderDate, dateFrom),
+          lte(orders.orderDate, dateTo),
         ),
+      )
+      .groupBy(sql`COALESCE(${products.category}, 'Uncategorized')`)
+      .orderBy(desc(sql`SUM(CAST(${orderLines.lineTotal} AS numeric))`)),
 
-      // Previous period revenue
-      db
-        .select({
-          total: sql<string>`COALESCE(SUM(CAST(${orders.totalAmount} AS numeric)), 0)`,
-        })
-        .from(orders)
-        .where(
-          and(
-            ...baseConditions,
-            gte(orders.orderDate, prevFrom),
-            lte(orders.orderDate, prevTo),
-          ),
-        ),
-
-      // Revenue by product category
-      db
-        .select({
-          category: sql<string>`COALESCE(${products.category}, 'Uncategorized')`,
-          total: sql<string>`SUM(CAST(${orderLines.lineTotal} AS numeric))`,
-        })
-        .from(orderLines)
-        .innerJoin(orders, eq(orderLines.orderId, orders.id))
-        .leftJoin(products, eq(orderLines.productId, products.id))
-        .where(
-          and(
-            eq(orders.businessId, businessId),
-            eq(orders.status, 'fulfilled'),
-            gte(orders.orderDate, dateFrom),
-            lte(orders.orderDate, dateTo),
-          ),
-        )
-        .groupBy(sql`COALESCE(${products.category}, 'Uncategorized')`)
-        .orderBy(desc(sql`SUM(CAST(${orderLines.lineTotal} AS numeric))`)),
-
-      // Recent transactions
-      db
-        .select({
-          id: orders.id,
-          orderDate: orders.orderDate,
-          orderNumber: orders.orderNumber,
-          customerName: customers.name,
-          totalAmount: orders.totalAmount,
-        })
-        .from(orders)
-        .leftJoin(customers, eq(orders.customerId, customers.id))
-        .where(
-          and(
-            ...baseConditions,
-            gte(orders.orderDate, dateFrom),
-            lte(orders.orderDate, dateTo),
-          ),
-        )
-        .orderBy(desc(orders.orderDate), desc(orders.createdAt))
-        .limit(20),
-    ])
+    // Recent transactions
+    db
+      .select({
+        id: orders.id,
+        orderDate: orders.orderDate,
+        orderNumber: orders.orderNumber,
+        customerName: customers.name,
+        totalAmount: orders.totalAmount,
+      })
+      .from(orders)
+      .leftJoin(customers, eq(orders.customerId, customers.id))
+      .where(and(...baseConditions, gte(orders.orderDate, dateFrom), lte(orders.orderDate, dateTo)))
+      .orderBy(desc(orders.orderDate), desc(orders.createdAt))
+      .limit(20),
+  ])
 
   const totalRevenue = Number(revenueRow[0]?.total ?? '0')
   const orderCount = Number(revenueRow[0]?.count ?? '0')
@@ -471,10 +454,7 @@ export async function getReceivablesAging(): Promise<ReceivablesAgingData> {
     .orderBy(desc(orders.orderDate))
 
   const today = new Date()
-  const customerMap = new Map<
-    string,
-    CustomerAgingRow
-  >()
+  const customerMap = new Map<string, CustomerAgingRow>()
   let totalReceivables = 0
   let totalOverdue = 0
   let weightedDays = 0
@@ -491,9 +471,7 @@ export async function getReceivablesAging(): Promise<ReceivablesAgingData> {
     if (balance <= 0) continue
 
     const orderDate = new Date(row.orderDate + 'T00:00:00')
-    const daysSince = Math.floor(
-      (today.getTime() - orderDate.getTime()) / 86400000,
-    )
+    const daysSince = Math.floor((today.getTime() - orderDate.getTime()) / 86400000)
 
     totalReceivables += balance
     weightedDays += daysSince * balance
@@ -544,9 +522,7 @@ export async function getReceivablesAging(): Promise<ReceivablesAgingData> {
     totalReceivables > 0 ? Math.round(weightedDays / totalReceivables) : 0
 
   const overduePercentage =
-    totalReceivables > 0
-      ? Math.round((totalOverdue / totalReceivables) * 1000) / 10
-      : 0
+    totalReceivables > 0 ? Math.round((totalOverdue / totalReceivables) * 1000) / 10 : 0
 
   // Sort customers by total balance descending
   const customerLedger = Array.from(customerMap.values()).sort(

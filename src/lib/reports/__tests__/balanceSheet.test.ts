@@ -16,27 +16,27 @@ import type { AccountBalance } from '../engine'
 // ─── Factory ──────────────────────────────────────────────────────────────────
 
 function makeBalance(overrides: {
-  accountId?:      string
-  accountCode:     string
-  accountName?:    string
-  accountType:     string
+  accountId?: string
+  accountCode: string
+  accountName?: string
+  accountType: string
   accountSubtype?: string | null
-  netBalance?:     number
+  netBalance?: number
   cashFlowActivity?: string | null
 }): AccountBalance {
   const isDebitNormal = ['asset', 'cogs', 'expense'].includes(overrides.accountType)
-  const netBalance    = overrides.netBalance ?? 0
-  const totalDebits   = isDebitNormal ? netBalance : 0
-  const totalCredits  = isDebitNormal ? 0 : netBalance
+  const netBalance = overrides.netBalance ?? 0
+  const totalDebits = isDebitNormal ? netBalance : 0
+  const totalCredits = isDebitNormal ? 0 : netBalance
 
   return {
-    accountId:        overrides.accountId   ?? 'uuid-' + overrides.accountCode,
-    accountCode:      overrides.accountCode,
-    accountName:      overrides.accountName ?? 'Account ' + overrides.accountCode,
-    accountType:      overrides.accountType,
-    accountSubtype:   overrides.accountSubtype ?? null,
+    accountId: overrides.accountId ?? 'uuid-' + overrides.accountCode,
+    accountCode: overrides.accountCode,
+    accountName: overrides.accountName ?? 'Account ' + overrides.accountCode,
+    accountType: overrides.accountType,
+    accountSubtype: overrides.accountSubtype ?? null,
     cashFlowActivity: overrides.cashFlowActivity ?? 'operating',
-    normalBalance:    isDebitNormal ? 'debit' : 'credit',
+    normalBalance: isDebitNormal ? 'debit' : 'credit',
     totalDebits,
     totalCredits,
     netBalance,
@@ -61,17 +61,41 @@ function makeBalance(overrides: {
 //   ∴ Assets (1300) = Equity (1300) — balanced ✓
 
 const BALANCED_BALANCES: AccountBalance[] = [
-  makeBalance({ accountCode: '1001', accountType: 'asset',   accountSubtype: 'current_asset', netBalance: 1000 }),
-  makeBalance({ accountCode: '1500', accountType: 'asset',   accountSubtype: 'fixed_asset',   netBalance: 300  }),
-  makeBalance({ accountCode: '1510', accountType: 'asset',   accountSubtype: null,             netBalance: 0    }),
-  makeBalance({ accountCode: '3001', accountType: 'equity',  accountSubtype: null,             netBalance: 1000 }),
+  makeBalance({
+    accountCode: '1001',
+    accountType: 'asset',
+    accountSubtype: 'current_asset',
+    netBalance: 1000,
+  }),
+  makeBalance({
+    accountCode: '1500',
+    accountType: 'asset',
+    accountSubtype: 'fixed_asset',
+    netBalance: 300,
+  }),
+  makeBalance({ accountCode: '1510', accountType: 'asset', accountSubtype: null, netBalance: 0 }),
+  makeBalance({
+    accountCode: '3001',
+    accountType: 'equity',
+    accountSubtype: null,
+    netBalance: 1000,
+  }),
 ]
 
-const YTD_PROFIT = { netProfit: 300, period: { from: '2026-01-01', to: '2026-12-31' }, revenue: { lines: [], total: 500 }, cogs: { lines: [], total: 0 }, grossProfit: 500, grossMarginPct: 100, expenses: { lines: [], total: 200 }, hasPrior: false }
+const YTD_PROFIT = {
+  netProfit: 300,
+  period: { from: '2026-01-01', to: '2026-12-31' },
+  revenue: { lines: [], total: 500 },
+  cogs: { lines: [], total: 0 },
+  grossProfit: 500,
+  grossMarginPct: 100,
+  expenses: { lines: [], total: 200 },
+  hasPrior: false,
+}
 
 const AS_OF = '2026-12-31'
-const BIZ   = 'biz-1'
-const FY_MONTH = 1  // January start
+const BIZ = 'biz-1'
+const FY_MONTH = 1 // January start
 
 beforeEach(() => {
   vi.resetAllMocks()
@@ -125,7 +149,7 @@ describe('getBalanceSheet', () => {
 
     const bs = await getBalanceSheet(BIZ, AS_OF, FY_MONTH)
 
-    const cash = bs.assets.currentAssets.find(a => a.accountCode === '1001')
+    const cash = bs.assets.currentAssets.find((a) => a.accountCode === '1001')
     expect(cash?.netBalance).toBe(1000)
   })
 
@@ -134,10 +158,10 @@ describe('getBalanceSheet', () => {
     const imbalancedBalances: AccountBalance[] = [
       ...BALANCED_BALANCES,
       makeBalance({
-        accountCode:    '2099',
-        accountType:    'liability',
+        accountCode: '2099',
+        accountType: 'liability',
         accountSubtype: 'current_liability',
-        netBalance:     500,
+        netBalance: 500,
       }),
     ]
     vi.mocked(getAccountBalances).mockResolvedValueOnce(imbalancedBalances)

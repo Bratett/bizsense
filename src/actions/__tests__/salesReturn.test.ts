@@ -117,14 +117,12 @@ describe('reverseOrder — sales return', () => {
     const mockPayments = [{ journalEntryId: 'je-payment-001' }]
 
     // Inventory transactions to restock
-    const mockInvTxs = [
-      { productId: 'prod-001', quantity: '-3.00', unitCost: '50.00' },
-    ]
+    const mockInvTxs = [{ productId: 'prod-001', quantity: '-3.00', unitCost: '50.00' }]
 
     vi.mocked(db.select)
-      .mockReturnValueOnce(makeChain([mockOrder]) as never)   // order fetch
-      .mockReturnValueOnce(makeChain(mockPayments) as never)  // paymentsReceived
-      .mockReturnValueOnce(makeChain(mockInvTxs) as never)    // inventory transactions
+      .mockReturnValueOnce(makeChain([mockOrder]) as never) // order fetch
+      .mockReturnValueOnce(makeChain(mockPayments) as never) // paymentsReceived
+      .mockReturnValueOnce(makeChain(mockInvTxs) as never) // inventory transactions
 
     const { txInserts, txUpdates } = mockDbTransaction()
 
@@ -139,14 +137,14 @@ describe('reverseOrder — sales return', () => {
     // reverseJournalEntry called twice: payment JE first, then sale JE
     expect(reverseJournalEntry).toHaveBeenCalledTimes(2)
     const calls = vi.mocked(reverseJournalEntry).mock.calls
-    expect(calls[0][1]).toBe('je-payment-001')  // payment JE reversed first
-    expect(calls[1][1]).toBe('je-sale-001')      // sale JE reversed second
+    expect(calls[0][1]).toBe('je-payment-001') // payment JE reversed first
+    expect(calls[1][1]).toBe('je-sale-001') // sale JE reversed second
 
     // inventory_transaction return_in inserted
     expect(txInserts).toHaveLength(1)
     const restockTx = txInserts[0]
     expect(restockTx.transactionType).toBe('return_in')
-    expect(restockTx.quantity).toBe('3.00')  // abs of -3.00
+    expect(restockTx.quantity).toBe('3.00') // abs of -3.00
 
     // order updated to cancelled
     expect(txUpdates).toHaveLength(1)

@@ -152,8 +152,10 @@ beforeEach(() => {
 describe('recordPaymentReceived', () => {
   it('Test 7 — full payment on unpaid order: Dr Cash / Cr AR, order becomes paid', async () => {
     vi.mocked(db.select)
-      .mockReturnValueOnce(makeChain([makeOrder()]) as never)  // order fetch
-      .mockReturnValueOnce(makeChain(Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))) as never)  // accounts
+      .mockReturnValueOnce(makeChain([makeOrder()]) as never) // order fetch
+      .mockReturnValueOnce(
+        makeChain(Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))) as never,
+      ) // accounts
 
     const captured = mockAtomicWrite()
 
@@ -198,8 +200,12 @@ describe('recordPaymentReceived', () => {
 
   it('Test 8 — partial payment on unpaid order: order becomes partial', async () => {
     vi.mocked(db.select)
-      .mockReturnValueOnce(makeChain([makeOrder({ totalAmount: '500.00', amountPaid: '0.00' })]) as never)
-      .mockReturnValueOnce(makeChain(Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))) as never)
+      .mockReturnValueOnce(
+        makeChain([makeOrder({ totalAmount: '500.00', amountPaid: '0.00' })]) as never,
+      )
+      .mockReturnValueOnce(
+        makeChain(Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))) as never,
+      )
 
     const captured = mockAtomicWrite()
 
@@ -220,8 +226,14 @@ describe('recordPaymentReceived', () => {
   it('Test 9 — second payment exactly settles the balance: status becomes paid', async () => {
     // total=500, already paid=300, paying 200 → fully paid
     vi.mocked(db.select)
-      .mockReturnValueOnce(makeChain([makeOrder({ totalAmount: '500.00', amountPaid: '300.00', paymentStatus: 'partial' })]) as never)
-      .mockReturnValueOnce(makeChain(Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))) as never)
+      .mockReturnValueOnce(
+        makeChain([
+          makeOrder({ totalAmount: '500.00', amountPaid: '300.00', paymentStatus: 'partial' }),
+        ]) as never,
+      )
+      .mockReturnValueOnce(
+        makeChain(Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))) as never,
+      )
 
     const captured = mockAtomicWrite()
 
@@ -242,7 +254,9 @@ describe('recordPaymentReceived', () => {
   it('Test 10 — amount > remaining balance: returns error, no write', async () => {
     // total=200, paid=150, remaining=50, trying to pay 100
     vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([makeOrder({ totalAmount: '200.00', amountPaid: '150.00', paymentStatus: 'partial' })]) as never,
+      makeChain([
+        makeOrder({ totalAmount: '200.00', amountPaid: '150.00', paymentStatus: 'partial' }),
+      ]) as never,
     )
 
     const result = await recordPaymentReceived({
