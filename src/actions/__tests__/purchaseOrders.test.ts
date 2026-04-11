@@ -109,9 +109,7 @@ function mockTransaction() {
     delete: vi.fn(() => makeTxDelete()),
   }
 
-  vi.mocked(db.transaction).mockImplementation(
-    async (fn: (tx: unknown) => Promise<unknown>) => fn(tx),
-  )
+  vi.mocked(db.transaction).mockImplementation(async (fn) => fn(tx as never))
 
   return { tx, inserts, updates, deletes }
 }

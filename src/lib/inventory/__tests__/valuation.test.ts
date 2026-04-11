@@ -60,10 +60,10 @@ describe('computeInventoryValuation', () => {
           { id: 'p1', name: 'Widget A', sku: 'WDG-001', category: 'Parts', unit: 'pcs', reorderLevel: 10 },
           { id: 'p2', name: 'Widget B', sku: 'WDG-002', category: 'Parts', unit: 'pcs', reorderLevel: 5 },
           { id: 'p3', name: 'Widget C', sku: 'WDG-003', category: 'Tools', unit: 'pcs', reorderLevel: 0 },
-        ]) as ReturnType<typeof db.select>
+        ]) as unknown as ReturnType<typeof db.select>
       }
       // GL balance query
-      return makeChain([{ balance: '1650.00' }]) as ReturnType<typeof db.select>
+      return makeChain([{ balance: '1650.00' }]) as unknown as ReturnType<typeof db.select>
     })
 
     vi.mocked(getProductTransactions)
@@ -100,9 +100,9 @@ describe('computeInventoryValuation', () => {
       if (selectCallCount === 1) {
         return makeChain([
           { id: 'p1', name: 'Empty Widget', sku: 'EMP-001', category: null, unit: 'pcs', reorderLevel: 5 },
-        ]) as ReturnType<typeof db.select>
+        ]) as unknown as ReturnType<typeof db.select>
       }
-      return makeChain([{ balance: '0' }]) as ReturnType<typeof db.select>
+      return makeChain([{ balance: '0' }]) as unknown as ReturnType<typeof db.select>
     })
 
     vi.mocked(getProductTransactions).mockResolvedValue([])
@@ -128,10 +128,10 @@ describe('computeInventoryValuation', () => {
       if (selectCallCount === 1) {
         return makeChain([
           { id: 'p1', name: 'Widget', sku: 'W-001', category: 'Parts', unit: 'pcs', reorderLevel: 0 },
-        ]) as ReturnType<typeof db.select>
+        ]) as unknown as ReturnType<typeof db.select>
       }
       // GL balance = 750 which matches the FIFO value
-      return makeChain([{ balance: '750.00' }]) as ReturnType<typeof db.select>
+      return makeChain([{ balance: '750.00' }]) as unknown as ReturnType<typeof db.select>
     })
 
     vi.mocked(getProductTransactions).mockResolvedValue([])

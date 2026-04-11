@@ -14,7 +14,7 @@ import {
   suppliers,
 } from '@/db/schema'
 import { requireRole } from '@/lib/auth/requireRole'
-import { atomicTransactionWrite } from '@/lib/atomic'
+import { atomicTransactionWrite, DrizzleTransaction } from '@/lib/atomic'
 import { computeFifoCogs } from '@/lib/inventory/fifo'
 import { getProductTransactions } from '@/lib/inventory/queries'
 import { isValidGrnNumber } from '@/lib/grnNumber'
@@ -815,7 +815,7 @@ export async function getGrnById(id: string): Promise<GrnWithLinesAndJournal> {
  * Must be called within an existing database transaction.
  */
 async function updatePoStatusAfterGrn(
-  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  tx: DrizzleTransaction,
   poId: string,
 ) {
   // Get all PO lines with their totals

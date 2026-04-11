@@ -102,7 +102,7 @@ let txInserts: Array<{ data: unknown }> = []
 
 function mockDbTransaction() {
   txInserts = []
-  vi.mocked(db.transaction).mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
+  vi.mocked(db.transaction).mockImplementation(async (callback) => {
     const mockTx = {
       insert: vi.fn(() => ({
         values: vi.fn((data: unknown) => {
@@ -121,7 +121,7 @@ function mockDbTransaction() {
         }),
       })),
     }
-    return callback(mockTx)
+    return callback(mockTx as never)
   })
 }
 
@@ -142,13 +142,13 @@ describe('initiateStocktake', () => {
       selectCallCount++
       if (selectCallCount === 1) {
         // Check for existing in_progress stocktake
-        return makeChain([]) as ReturnType<typeof db.select>
+        return makeChain([]) as unknown as ReturnType<typeof db.select>
       }
       // Fetch active products
       return makeChain([
         { id: PRODUCT_A, name: 'Widget A' },
         { id: PRODUCT_B, name: 'Widget B' },
-      ]) as ReturnType<typeof db.select>
+      ]) as unknown as ReturnType<typeof db.select>
     })
 
     vi.mocked(getProductTransactions)
@@ -190,7 +190,7 @@ describe('initiateStocktake', () => {
     mockUser('owner')
 
     vi.mocked(db.select).mockImplementation(() => {
-      return makeChain([{ id: 'existing-stocktake' }]) as ReturnType<typeof db.select>
+      return makeChain([{ id: 'existing-stocktake' }]) as unknown as ReturnType<typeof db.select>
     })
 
     const result = await initiateStocktake()
@@ -211,14 +211,14 @@ describe('updateStocktakeCount', () => {
       selectCallCount++
       if (selectCallCount === 1) {
         // Verify stocktake
-        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as ReturnType<typeof db.select>
+        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as unknown as ReturnType<typeof db.select>
       }
       if (selectCallCount === 2) {
         // Find line
-        return makeChain([{ id: 'line-1', expectedQuantity: '50.00' }]) as ReturnType<typeof db.select>
+        return makeChain([{ id: 'line-1', expectedQuantity: '50.00' }]) as unknown as ReturnType<typeof db.select>
       }
       // Fallback (costPrice lookup)
-      return makeChain([{ costPrice: '10.00' }]) as ReturnType<typeof db.select>
+      return makeChain([{ costPrice: '10.00' }]) as unknown as ReturnType<typeof db.select>
     })
 
     vi.mocked(getProductTransactions).mockResolvedValue([])
@@ -228,7 +228,7 @@ describe('updateStocktakeCount', () => {
       remainingLayers: [],
     })
 
-    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as ReturnType<typeof db.update>)
+    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as unknown as ReturnType<typeof db.update>)
 
     const result = await updateStocktakeCount(STOCKTAKE_ID, PRODUCT_A, 45)
 
@@ -248,7 +248,7 @@ describe('updateStocktakeCount', () => {
     mockUser('owner')
 
     vi.mocked(db.select).mockImplementation(() => {
-      return makeChain([{ id: STOCKTAKE_ID, status: 'confirmed' }]) as ReturnType<typeof db.select>
+      return makeChain([{ id: STOCKTAKE_ID, status: 'confirmed' }]) as unknown as ReturnType<typeof db.select>
     })
 
     const result = await updateStocktakeCount(STOCKTAKE_ID, PRODUCT_A, 10)
@@ -269,7 +269,7 @@ describe('confirmStocktake', () => {
       selectCallCount++
       if (selectCallCount === 1) {
         // Verify stocktake
-        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as ReturnType<typeof db.select>
+        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as unknown as ReturnType<typeof db.select>
       }
       // Fetch lines
       return makeChain([
@@ -289,11 +289,11 @@ describe('confirmStocktake', () => {
           varianceValue: '-25.00',
           adjustmentPosted: false,
         },
-      ]) as ReturnType<typeof db.select>
+      ]) as unknown as ReturnType<typeof db.select>
     })
 
     vi.mocked(adjustStock).mockResolvedValue({ success: true, transactionId: 'adj-1' })
-    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as ReturnType<typeof db.update>)
+    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as unknown as ReturnType<typeof db.update>)
 
     const result = await confirmStocktake(STOCKTAKE_ID)
 
@@ -327,7 +327,7 @@ describe('confirmStocktake', () => {
     vi.mocked(db.select).mockImplementation(() => {
       selectCallCount++
       if (selectCallCount === 1) {
-        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as ReturnType<typeof db.select>
+        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as unknown as ReturnType<typeof db.select>
       }
       return makeChain([
         {
@@ -346,7 +346,7 @@ describe('confirmStocktake', () => {
           varianceValue: null,
           adjustmentPosted: false,
         },
-      ]) as ReturnType<typeof db.select>
+      ]) as unknown as ReturnType<typeof db.select>
     })
 
     const result = await confirmStocktake(STOCKTAKE_ID)
@@ -365,7 +365,7 @@ describe('confirmStocktake', () => {
     vi.mocked(db.select).mockImplementation(() => {
       selectCallCount++
       if (selectCallCount === 1) {
-        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as ReturnType<typeof db.select>
+        return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as unknown as ReturnType<typeof db.select>
       }
       return makeChain([
         {
@@ -376,10 +376,10 @@ describe('confirmStocktake', () => {
           varianceValue: '0.00',
           adjustmentPosted: false,
         },
-      ]) as ReturnType<typeof db.select>
+      ]) as unknown as ReturnType<typeof db.select>
     })
 
-    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as ReturnType<typeof db.update>)
+    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as unknown as ReturnType<typeof db.update>)
 
     const result = await confirmStocktake(STOCKTAKE_ID)
 
@@ -395,10 +395,10 @@ describe('cancelStocktake', () => {
     mockUser('owner')
 
     vi.mocked(db.select).mockImplementation(() => {
-      return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as ReturnType<typeof db.select>
+      return makeChain([{ id: STOCKTAKE_ID, status: 'in_progress' }]) as unknown as ReturnType<typeof db.select>
     })
 
-    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as ReturnType<typeof db.update>)
+    vi.mocked(db.update).mockImplementation(() => makeUpdateChain() as unknown as ReturnType<typeof db.update>)
 
     const result = await cancelStocktake(STOCKTAKE_ID)
 
@@ -416,7 +416,7 @@ describe('getActiveStocktake', () => {
     mockUser('cashier')
 
     vi.mocked(db.select).mockImplementation(() => {
-      return makeChain([]) as ReturnType<typeof db.select>
+      return makeChain([]) as unknown as ReturnType<typeof db.select>
     })
 
     const result = await getActiveStocktake()

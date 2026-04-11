@@ -71,9 +71,9 @@ const Q2: { from: string; to: string } = { from: '2026-04-01', to: '2026-06-30' 
 function setupQ1Mocks() {
   // steps 1–3: business and account lookups (mockWhere resolves directly)
   mockWhere
-    .mockResolvedValueOnce([BASE_BUSINESS])
-    .mockResolvedValueOnce([ACCT_2100])
-    .mockResolvedValueOnce([ACCT_1101])
+    .mockResolvedValueOnce([BASE_BUSINESS] as never)
+    .mockResolvedValueOnce([ACCT_2100] as never)
+    .mockResolvedValueOnce([ACCT_1101] as never)
   // step 4: output VAT lines (mockWhere returns chain object; mockOrderBy resolves)
   mockOrderBy.mockResolvedValueOnce([OUTPUT_LINE_1, OUTPUT_LINE_2])
   // step 5: net supply per entry
@@ -98,7 +98,7 @@ beforeEach(() => {
 
 describe('getVatReport', () => {
   it('Test 1 — returns null for non-VAT-registered business', async () => {
-    mockWhere.mockResolvedValueOnce([{ id: 'biz-1', vatRegistered: false }])
+    mockWhere.mockResolvedValueOnce([{ id: 'biz-1', vatRegistered: false }] as never)
 
     const result = await getVatReport('biz-1', Q1)
 
@@ -163,9 +163,9 @@ describe('getVatReport', () => {
 
   it('Test 8 — Q2 period with no Q2 data returns zero lines and zero totals', async () => {
     mockWhere
-      .mockResolvedValueOnce([BASE_BUSINESS])
-      .mockResolvedValueOnce([ACCT_2100])
-      .mockResolvedValueOnce([ACCT_1101])
+      .mockResolvedValueOnce([BASE_BUSINESS] as never)
+      .mockResolvedValueOnce([ACCT_2100] as never)
+      .mockResolvedValueOnce([ACCT_1101] as never)
     // No output lines in Q2 — net supply query is skipped
     mockOrderBy.mockResolvedValueOnce([])
     // No input lines in Q2 — net purchase query is skipped

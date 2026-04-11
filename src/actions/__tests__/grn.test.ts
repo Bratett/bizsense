@@ -153,9 +153,7 @@ describe('createGrn', () => {
 
     // Mock db.transaction to execute callback with fake tx
     const { tx, insertedValues } = makeMockTx()
-    vi.mocked(db.transaction).mockImplementation(
-      async (fn: (tx: unknown) => Promise<unknown>) => fn(tx),
-    )
+    vi.mocked(db.transaction).mockImplementation(async (fn) => fn(tx as never))
 
     const result = await createGrn(baseCreateInput())
 
@@ -226,9 +224,9 @@ describe('confirmGrn', () => {
     const { tx, insertedValues, updatedValues } = makeMockTx()
 
     vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput: unknown, cb: (tx: unknown, id: string) => Promise<unknown>) => {
+      async (journalInput, cb) => {
         capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx, JOURNAL_ENTRY_ID)
+        return await cb(tx as never, JOURNAL_ENTRY_ID)
       },
     )
 
@@ -314,9 +312,9 @@ describe('confirmGrn', () => {
     const { tx } = makeMockTx()
 
     vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput: unknown, cb: (tx: unknown, id: string) => Promise<unknown>) => {
+      async (journalInput, cb) => {
         capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx, JOURNAL_ENTRY_ID)
+        return await cb(tx as never, JOURNAL_ENTRY_ID)
       },
     )
 
@@ -374,8 +372,8 @@ describe('confirmGrn', () => {
       )
 
     vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (_journalInput: unknown, cb: (tx: unknown, id: string) => Promise<unknown>) => {
-        return await cb(tx, JOURNAL_ENTRY_ID)
+      async (_journalInput, cb) => {
+        return await cb(tx as never, JOURNAL_ENTRY_ID)
       },
     )
 
@@ -434,8 +432,8 @@ describe('confirmGrn', () => {
       )
 
     vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (_journalInput: unknown, cb: (tx: unknown, id: string) => Promise<unknown>) => {
-        return await cb(tx, JOURNAL_ENTRY_ID)
+      async (_journalInput, cb) => {
+        return await cb(tx as never, JOURNAL_ENTRY_ID)
       },
     )
 
@@ -516,9 +514,9 @@ describe('reverseGrn', () => {
     const { tx, insertedValues, updatedValues } = makeMockTx()
 
     vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput: unknown, cb: (tx: unknown, id: string) => Promise<unknown>) => {
+      async (journalInput, cb) => {
         capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx, 'je-reversal-001')
+        return await cb(tx as never, 'je-reversal-001')
       },
     )
 
@@ -613,9 +611,9 @@ describe('reverseGrn', () => {
     const { tx } = makeMockTx()
 
     vi.mocked(atomicTransactionWrite).mockImplementation(
-      async (journalInput: unknown, cb: (tx: unknown, id: string) => Promise<unknown>) => {
+      async (journalInput, cb) => {
         capturedJournalInput = journalInput as Record<string, unknown>
-        return await cb(tx, 'je-partial-reversal')
+        return await cb(tx as never, 'je-partial-reversal')
       },
     )
 

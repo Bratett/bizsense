@@ -133,7 +133,7 @@ let capturedTxCalls: Array<{ action: string; data: unknown }> = []
 function mockDbTransaction() {
   capturedTxCalls = []
 
-  vi.mocked(db.transaction).mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
+  vi.mocked(db.transaction).mockImplementation(async (callback) => {
     const mockTx = {
       insert: vi.fn((table: unknown) => {
         const chain = {
@@ -176,7 +176,7 @@ function mockDbTransaction() {
 
     // Mock postJournalEntry which is called within the transaction
     // The callback receives tx and returns result
-    return callback(mockTx)
+    return callback(mockTx as never)
   })
 }
 

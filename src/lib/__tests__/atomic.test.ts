@@ -47,9 +47,9 @@ const MOCK_JOURNAL_INPUT: PostJournalEntryInput = {
 beforeEach(() => {
   vi.clearAllMocks()
   // Default: db.transaction calls the callback with a mock tx
-  mockedTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
+  mockedTransaction.mockImplementation(async (callback) => {
     const mockTx = {} // the mock tx object passed into the callback
-    return callback(mockTx)
+    return callback(mockTx as never)
   })
 })
 

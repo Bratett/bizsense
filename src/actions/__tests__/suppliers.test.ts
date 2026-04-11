@@ -143,12 +143,14 @@ describe('deactivateSupplier', () => {
     let selectCallIdx = 0
 
     // Call 1: ownership check → found
-    // Call 2: AP balance → GHS 5000
-    // Call 3: open POs → (should not reach here)
+    // Call 2: getSupplierApBalance — totalOwed (GRNs) → 5000
+    // Call 3: getSupplierApBalance — totalPaid (payments) → 0
+    // Call 4: open POs → (should not reach here)
     vi.mocked(db.select).mockImplementation(() => {
       const idx = selectCallIdx++
       if (idx === 0) return makeChain([{ id: 'sup-001' }]) as never
-      if (idx === 1) return makeChain([{ outstanding: '5000.00' }]) as never
+      if (idx === 1) return makeChain([{ totalOwed: '5000.00' }]) as never
+      if (idx === 2) return makeChain([{ totalPaid: '0' }]) as never
       return makeChain([]) as never
     })
 
@@ -167,12 +169,14 @@ describe('deactivateSupplier', () => {
     let selectCallIdx = 0
 
     // Call 1: ownership check → found
-    // Call 2: AP balance → 0
-    // Call 3: open POs → one found
+    // Call 2: getSupplierApBalance — totalOwed → 0
+    // Call 3: getSupplierApBalance — totalPaid → 0
+    // Call 4: open POs → one found
     vi.mocked(db.select).mockImplementation(() => {
       const idx = selectCallIdx++
       if (idx === 0) return makeChain([{ id: 'sup-001' }]) as never
-      if (idx === 1) return makeChain([{ outstanding: '0' }]) as never
+      if (idx === 1) return makeChain([{ totalOwed: '0' }]) as never
+      if (idx === 2) return makeChain([{ totalPaid: '0' }]) as never
       return makeChain([{ id: 'po-open-001' }]) as never
     })
 
@@ -190,12 +194,14 @@ describe('deactivateSupplier', () => {
     let selectCallIdx = 0
 
     // Call 1: ownership check → found
-    // Call 2: AP balance → 0
-    // Call 3: open POs → empty
+    // Call 2: getSupplierApBalance — totalOwed → 0
+    // Call 3: getSupplierApBalance — totalPaid → 0
+    // Call 4: open POs → empty
     vi.mocked(db.select).mockImplementation(() => {
       const idx = selectCallIdx++
       if (idx === 0) return makeChain([{ id: 'sup-001' }]) as never
-      if (idx === 1) return makeChain([{ outstanding: '0' }]) as never
+      if (idx === 1) return makeChain([{ totalOwed: '0' }]) as never
+      if (idx === 2) return makeChain([{ totalPaid: '0' }]) as never
       return makeChain([]) as never
     })
 
@@ -287,11 +293,13 @@ describe('getSupplierById', () => {
     }
 
     // Call 1: supplier fetch → found
-    // Call 2: AP balance → SUM result
+    // Call 2: getSupplierApBalance — totalOwed (GRNs) → 2500
+    // Call 3: getSupplierApBalance — totalPaid (payments) → 0
     vi.mocked(db.select).mockImplementation(() => {
       const idx = selectCallIdx++
       if (idx === 0) return makeChain([supplierRow]) as never
-      return makeChain([{ outstanding: '2500.00' }]) as never
+      if (idx === 1) return makeChain([{ totalOwed: '2500.00' }]) as never
+      return makeChain([{ totalPaid: '0' }]) as never
     })
 
     const result = await getSupplierById('sup-001')
