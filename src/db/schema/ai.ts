@@ -18,6 +18,10 @@ export const pendingAiActions = pgTable('pending_ai_actions', {
   expiresAt: timestamp('expires_at').notNull(),
   resultId: uuid('result_id'),
   resultTable: text('result_table'),
+  // Reversal tracking — set when an owner/manager reverses a confirmed action
+  reversedAt: timestamp('reversed_at'),
+  reversedBy: uuid('reversed_by').references(() => users.id),
+  reversalReason: text('reversal_reason'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

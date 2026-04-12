@@ -1,7 +1,17 @@
-export default function AiPage() {
-  return (
-    <main className="p-8">
-      <h1 className="text-xl font-semibold text-gray-800">BizSense AI — coming in Sprint 8</h1>
-    </main>
-  )
+import { getServerSession } from '@/lib/session'
+import { AiChatClient } from './page.client'
+import { db } from '@/db'
+import { businesses } from '@/db/schema/core'
+import { eq } from 'drizzle-orm'
+
+export default async function AiPage() {
+  const session = await getServerSession()
+  const { businessId } = session.user
+
+  const [business] = await db
+    .select({ name: businesses.name })
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+
+  return <AiChatClient businessName={business?.name ?? 'Your Business'} />
 }
