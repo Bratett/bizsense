@@ -288,9 +288,7 @@ export default async function DashboardPage() {
                     ) : (
                       <>
                         <p className="mt-1 text-2xl font-semibold text-green-700">All stocked</p>
-                        <p className="mt-0.5 text-xs text-gray-500">
-                          No items below reorder level
-                        </p>
+                        <p className="mt-0.5 text-xs text-gray-500">No items below reorder level</p>
                       </>
                     )}
                   </CardContent>

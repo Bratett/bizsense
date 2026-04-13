@@ -32,10 +32,8 @@ function makeChain(result: unknown[]) {
       if (prop === 'then')
         return (f?: (v: unknown) => unknown, r?: (e: unknown) => unknown) =>
           Promise.resolve(result).then(f, r)
-      if (prop === 'catch')
-        return (f?: (e: unknown) => unknown) => Promise.resolve(result).catch(f)
-      if (prop === 'finally')
-        return (f?: () => void) => Promise.resolve(result).finally(f)
+      if (prop === 'catch') return (f?: (e: unknown) => unknown) => Promise.resolve(result).catch(f)
+      if (prop === 'finally') return (f?: () => void) => Promise.resolve(result).finally(f)
       // All other method calls return the same chain (fluent)
       return () => chain
     },
@@ -111,7 +109,11 @@ describe('querySales — total', () => {
       makeChain([{ orderCount: '12', total: '4500.00' }]) as never,
     )
 
-    const raw = await handleReadTool('query_sales', { period: 'this_month', group_by: 'total' }, BIZ)
+    const raw = await handleReadTool(
+      'query_sales',
+      { period: 'this_month', group_by: 'total' },
+      BIZ,
+    )
     const result = JSON.parse(raw)
 
     expect(result.groupBy).toBe('total')
@@ -122,9 +124,7 @@ describe('querySales — total', () => {
 
   it('Test 5 — today/total with zero aggregate returns orderCount=0 (draft orders excluded)', async () => {
     // The query filters status IN ('confirmed','fulfilled'), so drafts yield zero rows
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ orderCount: '0', total: '0' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([{ orderCount: '0', total: '0' }]) as never)
 
     const raw = await handleReadTool('query_sales', { period: 'today', group_by: 'total' }, BIZ)
     const result = JSON.parse(raw)
@@ -142,7 +142,12 @@ describe('querySales — group_by=customer', () => {
   it('Test 6 — returns customers array with name, orders count, and total', async () => {
     vi.mocked(db.select).mockReturnValueOnce(
       makeChain([
-        { customerName: 'Ama Owusu', customerPhone: '0244000001', orderCount: '3', total: '1200.00' },
+        {
+          customerName: 'Ama Owusu',
+          customerPhone: '0244000001',
+          orderCount: '3',
+          total: '1200.00',
+        },
         { customerName: null, customerPhone: null, orderCount: '2', total: '300.00' },
       ]) as never,
     )
@@ -156,7 +161,12 @@ describe('querySales — group_by=customer', () => {
 
     expect(result.groupBy).toBe('customer')
     expect(result.customers).toHaveLength(2)
-    expect(result.customers[0]).toMatchObject({ name: 'Ama Owusu', phone: '0244000001', orders: 3, total: 1200 })
+    expect(result.customers[0]).toMatchObject({
+      name: 'Ama Owusu',
+      phone: '0244000001',
+      orders: 3,
+      total: 1200,
+    })
     // null customerName → 'Walk-in'
     expect(result.customers[1]).toMatchObject({ name: 'Walk-in', orders: 2, total: 300 })
   })
@@ -208,9 +218,7 @@ describe('querySales — customerName filter', () => {
 
 describe('queryExpenses — total', () => {
   it('Test 8 — this_month/total returns count and total as numbers (approved only)', async () => {
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ count: '5', total: '2300.00' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([{ count: '5', total: '2300.00' }]) as never)
 
     const raw = await handleReadTool(
       'query_expenses',
@@ -264,11 +272,13 @@ describe('getCashPosition', () => {
     const raw = await handleReadTool('get_cash_position', {}, BIZ)
     const result = JSON.parse(raw)
 
-    expect(vi.mocked(getAccountBalances)).toHaveBeenCalledWith(
-      BIZ,
-      { type: 'asOf', date: today },
-      ['1001', '1002', '1003', '1004', '1005'],
-    )
+    expect(vi.mocked(getAccountBalances)).toHaveBeenCalledWith(BIZ, { type: 'asOf', date: today }, [
+      '1001',
+      '1002',
+      '1003',
+      '1004',
+      '1005',
+    ])
     expect(result.accounts).toHaveLength(2)
     expect(result.accounts[0]).toMatchObject({ code: '1001', name: 'Cash on Hand', balance: 3000 })
     expect(result.accounts[1]).toMatchObject({ code: '1002', name: 'MTN MoMo', balance: 1500 })
@@ -295,10 +305,10 @@ describe('getProfit', () => {
     expect(result.revenue).toBe(10000)
     expect(result.cogs).toBe(4000)
     expect(result.expenses).toBe(1500)
-    expect(result.grossProfit).toBe(6000)   // 10000 - 4000
-    expect(result.netProfit).toBe(4500)     // 10000 - 4000 - 1500
-    expect(result.grossMarginPct).toBe(60)  // Math.round(0.6 * 1000) / 10
-    expect(result.netMarginPct).toBe(45)    // Math.round(0.45 * 1000) / 10
+    expect(result.grossProfit).toBe(6000) // 10000 - 4000
+    expect(result.netProfit).toBe(4500) // 10000 - 4000 - 1500
+    expect(result.grossMarginPct).toBe(60) // Math.round(0.6 * 1000) / 10
+    expect(result.netMarginPct).toBe(45) // Math.round(0.45 * 1000) / 10
 
     expect(vi.mocked(getAccountBalances)).toHaveBeenCalledWith(
       BIZ,
@@ -319,11 +329,7 @@ describe('getCustomerBalance', () => {
       )
       .mockReturnValueOnce(makeChain([{ outstanding: '750.00' }]) as never)
 
-    const raw = await handleReadTool(
-      'get_customer_balance',
-      { customer_name_or_phone: 'Ama' },
-      BIZ,
-    )
+    const raw = await handleReadTool('get_customer_balance', { customer_name_or_phone: 'Ama' }, BIZ)
     const result = JSON.parse(raw)
 
     expect(vi.mocked(db.select)).toHaveBeenCalledTimes(2)
@@ -378,7 +384,9 @@ describe('checkStock — specific product', () => {
   it('Test 15 — single product below reorder level: found=true, lowStock=true', async () => {
     vi.mocked(db.select)
       .mockReturnValueOnce(
-        makeChain([{ id: 'prod-rice', name: 'Basmati Rice 5kg', unit: 'bags', reorderLevel: 10 }]) as never,
+        makeChain([
+          { id: 'prod-rice', name: 'Basmati Rice 5kg', unit: 'bags', reorderLevel: 10 },
+        ]) as never,
       )
       .mockReturnValueOnce(makeChain([{ total: '7' }]) as never)
 
@@ -390,13 +398,15 @@ describe('checkStock — specific product', () => {
     expect(result.product.name).toBe('Basmati Rice 5kg')
     expect(result.product.stock).toBe(7)
     expect(result.product.reorderLevel).toBe(10)
-    expect(result.product.lowStock).toBe(true)  // 7 <= 10
+    expect(result.product.lowStock).toBe(true) // 7 <= 10
   })
 
   it('Test 15b — single product above reorder level: lowStock=false', async () => {
     vi.mocked(db.select)
       .mockReturnValueOnce(
-        makeChain([{ id: 'prod-oil', name: 'Palm Oil 1L', unit: 'bottles', reorderLevel: 5 }]) as never,
+        makeChain([
+          { id: 'prod-oil', name: 'Palm Oil 1L', unit: 'bottles', reorderLevel: 5 },
+        ]) as never,
       )
       .mockReturnValueOnce(makeChain([{ total: '25' }]) as never)
 
@@ -404,7 +414,7 @@ describe('checkStock — specific product', () => {
     const result = JSON.parse(raw)
 
     expect(result.product.stock).toBe(25)
-    expect(result.product.lowStock).toBe(false)  // 25 > 5
+    expect(result.product.lowStock).toBe(false) // 25 > 5
   })
 
   it('Test 17 — multiple product matches returns found="multiple"; stops at 1 query', async () => {
@@ -442,9 +452,9 @@ describe('checkStock — low-stock scan (no product_name)', () => {
     // CALL 2: stock aggregates by productId
     vi.mocked(db.select).mockReturnValueOnce(
       makeChain([
-        { productId: 'prod-a', total: '8' },   // low
-        { productId: 'prod-b', total: '25' },  // ok
-        { productId: 'prod-c', total: '3' },   // low
+        { productId: 'prod-a', total: '8' }, // low
+        { productId: 'prod-b', total: '25' }, // ok
+        { productId: 'prod-c', total: '3' }, // low
       ]) as never,
     )
 
@@ -455,8 +465,16 @@ describe('checkStock — low-stock scan (no product_name)', () => {
     expect(result.count).toBe(2)
     expect(result.lowStockItems).toHaveLength(2)
     // Sorted ascending by stock: Cooking Oil (3) before Maize Flour (8)
-    expect(result.lowStockItems[0]).toMatchObject({ name: 'Cooking Oil', stock: 3, reorderLevel: 10 })
-    expect(result.lowStockItems[1]).toMatchObject({ name: 'Maize Flour', stock: 8, reorderLevel: 20 })
+    expect(result.lowStockItems[0]).toMatchObject({
+      name: 'Cooking Oil',
+      stock: 3,
+      reorderLevel: 10,
+    })
+    expect(result.lowStockItems[1]).toMatchObject({
+      name: 'Maize Flour',
+      stock: 8,
+      reorderLevel: 20,
+    })
   })
 
   it('Test 16b — all products adequately stocked returns message string', async () => {

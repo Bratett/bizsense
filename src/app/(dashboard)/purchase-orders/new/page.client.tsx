@@ -278,11 +278,7 @@ export default function NewPurchaseOrderForm({
           {/* Order date */}
           <div>
             <Label className="mb-1">Order Date</Label>
-            <Input
-              type="date"
-              value={orderDate}
-              onChange={(e) => setOrderDate(e.target.value)}
-            />
+            <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} />
             {fieldErrors['orderDate'] && (
               <p className="mt-1 text-xs text-destructive">{fieldErrors['orderDate']}</p>
             )}
@@ -291,7 +287,8 @@ export default function NewPurchaseOrderForm({
           {/* Expected date */}
           <div>
             <Label className="mb-1">
-              Expected Delivery Date <span className="font-normal text-muted-foreground">(optional)</span>
+              Expected Delivery Date{' '}
+              <span className="font-normal text-muted-foreground">(optional)</span>
             </Label>
             <Input
               type="date"
@@ -341,8 +338,8 @@ export default function NewPurchaseOrderForm({
                 <Alert className="mt-2">
                   <AlertDescription>
                     <p>
-                      This rate deviates {(fxDeviation * 100).toFixed(1)}% from the last recorded rate
-                      ({latestUsdRate?.toFixed(4)}).
+                      This rate deviates {(fxDeviation * 100).toFixed(1)}% from the last recorded
+                      rate ({latestUsdRate?.toFixed(4)}).
                     </p>
                     <label className="mt-2 flex items-center gap-2">
                       <input
@@ -357,7 +354,9 @@ export default function NewPurchaseOrderForm({
                 </Alert>
               )}
               {fxRateNum > 0 && !showFxWarning && (
-                <p className="mt-1 text-xs text-muted-foreground">USD 1 = GHS {fxRateNum.toFixed(4)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  USD 1 = GHS {fxRateNum.toFixed(4)}
+                </p>
               )}
             </div>
           )}
@@ -408,7 +407,11 @@ export default function NewPurchaseOrderForm({
                         strokeWidth={2}
                         stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </Button>
                   )}
@@ -572,7 +575,9 @@ export default function NewPurchaseOrderForm({
             <CardContent className="space-y-1">
               {lines.map((l, i) => (
                 <div key={l.key} className="flex items-center justify-between text-sm">
-                  <span className="truncate text-muted-foreground">{l.description || `Item ${i + 1}`}</span>
+                  <span className="truncate text-muted-foreground">
+                    {l.description || `Item ${i + 1}`}
+                  </span>
                   <span className="ml-2 flex-shrink-0 text-muted-foreground">
                     {l.quantity} × {currency} {l.unitCost || '0'} ={' '}
                     <span className="font-medium text-foreground">

@@ -202,7 +202,9 @@ export default function SalesList({
                   <span
                     className={cn(
                       'mt-1 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
-                      customerTrend >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+                      customerTrend >= 0
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700',
                     )}
                   >
                     {customerTrend >= 0 ? '\u2197' : '\u2198'} {Math.abs(customerTrend)}%
@@ -276,13 +278,13 @@ export default function SalesList({
                         <TableCell className="text-muted-foreground">
                           {formatDate(item.orderDate)}
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {item.orderNumber}
-                        </TableCell>
+                        <TableCell className="font-medium">{item.orderNumber}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2.5">
                             <Avatar>
-                              <AvatarFallback className={cn(avatarColor(item.customerName), 'text-white text-xs')}>
+                              <AvatarFallback
+                                className={cn(avatarColor(item.customerName), 'text-white text-xs')}
+                              >
                                 {initials(item.customerName ?? '?')}
                               </AvatarFallback>
                             </Avatar>
@@ -304,10 +306,18 @@ export default function SalesList({
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon-sm" render={<Link href={`/sales/${item.id}`} title="View" />}>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              render={<Link href={`/sales/${item.id}`} title="View" />}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon-sm" render={<Link href={`/sales/${item.id}`} title="Edit" />}>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              render={<Link href={`/sales/${item.id}`} title="Edit" />}
+                            >
                               <Pencil className="h-4 w-4" />
                             </Button>
                           </div>

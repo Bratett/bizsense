@@ -14,8 +14,7 @@ export const AI_TOOLS: Anthropic.Tool[] = [
       properties: {
         customer_name_or_phone: {
           type: 'string',
-          description:
-            'Customer name or phone number to look up. Omit for walk-in cash sales.',
+          description: 'Customer name or phone number to look up. Omit for walk-in cash sales.',
         },
         items: {
           type: 'array',
@@ -72,8 +71,7 @@ export const AI_TOOLS: Anthropic.Tool[] = [
         expense_date: { type: 'string', description: 'Date (ISO). Defaults to today.' },
         includes_vat: {
           type: 'boolean',
-          description:
-            'True if the amount includes VAT (for VAT-registered businesses)',
+          description: 'True if the amount includes VAT (for VAT-registered businesses)',
         },
       },
       required: ['category', 'amount', 'payment_method', 'description'],

@@ -209,9 +209,7 @@ describe('confirmAiAction — expiry', () => {
     }
 
     // Status updated to expired
-    expect(setMock).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'expired' }),
-    )
+    expect(setMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'expired' }))
     // Underlying action never called
     expect(createOrder).not.toHaveBeenCalled()
   })
@@ -353,9 +351,7 @@ describe('rejectAiAction', () => {
 
     await rejectAiAction(PENDING_ID)
 
-    expect(setMock).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'rejected' }),
-    )
+    expect(setMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'rejected' }))
   })
 
   it('Test 8: already confirmed action is a no-op (status filter in WHERE)', async () => {

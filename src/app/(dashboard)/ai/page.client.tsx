@@ -323,11 +323,7 @@ export function AiChatClient({ businessName }: { businessName: string }) {
         {lastError && !isSubmitting && (
           <div className="mx-auto mt-2 flex max-w-sm items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
             <p className="flex-1 text-sm text-red-700">Something went wrong.</p>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleRetry}
-            >
+            <Button variant="destructive" size="sm" onClick={handleRetry}>
               Retry
             </Button>
           </div>

@@ -25,10 +25,8 @@ function makeChain(result: unknown[]) {
       if (prop === 'then')
         return (f?: (v: unknown) => unknown, r?: (e: unknown) => unknown) =>
           Promise.resolve(result).then(f, r)
-      if (prop === 'catch')
-        return (f?: (e: unknown) => unknown) => Promise.resolve(result).catch(f)
-      if (prop === 'finally')
-        return (f?: () => void) => Promise.resolve(result).finally(f)
+      if (prop === 'catch') return (f?: (e: unknown) => unknown) => Promise.resolve(result).catch(f)
+      if (prop === 'finally') return (f?: () => void) => Promise.resolve(result).finally(f)
       return () => chain
     },
   }
@@ -273,9 +271,7 @@ describe('add_customer', () => {
   })
 
   it('Test 9 — duplicate phone: returns error JSON, no db.insert', async () => {
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ id: 'cust-existing' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([{ id: 'cust-existing' }]) as never)
 
     const raw = await handleWriteTool(
       'add_customer',
@@ -307,9 +303,7 @@ describe('adjust_stock', () => {
       makeChain([{ id: 'prod-001', name: 'Basmati Rice 5kg', unit: 'bags' }]) as never,
     )
     // Call 2: current stock aggregate
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ total: '50' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([{ total: '50' }]) as never)
     mockInsert('staging-010')
 
     const raw = await handleWriteTool(
@@ -338,9 +332,7 @@ describe('adjust_stock', () => {
     vi.mocked(db.select).mockReturnValueOnce(
       makeChain([{ id: 'prod-001', name: 'Basmati Rice 5kg', unit: 'bags' }]) as never,
     )
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ total: '5' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([{ total: '5' }]) as never)
 
     const raw = await handleWriteTool(
       'adjust_stock',

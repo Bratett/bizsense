@@ -6,7 +6,14 @@ import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { BalanceSheet } from '@/lib/reports/balanceSheet'
 import type { AccountBalance } from '@/lib/reports/engine'
 
@@ -173,7 +180,9 @@ function AccountRow({ account }: { account: AccountBalance }) {
   if (account.netBalance === 0) return null
   return (
     <TableRow>
-      <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground w-16">{account.accountCode}</TableCell>
+      <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground w-16">
+        {account.accountCode}
+      </TableCell>
       <TableCell className="py-1.5 text-sm text-foreground/80">{account.accountName}</TableCell>
       <TableCell className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-foreground">
         {formatGhs(account.netBalance)}
@@ -343,158 +352,162 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
       {/* Report table */}
       <Card>
         <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="py-3 pl-4 w-16">
-                Code
-              </TableHead>
-              <TableHead className="py-3">
-                Account
-              </TableHead>
-              <TableHead className="py-3 pr-4 text-right">
-                Amount (GHS)
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* ── ASSETS ─────────────────────────────────────────────────── */}
-            <TableRow className="bg-green-50">
-              <TableCell
-                colSpan={3}
-                className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-green-900"
-              >
-                Assets
-              </TableCell>
-            </TableRow>
-
-            {/* Current Assets */}
-            <SectionHeader label="Current Assets" />
-            {assets.currentAssets.map((a) => (
-              <AccountRow key={a.accountId} account={a} />
-            ))}
-            <SubtotalRow label="Total Current Assets" amount={totalCurrentAssets} />
-
-            {/* Fixed Assets */}
-            <SectionHeader label="Fixed Assets" />
-            <TableRow>
-              <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground">1500</TableCell>
-              <TableCell className="py-1.5 text-sm text-foreground/80">Fixed Assets — Cost</TableCell>
-              <TableCell className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-foreground">
-                {formatGhs(assets.fixedAssets.cost)}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground">1510</TableCell>
-              <TableCell className="py-1.5 text-sm text-muted-foreground italic">
-                Less: Accumulated Depreciation
-              </TableCell>
-              <TableCell className="py-1.5 pr-4 text-right text-sm tabular-nums text-muted-foreground">
-                ({formatGhs(assets.fixedAssets.accumulatedDepreciation)})
-              </TableCell>
-            </TableRow>
-            <SubtotalRow label="Net Book Value" amount={assets.fixedAssets.netBookValue} />
-            {assets.fixedAssets.accumulatedDepreciation === 0 && (
-              <TableRow>
-                <TableCell></TableCell>
-                <TableCell colSpan={2} className="py-1 text-xs text-muted-foreground/60 italic">
-                  Accumulated depreciation tracking will be available after monthly depreciation is
-                  processed.
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="py-3 pl-4 w-16">Code</TableHead>
+                <TableHead className="py-3">Account</TableHead>
+                <TableHead className="py-3 pr-4 text-right">Amount (GHS)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* ── ASSETS ─────────────────────────────────────────────────── */}
+              <TableRow className="bg-green-50">
+                <TableCell
+                  colSpan={3}
+                  className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-green-900"
+                >
+                  Assets
                 </TableCell>
               </TableRow>
-            )}
 
-            {/* Total Assets */}
-            <GrandTotalRow label="TOTAL ASSETS" amount={assets.totalAssets} />
-
-            {/* ── LIABILITIES ────────────────────────────────────────────── */}
-            <TableRow className="bg-amber-50">
-              <TableCell
-                colSpan={3}
-                className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-amber-900"
-              >
-                Liabilities
-              </TableCell>
-            </TableRow>
-
-            {/* Current Liabilities */}
-            <SectionHeader label="Current Liabilities" />
-            {liabilities.currentLiabilities.length > 0 ? (
-              liabilities.currentLiabilities.map((a) => (
+              {/* Current Assets */}
+              <SectionHeader label="Current Assets" />
+              {assets.currentAssets.map((a) => (
                 <AccountRow key={a.accountId} account={a} />
-              ))
-            ) : (
+              ))}
+              <SubtotalRow label="Total Current Assets" amount={totalCurrentAssets} />
+
+              {/* Fixed Assets */}
+              <SectionHeader label="Fixed Assets" />
               <TableRow>
-                <TableCell colSpan={3} className="py-2 pl-4 text-sm text-muted-foreground/60 italic">
-                  None
+                <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground">1500</TableCell>
+                <TableCell className="py-1.5 text-sm text-foreground/80">
+                  Fixed Assets — Cost
+                </TableCell>
+                <TableCell className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-foreground">
+                  {formatGhs(assets.fixedAssets.cost)}
                 </TableCell>
               </TableRow>
-            )}
-            <SubtotalRow label="Total Current Liabilities" amount={totalCurrentL} />
+              <TableRow>
+                <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground">1510</TableCell>
+                <TableCell className="py-1.5 text-sm text-muted-foreground italic">
+                  Less: Accumulated Depreciation
+                </TableCell>
+                <TableCell className="py-1.5 pr-4 text-right text-sm tabular-nums text-muted-foreground">
+                  ({formatGhs(assets.fixedAssets.accumulatedDepreciation)})
+                </TableCell>
+              </TableRow>
+              <SubtotalRow label="Net Book Value" amount={assets.fixedAssets.netBookValue} />
+              {assets.fixedAssets.accumulatedDepreciation === 0 && (
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell colSpan={2} className="py-1 text-xs text-muted-foreground/60 italic">
+                    Accumulated depreciation tracking will be available after monthly depreciation
+                    is processed.
+                  </TableCell>
+                </TableRow>
+              )}
 
-            {/* Long-term Liabilities */}
-            <SectionHeader label="Long-term Liabilities" />
-            {liabilities.longTermLiabilities.length > 0 ? (
-              liabilities.longTermLiabilities.map((a) => (
+              {/* Total Assets */}
+              <GrandTotalRow label="TOTAL ASSETS" amount={assets.totalAssets} />
+
+              {/* ── LIABILITIES ────────────────────────────────────────────── */}
+              <TableRow className="bg-amber-50">
+                <TableCell
+                  colSpan={3}
+                  className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-amber-900"
+                >
+                  Liabilities
+                </TableCell>
+              </TableRow>
+
+              {/* Current Liabilities */}
+              <SectionHeader label="Current Liabilities" />
+              {liabilities.currentLiabilities.length > 0 ? (
+                liabilities.currentLiabilities.map((a) => (
+                  <AccountRow key={a.accountId} account={a} />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={3}
+                    className="py-2 pl-4 text-sm text-muted-foreground/60 italic"
+                  >
+                    None
+                  </TableCell>
+                </TableRow>
+              )}
+              <SubtotalRow label="Total Current Liabilities" amount={totalCurrentL} />
+
+              {/* Long-term Liabilities */}
+              <SectionHeader label="Long-term Liabilities" />
+              {liabilities.longTermLiabilities.length > 0 ? (
+                liabilities.longTermLiabilities.map((a) => (
+                  <AccountRow key={a.accountId} account={a} />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={3}
+                    className="py-2 pl-4 text-sm text-muted-foreground/60 italic"
+                  >
+                    None
+                  </TableCell>
+                </TableRow>
+              )}
+              <SubtotalRow label="Total Long-term Liabilities" amount={totalLongTermL} />
+
+              {/* Total Liabilities */}
+              <GrandTotalRow label="TOTAL LIABILITIES" amount={liabilities.totalLiabilities} />
+
+              {/* ── EQUITY ─────────────────────────────────────────────────── */}
+              <TableRow className="bg-blue-50">
+                <TableCell
+                  colSpan={3}
+                  className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-blue-900"
+                >
+                  Equity
+                </TableCell>
+              </TableRow>
+
+              <SectionHeader label="Owner's Equity" />
+              {equity.lines.map((a) => (
                 <AccountRow key={a.accountId} account={a} />
-              ))
-            ) : (
+              ))}
               <TableRow>
-                <TableCell colSpan={3} className="py-2 pl-4 text-sm text-muted-foreground/60 italic">
-                  None
+                <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground"></TableCell>
+                <TableCell className="py-1.5 text-sm text-foreground/80">
+                  Financial Year to Date Profit/(Loss)
+                </TableCell>
+                <TableCell
+                  className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
+                    equity.currentPeriodProfit < 0 ? 'text-red-600' : 'text-foreground'
+                  }`}
+                >
+                  {equity.currentPeriodProfit < 0
+                    ? `(${formatGhs(Math.abs(equity.currentPeriodProfit))})`
+                    : formatGhs(equity.currentPeriodProfit)}
                 </TableCell>
               </TableRow>
-            )}
-            <SubtotalRow label="Total Long-term Liabilities" amount={totalLongTermL} />
+              <GrandTotalRow label="TOTAL EQUITY" amount={equity.totalEquity} />
 
-            {/* Total Liabilities */}
-            <GrandTotalRow label="TOTAL LIABILITIES" amount={liabilities.totalLiabilities} />
-
-            {/* ── EQUITY ─────────────────────────────────────────────────── */}
-            <TableRow className="bg-blue-50">
-              <TableCell
-                colSpan={3}
-                className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-blue-900"
-              >
-                Equity
-              </TableCell>
-            </TableRow>
-
-            <SectionHeader label="Owner's Equity" />
-            {equity.lines.map((a) => (
-              <AccountRow key={a.accountId} account={a} />
-            ))}
-            <TableRow>
-              <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground"></TableCell>
-              <TableCell className="py-1.5 text-sm text-foreground/80">Financial Year to Date Profit/(Loss)</TableCell>
-              <TableCell
-                className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
-                  equity.currentPeriodProfit < 0 ? 'text-red-600' : 'text-foreground'
-                }`}
-              >
-                {equity.currentPeriodProfit < 0
-                  ? `(${formatGhs(Math.abs(equity.currentPeriodProfit))})`
-                  : formatGhs(equity.currentPeriodProfit)}
-              </TableCell>
-            </TableRow>
-            <GrandTotalRow label="TOTAL EQUITY" amount={equity.totalEquity} />
-
-            {/* ── TOTAL L + E ─────────────────────────────────────────────── */}
-            <TableRow className="border-t-4 border-foreground bg-muted">
-              <TableCell className="py-4 pl-4 text-sm"></TableCell>
-              <TableCell className="py-4 text-sm font-bold text-foreground uppercase tracking-wide">
-                Total Liabilities + Equity
-              </TableCell>
-              <TableCell
-                className={`py-4 pr-4 text-right text-sm font-bold tabular-nums ${
-                  data.totalLiabilitiesAndEquity < 0 ? 'text-red-600' : 'text-foreground'
-                }`}
-              >
-                {formatGhs(data.totalLiabilitiesAndEquity)}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+              {/* ── TOTAL L + E ─────────────────────────────────────────────── */}
+              <TableRow className="border-t-4 border-foreground bg-muted">
+                <TableCell className="py-4 pl-4 text-sm"></TableCell>
+                <TableCell className="py-4 text-sm font-bold text-foreground uppercase tracking-wide">
+                  Total Liabilities + Equity
+                </TableCell>
+                <TableCell
+                  className={`py-4 pr-4 text-right text-sm font-bold tabular-nums ${
+                    data.totalLiabilitiesAndEquity < 0 ? 'text-red-600' : 'text-foreground'
+                  }`}
+                >
+                  {formatGhs(data.totalLiabilitiesAndEquity)}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

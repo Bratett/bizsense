@@ -37,7 +37,12 @@ export default function SetupForm() {
         <p className="text-xs text-gray-400">You can update this later in Settings.</p>
       </div>
 
-      <Button type="submit" disabled={isPending} size="lg" className="mt-1 h-11 text-base font-semibold">
+      <Button
+        type="submit"
+        disabled={isPending}
+        size="lg"
+        className="mt-1 h-11 text-base font-semibold"
+      >
         {isPending ? 'Creating your account\u2026' : 'Create business'}
       </Button>
     </form>

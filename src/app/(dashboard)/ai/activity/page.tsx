@@ -17,7 +17,8 @@ export default async function AiActivityPage({ searchParams }: PageProps) {
 
   const params = await searchParams
 
-  const status = (params.status as 'all' | 'confirmed' | 'rejected' | 'pending' | 'expired') ?? 'all'
+  const status =
+    (params.status as 'all' | 'confirmed' | 'rejected' | 'pending' | 'expired') ?? 'all'
 
   // Default date range: last 7 days
   const today = new Date()

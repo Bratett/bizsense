@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { deactivateProduct, type ProductDetail, type InventoryMovement } from '@/actions/products'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import type { UserRole } from '@/lib/session'
 import { formatGhs, formatDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
@@ -12,7 +19,14 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page-header'
 import { Pencil, Trash2, ListOrdered } from 'lucide-react'
@@ -28,12 +42,32 @@ const TYPE_STYLES: Record<string, { bg: string; text: string; label: string }> =
 
 function stockStatusInfo(product: ProductDetail) {
   if (!product.trackInventory)
-    return { dot: 'bg-gray-400', label: 'Not tracked', textColor: 'text-gray-600', badge: 'bg-gray-100 text-gray-600' }
+    return {
+      dot: 'bg-gray-400',
+      label: 'Not tracked',
+      textColor: 'text-gray-600',
+      badge: 'bg-gray-100 text-gray-600',
+    }
   if (product.currentStock <= 0)
-    return { dot: 'bg-red-500', label: 'Out of Stock', textColor: 'text-red-600', badge: 'bg-red-100 text-red-700' }
+    return {
+      dot: 'bg-red-500',
+      label: 'Out of Stock',
+      textColor: 'text-red-600',
+      badge: 'bg-red-100 text-red-700',
+    }
   if (product.reorderLevel > 0 && product.currentStock <= product.reorderLevel)
-    return { dot: 'bg-amber-500', label: 'Low Stock', textColor: 'text-amber-600', badge: 'bg-amber-100 text-amber-700' }
-  return { dot: 'bg-green-500', label: 'Optimal Level', textColor: 'text-green-600', badge: 'bg-green-100 text-green-700' }
+    return {
+      dot: 'bg-amber-500',
+      label: 'Low Stock',
+      textColor: 'text-amber-600',
+      badge: 'bg-amber-100 text-amber-700',
+    }
+  return {
+    dot: 'bg-green-500',
+    label: 'Optimal Level',
+    textColor: 'text-green-600',
+    badge: 'bg-green-100 text-green-700',
+  }
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -100,10 +134,7 @@ export default function ProductDetailView({
         actions={
           <>
             {canDeactivate && product.isActive && (
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeactivateConfirm(true)}
-              >
+              <Button variant="destructive" onClick={() => setShowDeactivateConfirm(true)}>
                 <Trash2 data-icon="inline-start" />
                 Delete
               </Button>
@@ -117,7 +148,9 @@ export default function ProductDetailView({
       />
 
       {!product.isActive && (
-        <Badge variant="destructive" className="mb-4">Deactivated</Badge>
+        <Badge variant="destructive" className="mb-4">
+          Deactivated
+        </Badge>
       )}
 
       {/* Error */}
@@ -137,19 +170,27 @@ export default function ProductDetailView({
               <div className="grid grid-cols-2 gap-4">
                 {product.category && (
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Category
+                    </p>
                     <p className="mt-1 text-sm font-medium text-foreground">{product.category}</p>
                   </div>
                 )}
                 {product.unit && (
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Unit</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Unit
+                    </p>
                     <p className="mt-1 text-sm font-medium text-foreground">{product.unit}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Track Inventory</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{product.trackInventory ? 'Yes' : 'No'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Track Inventory
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">
+                    {product.trackInventory ? 'Yes' : 'No'}
+                  </p>
                 </div>
               </div>
 
@@ -157,7 +198,9 @@ export default function ProductDetailView({
                 <>
                   <Separator className="my-4" />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Description
+                    </p>
                     <p className="mt-1 text-sm text-muted-foreground">{product.description}</p>
                   </div>
                 </>
@@ -168,7 +211,9 @@ export default function ProductDetailView({
                 <>
                   <Separator className="my-4" />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stock Visualizer</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Stock Visualizer
+                    </p>
                     <div className="mt-3 flex items-start justify-between">
                       <div>
                         <p className={`text-3xl font-bold tabular-nums ${status.textColor}`}>
@@ -176,7 +221,9 @@ export default function ProductDetailView({
                         </p>
                         <p className="text-xs text-muted-foreground">{product.unit ?? 'Units'}</p>
                       </div>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}
+                      >
                         {status.label}
                       </span>
                     </div>
@@ -307,7 +354,8 @@ export default function ProductDetailView({
           </CardContent>
           {product.movements.length > 0 && (
             <div className="border-t px-4 py-3 text-xs text-muted-foreground">
-              Showing last {product.movements.length} movement{product.movements.length !== 1 ? 's' : ''}
+              Showing last {product.movements.length} movement
+              {product.movements.length !== 1 ? 's' : ''}
             </div>
           )}
         </Card>
@@ -317,24 +365,15 @@ export default function ProductDetailView({
       {showDeactivateConfirm && (
         <Alert variant="destructive" className="mt-4">
           <AlertDescription>
-            <p className="font-semibold">
-              Deactivate &ldquo;{product.name}&rdquo;?
-            </p>
+            <p className="font-semibold">Deactivate &ldquo;{product.name}&rdquo;?</p>
             <p className="mt-1 text-xs">
               This product will no longer appear in search results or be available for new sales.
             </p>
             <div className="mt-3 flex gap-2">
-              <Button
-                variant="destructive"
-                onClick={handleDeactivate}
-                disabled={isPending}
-              >
+              <Button variant="destructive" onClick={handleDeactivate} disabled={isPending}>
                 {isPending ? 'Deactivating...' : 'Yes, Deactivate'}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowDeactivateConfirm(false)}
-              >
+              <Button variant="outline" onClick={() => setShowDeactivateConfirm(false)}>
                 Cancel
               </Button>
             </div>
@@ -356,7 +395,9 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
 
   return (
     <TableRow>
-      <TableCell className="text-xs text-muted-foreground">{formatDate(movement.transactionDate)}</TableCell>
+      <TableCell className="text-xs text-muted-foreground">
+        {formatDate(movement.transactionDate)}
+      </TableCell>
       <TableCell>
         <Badge variant="secondary" className={`${style.bg} ${style.text}`}>
           {style.label}
@@ -369,9 +410,7 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
           {isPositive ? '+' : ''}
           {qty} {unit ?? 'units'}
         </span>
-        {movement.notes && (
-          <p className="mt-0.5 text-xs text-muted-foreground">{movement.notes}</p>
-        )}
+        {movement.notes && <p className="mt-0.5 text-xs text-muted-foreground">{movement.notes}</p>}
       </TableCell>
       <TableCell className="text-right text-xs tabular-nums text-muted-foreground">
         {formatGhs(movement.unitCost)}

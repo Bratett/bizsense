@@ -6,7 +6,14 @@ import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { VatReport, VatReportLine } from '@/lib/reports/vat'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -143,7 +150,9 @@ function VatDocument({ data }: { data: VatReport }) {
 function LineRow({ line, netLabel }: { line: VatReportLine; netLabel: string }) {
   return (
     <TableRow>
-      <TableCell className="py-2 pl-4 text-sm tabular-nums text-muted-foreground">{line.entryDate}</TableCell>
+      <TableCell className="py-2 pl-4 text-sm tabular-nums text-muted-foreground">
+        {line.entryDate}
+      </TableCell>
       <TableCell className="py-2 text-sm text-muted-foreground">{line.reference || '—'}</TableCell>
       <TableCell className="py-2 text-sm text-foreground/80">{line.description || '—'}</TableCell>
       <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground">
@@ -257,39 +266,44 @@ export default function VatReportClient({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-        {data.outputVat.lines.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-muted-foreground/60">No VAT-bearing sales in this period.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="py-2 pl-4 w-28">Date</TableHead>
-                <TableHead className="py-2 w-28">Invoice Ref</TableHead>
-                <TableHead className="py-2">Description</TableHead>
-                <TableHead className="py-2 pr-4 text-right w-32">Net Supply (GHS)</TableHead>
-                <TableHead className="py-2 pr-4 text-right w-28">VAT (GHS)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.outputVat.lines.map((l, i) => (
-                <LineRow key={i} line={l} netLabel="Net Supply" />
-              ))}
-            </TableBody>
-            <tfoot>
-              <TableRow className="border-t bg-muted/50">
-                <TableCell colSpan={3} className="py-2.5 pl-4 text-sm font-semibold text-foreground/80">
-                  Total Taxable Supplies
-                </TableCell>
-                <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
-                  {formatGhs(data.outputVat.totalNetSupply)}
-                </TableCell>
-                <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
-                  {formatGhs(data.outputVat.totalVat)}
-                </TableCell>
-              </TableRow>
-            </tfoot>
-          </Table>
-        )}
+          {data.outputVat.lines.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-muted-foreground/60">
+              No VAT-bearing sales in this period.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="py-2 pl-4 w-28">Date</TableHead>
+                  <TableHead className="py-2 w-28">Invoice Ref</TableHead>
+                  <TableHead className="py-2">Description</TableHead>
+                  <TableHead className="py-2 pr-4 text-right w-32">Net Supply (GHS)</TableHead>
+                  <TableHead className="py-2 pr-4 text-right w-28">VAT (GHS)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.outputVat.lines.map((l, i) => (
+                  <LineRow key={i} line={l} netLabel="Net Supply" />
+                ))}
+              </TableBody>
+              <tfoot>
+                <TableRow className="border-t bg-muted/50">
+                  <TableCell
+                    colSpan={3}
+                    className="py-2.5 pl-4 text-sm font-semibold text-foreground/80"
+                  >
+                    Total Taxable Supplies
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
+                    {formatGhs(data.outputVat.totalNetSupply)}
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
+                    {formatGhs(data.outputVat.totalVat)}
+                  </TableCell>
+                </TableRow>
+              </tfoot>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -301,45 +315,50 @@ export default function VatReportClient({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-        {data.inputVat.lines.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-muted-foreground/60">No VAT-bearing expenses in this period.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="py-2 pl-4 w-28">Date</TableHead>
-                <TableHead className="py-2 w-28">Reference</TableHead>
-                <TableHead className="py-2">Description</TableHead>
-                <TableHead className="py-2 pr-4 text-right w-32">Net Purchase (GHS)</TableHead>
-                <TableHead className="py-2 pr-4 text-right w-28">VAT (GHS)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.inputVat.lines.map((l, i) => (
-                <LineRow key={i} line={l} netLabel="Net Purchase" />
-              ))}
-            </TableBody>
-            <tfoot>
-              <TableRow className="border-t bg-muted/50">
-                <TableCell colSpan={3} className="py-2.5 pl-4 text-sm font-semibold text-foreground/80">
-                  Total Purchases (Incl. VAT)
-                </TableCell>
-                <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
-                  {formatGhs(data.inputVat.totalNetPurchase + data.inputVat.totalVat)}
-                </TableCell>
-                <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
-                  {formatGhs(data.inputVat.totalVat)}
-                </TableCell>
-              </TableRow>
-            </tfoot>
-          </Table>
-        )}
+          {data.inputVat.lines.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-muted-foreground/60">
+              No VAT-bearing expenses in this period.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="py-2 pl-4 w-28">Date</TableHead>
+                  <TableHead className="py-2 w-28">Reference</TableHead>
+                  <TableHead className="py-2">Description</TableHead>
+                  <TableHead className="py-2 pr-4 text-right w-32">Net Purchase (GHS)</TableHead>
+                  <TableHead className="py-2 pr-4 text-right w-28">VAT (GHS)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.inputVat.lines.map((l, i) => (
+                  <LineRow key={i} line={l} netLabel="Net Purchase" />
+                ))}
+              </TableBody>
+              <tfoot>
+                <TableRow className="border-t bg-muted/50">
+                  <TableCell
+                    colSpan={3}
+                    className="py-2.5 pl-4 text-sm font-semibold text-foreground/80"
+                  >
+                    Total Purchases (Incl. VAT)
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
+                    {formatGhs(data.inputVat.totalNetPurchase + data.inputVat.totalVat)}
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm font-semibold tabular-nums text-foreground">
+                    {formatGhs(data.inputVat.totalVat)}
+                  </TableCell>
+                </TableRow>
+              </tfoot>
+            </Table>
+          )}
 
-        {/* Amber banner — always shown */}
-        <div className="border-t border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Input VAT from supplier purchases is not yet included in this report. Only VAT from
-          recorded expenses is shown. Speak to your accountant for a complete VAT return.
-        </div>
+          {/* Amber banner — always shown */}
+          <div className="border-t border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Input VAT from supplier purchases is not yet included in this report. Only VAT from
+            recorded expenses is shown. Speak to your accountant for a complete VAT return.
+          </div>
         </CardContent>
       </Card>
 
@@ -351,39 +370,41 @@ export default function VatReportClient({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-        <div className="divide-y px-4">
-          <div className="flex items-center justify-between py-3">
-            <span className="text-sm text-muted-foreground">Output VAT (payable to GRA)</span>
-            <span className="text-sm tabular-nums text-foreground">
-              {formatGhs(data.outputVat.totalVat)}
-            </span>
+          <div className="divide-y px-4">
+            <div className="flex items-center justify-between py-3">
+              <span className="text-sm text-muted-foreground">Output VAT (payable to GRA)</span>
+              <span className="text-sm tabular-nums text-foreground">
+                {formatGhs(data.outputVat.totalVat)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <span className="text-sm text-muted-foreground">Less: Input VAT Recoverable</span>
+              <span className="text-sm tabular-nums text-muted-foreground">
+                ({formatGhs(data.inputVat.totalVat)})
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-3.5">
+              <span
+                className={`text-sm font-bold ${isRefund ? 'text-green-700' : 'text-foreground'}`}
+              >
+                {isRefund ? 'VAT Refund Due from GRA' : 'Net VAT Payable to GRA'}
+              </span>
+              <span
+                className={`text-base font-bold tabular-nums ${
+                  isRefund ? 'text-green-700' : 'text-foreground'
+                }`}
+              >
+                {formatGhs(Math.abs(data.netVatPayable))}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center justify-between py-3">
-            <span className="text-sm text-muted-foreground">Less: Input VAT Recoverable</span>
-            <span className="text-sm tabular-nums text-muted-foreground">
-              ({formatGhs(data.inputVat.totalVat)})
-            </span>
-          </div>
-          <div className="flex items-center justify-between py-3.5">
-            <span className={`text-sm font-bold ${isRefund ? 'text-green-700' : 'text-foreground'}`}>
-              {isRefund ? 'VAT Refund Due from GRA' : 'Net VAT Payable to GRA'}
-            </span>
-            <span
-              className={`text-base font-bold tabular-nums ${
-                isRefund ? 'text-green-700' : 'text-foreground'
-              }`}
-            >
-              {formatGhs(Math.abs(data.netVatPayable))}
-            </span>
-          </div>
-        </div>
 
-        {/* GRA Filing Guidance */}
-        <div className="border-t border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          This report is prepared for your reference. To file your VAT return, log in to{' '}
-          <span className="font-medium">GRA e-Services (ets.gra.gov.gh)</span> and enter these
-          figures in your quarterly VAT return. Your accountant can assist with submission.
-        </div>
+          {/* GRA Filing Guidance */}
+          <div className="border-t border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            This report is prepared for your reference. To file your VAT return, log in to{' '}
+            <span className="font-medium">GRA e-Services (ets.gra.gov.gh)</span> and enter these
+            figures in your quarterly VAT return. Your accountant can assist with submission.
+          </div>
         </CardContent>
       </Card>
     </div>

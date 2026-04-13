@@ -47,16 +47,10 @@ function PaymentBadge({
     return <StatusBadge variant="paid">Paid</StatusBadge>
   }
   if (paymentStatus === 'unpaid') {
-    return (
-      <StatusBadge variant="unpaid">
-        Unpaid &middot; GHS {outstanding.toFixed(2)}
-      </StatusBadge>
-    )
+    return <StatusBadge variant="unpaid">Unpaid &middot; GHS {outstanding.toFixed(2)}</StatusBadge>
   }
   return (
-    <StatusBadge variant="partial">
-      Partial &middot; GHS {outstanding.toFixed(2)} due
-    </StatusBadge>
+    <StatusBadge variant="partial">Partial &middot; GHS {outstanding.toFixed(2)} due</StatusBadge>
   )
 }
 
@@ -197,10 +191,7 @@ export default function OrderList({
                 },
               ]}
             >
-              <Link
-                href={`/orders/${order.id}`}
-                className="block"
-              >
+              <Link href={`/orders/${order.id}`} className="block">
                 <Card className="p-4 transition-colors hover:bg-muted/30 active:bg-muted/50">
                   <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
@@ -222,9 +213,7 @@ export default function OrderList({
                       )}
                     </div>
                     <div className="ml-4 flex items-center gap-2">
-                      <p className="text-base font-semibold">
-                        {formatGhs(order.totalAmount)}
-                      </p>
+                      <p className="text-base font-semibold">{formatGhs(order.totalAmount)}</p>
                       <ChevronRight className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     </div>
                   </div>

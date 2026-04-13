@@ -187,11 +187,7 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
 
             <div className="space-y-1.5">
               <Label>Payment Date</Label>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              />
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
 
             {(method === 'momo_mtn' || method === 'momo_telecel' || method === 'momo_airtel') && (
@@ -231,19 +227,10 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
           </div>
 
           <div className="mt-6 flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={onClose}
-              disabled={isPending}
-            >
+            <Button variant="outline" className="flex-1" onClick={onClose} disabled={isPending}>
               Cancel
             </Button>
-            <Button
-              className="flex-1"
-              onClick={handleSubmit}
-              disabled={isPending}
-            >
+            <Button className="flex-1" onClick={handleSubmit} disabled={isPending}>
               {isPending ? 'Saving...' : awaitingConfirm ? 'Confirm Payment' : 'Record Payment'}
             </Button>
           </div>
@@ -260,7 +247,9 @@ function GrnRow({ grn }: { grn: AllocatedGrn }) {
   return (
     <TableRow>
       <TableCell className="pl-10 text-xs text-muted-foreground">{grn.grnNumber}</TableCell>
-      <TableCell className="text-xs text-muted-foreground">{formatDate(grn.receivedDate)}</TableCell>
+      <TableCell className="text-xs text-muted-foreground">
+        {formatDate(grn.receivedDate)}
+      </TableCell>
       <TableCell className="text-xs text-muted-foreground">{formatDate(grn.dueDate)}</TableCell>
       <TableCell className="text-right text-xs text-foreground">
         {formatGhs(grn.originalAmount)}
@@ -301,10 +290,7 @@ function SupplierRow({
 
   return (
     <>
-      <TableRow
-        className="cursor-pointer"
-        onClick={() => setExpanded((e) => !e)}
-      >
+      <TableRow className="cursor-pointer" onClick={() => setExpanded((e) => !e)}>
         <TableCell className="py-3">
           <div className="flex items-center gap-3">
             <div
@@ -341,9 +327,7 @@ function SupplierRow({
         </TableCell>
         <TableCell className={cn('text-right text-sm', over90Class)}>
           {row.totals.over90 > 0 ? (
-            <span className="rounded-md bg-red-50 px-2 py-0.5">
-              {formatGhs(row.totals.over90)}
-            </span>
+            <span className="rounded-md bg-red-50 px-2 py-0.5">{formatGhs(row.totals.over90)}</span>
           ) : (
             '\u2014'
           )}
@@ -473,10 +457,20 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
           {/* Over 90 Days */}
           <Card className={cn(gt.over90 > 0 && 'border-red-200 bg-red-50')}>
             <CardContent>
-              <p className={cn('text-xs font-medium', gt.over90 > 0 ? 'text-red-500' : 'text-muted-foreground')}>
+              <p
+                className={cn(
+                  'text-xs font-medium',
+                  gt.over90 > 0 ? 'text-red-500' : 'text-muted-foreground',
+                )}
+              >
                 OVER 90 DAYS
               </p>
-              <p className={cn('mt-1 text-2xl font-bold tabular-nums', gt.over90 > 0 ? 'text-red-600' : 'text-foreground')}>
+              <p
+                className={cn(
+                  'mt-1 text-2xl font-bold tabular-nums',
+                  gt.over90 > 0 ? 'text-red-600' : 'text-foreground',
+                )}
+              >
                 {formatGhs(gt.over90)}
               </p>
               <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
@@ -524,13 +518,27 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[11px] uppercase tracking-wide">Supplier Name</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase tracking-wide">Total Balance</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase tracking-wide">1-30 Days</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase tracking-wide">31-60 Days</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase tracking-wide">61-90 Days</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase tracking-wide">Over 90 Days</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase tracking-wide">Actions</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wide">
+                      Supplier Name
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wide">
+                      Total Balance
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wide">
+                      1-30 Days
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wide">
+                      31-60 Days
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wide">
+                      61-90 Days
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wide">
+                      Over 90 Days
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wide">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -578,8 +586,8 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
                 <>
                   <p className="text-sm text-muted-foreground">
                     Your &ldquo;Over 90 Days&rdquo; payables have{' '}
-                    {((criticalSupplier.totals.over90 / totalForPct) * 100).toFixed(0)}% concentration
-                    with{' '}
+                    {((criticalSupplier.totals.over90 / totalForPct) * 100).toFixed(0)}%
+                    concentration with{' '}
                     <span className="font-semibold text-foreground">
                       {criticalSupplier.supplierName}
                     </span>
@@ -587,14 +595,10 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
                     and avoid late penalties.
                   </p>
                   <div className="mt-4 flex gap-3">
-                    <Button
-                      onClick={() => setPaymentTarget(criticalSupplier)}
-                    >
+                    <Button onClick={() => setPaymentTarget(criticalSupplier)}>
                       Review Payment Plan
                     </Button>
-                    <Button variant="ghost">
-                      Dismiss Advisory
-                    </Button>
+                    <Button variant="ghost">Dismiss Advisory</Button>
                   </div>
                 </>
               ) : (
@@ -635,7 +639,9 @@ export default function PayablesAgingClient({ report }: { report: PayablesAgingR
           </Card>
         </div>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">Report generated as at {asAt}</p>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Report generated as at {asAt}
+        </p>
       </div>
     </div>
   )

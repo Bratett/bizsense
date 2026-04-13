@@ -135,22 +135,14 @@ function ReversalModal({
 
 // ─── ActionRow ────────────────────────────────────────────────────────────────
 
-function ActionRow({
-  action,
-  userRole,
-}: {
-  action: PendingActionRow
-  userRole: string
-}) {
+function ActionRow({ action, userRole }: { action: PendingActionRow; userRole: string }) {
   const [expanded, setExpanded] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [reversed, setReversed] = useState(!!action.reversedAt)
   const router = useRouter()
 
   const canReverse =
-    action.status === 'confirmed' &&
-    !reversed &&
-    (userRole === 'owner' || userRole === 'manager')
+    action.status === 'confirmed' && !reversed && (userRole === 'owner' || userRole === 'manager')
 
   const resultRoute = action.resultTable ? RESULT_ROUTES[action.resultTable] : undefined
 
@@ -271,8 +263,7 @@ export function ActivityLogClient({
   const [showFlagged, setShowFlagged] = useState(flaggedLogs.length > 0)
   const router = useRouter()
 
-  const filtered =
-    activeTab === 'all' ? actions : actions.filter((a) => a.status === activeTab)
+  const filtered = activeTab === 'all' ? actions : actions.filter((a) => a.status === activeTab)
 
   function applyDateFilter(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -318,8 +309,7 @@ export function ActivityLogClient({
                   </p>
                   {log.aiResponse && (
                     <p className="mt-1 text-gray-600">
-                      <span className="font-medium">AI:</span>{' '}
-                      {log.aiResponse.slice(0, 200)}
+                      <span className="font-medium">AI:</span> {log.aiResponse.slice(0, 200)}
                       {log.aiResponse.length > 200 ? '…' : ''}
                     </p>
                   )}

@@ -243,13 +243,19 @@ export default function ValuationReportView({ report }: { report: ValuationRepor
                   </TableCell>
                   <TableCell className="px-4 text-right">
                     {line.isLowStock ? (
-                      <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
+                      <Badge
+                        variant="outline"
+                        className="bg-amber-100 text-amber-700 border-amber-200"
+                      >
                         Low
                       </Badge>
                     ) : line.currentQuantity <= 0 ? (
                       <Badge variant="destructive">Out</Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                      <Badge
+                        variant="outline"
+                        className="bg-green-100 text-green-700 border-green-200"
+                      >
                         OK
                       </Badge>
                     )}

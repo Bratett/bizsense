@@ -10,11 +10,7 @@ import { createOrder, type PaymentMethod, reverseOrder } from '@/actions/orders'
 import { createExpense, reverseExpense } from '@/actions/expenses'
 import { recordPaymentReceived } from '@/actions/payments'
 import { adjustStock } from '@/actions/inventory'
-import {
-  createCustomer,
-  updateCustomer,
-  type CustomerActionResult,
-} from '@/actions/customers'
+import { createCustomer, updateCustomer, type CustomerActionResult } from '@/actions/customers'
 import { createSupplier, type SupplierActionResult } from '@/actions/suppliers'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -85,10 +81,7 @@ export async function confirmAiAction(pendingId: string): Promise<ConfirmAiActio
           discountType: data.discountAmount ? ('fixed' as const) : undefined,
           discountValue: Number(data.discountAmount ?? 0),
           paymentMethod: data.paymentMethod as PaymentMethod | undefined,
-          paymentStatus:
-            data.paymentMethod === 'credit'
-              ? ('unpaid' as const)
-              : ('paid' as const),
+          paymentStatus: data.paymentMethod === 'credit' ? ('unpaid' as const) : ('paid' as const),
           applyVat: false,
         })
 
@@ -323,7 +316,12 @@ export async function reverseAiAction(pendingId: string, reason: string): Promis
 
   await db
     .update(pendingAiActions)
-    .set({ reversedAt: new Date(), reversedBy: userId, reversalReason: reason, updatedAt: new Date() })
+    .set({
+      reversedAt: new Date(),
+      reversedBy: userId,
+      reversalReason: reason,
+      updatedAt: new Date(),
+    })
     .where(eq(pendingAiActions.id, pendingId))
 }
 

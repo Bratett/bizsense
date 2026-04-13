@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { adjustStock, type AdjustStockInput } from '@/actions/inventory'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import type { ProductDetail } from '@/actions/products'
 import { formatGhs } from '@/lib/format'
 import { Button } from '@/components/ui/button'
@@ -71,7 +78,9 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`/inventory/${product.id}`} />}>{product.name}</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={`/inventory/${product.id}`} />}>
+              {product.name}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

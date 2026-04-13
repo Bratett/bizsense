@@ -65,11 +65,21 @@ export default function SupplierList({
         {/* Column headers (desktop) */}
         {filtered.length > 0 && (
           <div className="mt-4 hidden grid-cols-[1fr,140px,160px,160px,80px] items-center gap-4 px-4 md:grid">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Supplier</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Location</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Supplier
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Phone
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Location
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Status
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Actions
+            </span>
           </div>
         )}
 
@@ -119,7 +129,9 @@ export default function SupplierList({
 
                   {/* Name + meta */}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{supplier.name}</p>
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {supplier.name}
+                    </p>
                     {supplier.phone && (
                       <p className="mt-0.5 text-xs text-muted-foreground">{supplier.phone}</p>
                     )}
@@ -129,17 +141,26 @@ export default function SupplierList({
                     {/* Status badges */}
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {supplier.outstandingPayable > 0 && (
-                        <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                        <Badge
+                          variant="outline"
+                          className="border-amber-200 bg-amber-50 text-amber-700"
+                        >
                           {formatGhs(supplier.outstandingPayable)} owed
                         </Badge>
                       )}
                       {supplier.openPoCount > 0 && (
-                        <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
+                        <Badge
+                          variant="outline"
+                          className="border-blue-200 bg-blue-50 text-blue-700"
+                        >
                           {supplier.openPoCount} open PO{supplier.openPoCount !== 1 ? 's' : ''}
                         </Badge>
                       )}
                       {supplier.outstandingPayable === 0 && supplier.openPoCount === 0 && (
-                        <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+                        <Badge
+                          variant="outline"
+                          className="border-green-200 bg-green-50 text-green-700"
+                        >
                           All clear
                         </Badge>
                       )}
@@ -172,7 +193,8 @@ export default function SupplierList({
         {/* Footer count */}
         {filtered.length > 0 && (
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            Showing {filtered.length} of {initialSuppliers.length} supplier{initialSuppliers.length !== 1 ? 's' : ''}
+            Showing {filtered.length} of {initialSuppliers.length} supplier
+            {initialSuppliers.length !== 1 ? 's' : ''}
           </p>
         )}
       </div>

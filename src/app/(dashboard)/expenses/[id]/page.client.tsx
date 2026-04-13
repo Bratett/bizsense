@@ -9,7 +9,14 @@ import {
   reverseExpense,
   type ExpenseDetail,
 } from '@/actions/expenses'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { getCategoryLabel } from '@/lib/expenses/categories'
 import ReceiptCapture from '@/components/receipts/ReceiptCapture.client'
 import type { UserRole } from '@/lib/session'
@@ -112,7 +119,9 @@ export default function ExpenseDetailView({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{expense.description || getCategoryLabel(expense.category ?? '') || 'Expense'}</BreadcrumbPage>
+            <BreadcrumbPage>
+              {expense.description || getCategoryLabel(expense.category ?? '') || 'Expense'}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -139,9 +148,7 @@ export default function ExpenseDetailView({
                 <p className="text-lg font-bold text-foreground">{formatGhs(expense.amount)}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{expense.description}</p>
               </div>
-              <StatusBadge
-                variant={STATUS_BADGE_VARIANT[expense.approvalStatus] ?? 'draft'}
-              >
+              <StatusBadge variant={STATUS_BADGE_VARIANT[expense.approvalStatus] ?? 'draft'}>
                 {STATUS_LABELS[expense.approvalStatus] ?? expense.approvalStatus}
               </StatusBadge>
             </div>

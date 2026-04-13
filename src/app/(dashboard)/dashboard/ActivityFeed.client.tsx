@@ -40,10 +40,7 @@ export default function ActivityFeed({ items }: { items: ActivityItem[] }) {
             >
               <Avatar size="lg">
                 <AvatarFallback
-                  className={cn(
-                    'text-white text-xs font-semibold',
-                    avatarColor(item.description),
-                  )}
+                  className={cn('text-white text-xs font-semibold', avatarColor(item.description))}
                 >
                   {getInitial(item.description)}
                 </AvatarFallback>
@@ -65,7 +62,8 @@ export default function ActivityFeed({ items }: { items: ActivityItem[] }) {
                     item.type === 'sale' ? 'text-green-700' : 'text-red-600',
                   )}
                 >
-                  {item.type === 'sale' ? '+' : '-'}{formatGhs(item.amount)}
+                  {item.type === 'sale' ? '+' : '-'}
+                  {formatGhs(item.amount)}
                 </p>
                 {item.status === 'pending_approval' && (
                   <StatusBadge variant="pending" className="mt-0.5 text-[10px]">

@@ -28,9 +28,7 @@ export function PageHeader({ title, subtitle, backHref, actions, className }: Pa
         )}
         <div>
           <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-          {subtitle && (
-            <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
-          )}
+          {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

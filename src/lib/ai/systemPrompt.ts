@@ -4,10 +4,7 @@ import { businesses } from '@/db/schema'
 import { getAccountBalances } from '@/lib/reports/engine'
 import { formatGhs } from '@/lib/format'
 
-export async function buildSystemPrompt(
-  businessId: string,
-  userRole: string,
-): Promise<string> {
+export async function buildSystemPrompt(businessId: string, userRole: string): Promise<string> {
   const business = await db.query.businesses.findFirst({
     where: eq(businesses.id, businessId),
   })
@@ -109,11 +106,13 @@ Then:
 async function getCashSummary(businessId: string): Promise<string> {
   try {
     const today = new Date().toISOString().slice(0, 10)
-    const balances = await getAccountBalances(
-      businessId,
-      { type: 'asOf', date: today },
-      ['1001', '1002', '1003', '1004', '1005'],
-    )
+    const balances = await getAccountBalances(businessId, { type: 'asOf', date: today }, [
+      '1001',
+      '1002',
+      '1003',
+      '1004',
+      '1005',
+    ])
     const total = balances.reduce((s, a) => s + a.netBalance, 0)
     return formatGhs(total) + ' total'
   } catch {

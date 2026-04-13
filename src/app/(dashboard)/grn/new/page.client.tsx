@@ -381,10 +381,7 @@ export default function WalkInGrnForm({
                 <Button variant="outline" onClick={() => setConfirmMode(false)}>
                   Cancel
                 </Button>
-                <Button
-                  disabled={isPending}
-                  onClick={() => handleSubmit(true)}
-                >
+                <Button disabled={isPending} onClick={() => handleSubmit(true)}>
                   {isPending ? 'Confirming...' : 'Yes, Confirm Receipt'}
                 </Button>
               </div>

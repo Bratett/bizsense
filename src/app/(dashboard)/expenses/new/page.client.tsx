@@ -270,10 +270,7 @@ export default function NewExpenseForm({
                 <p className="text-sm font-medium text-foreground">This purchase includes VAT</p>
                 <p className="text-xs text-muted-foreground">Reverse-calculate input VAT</p>
               </div>
-              <Switch
-                checked={includesVat}
-                onCheckedChange={setIncludesVat}
-              />
+              <Switch checked={includesVat} onCheckedChange={setIncludesVat} />
             </div>
 
             {/* VAT breakdown */}
@@ -478,10 +475,7 @@ export default function NewExpenseForm({
                 <p className="text-sm font-medium text-foreground">Recurring expense?</p>
                 <p className="text-xs text-muted-foreground">Auto-posts on schedule</p>
               </div>
-              <Switch
-                checked={isRecurring}
-                onCheckedChange={setIsRecurring}
-              />
+              <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
             </div>
 
             {isRecurring && (

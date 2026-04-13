@@ -70,9 +70,7 @@ async function createStagingRecord(params: {
 
 // ── Category resolver ─────────────────────────────────────────────────────────
 
-function resolveExpenseCategory(
-  input: string,
-): (typeof EXPENSE_CATEGORIES)[number] | null {
+function resolveExpenseCategory(input: string): (typeof EXPENSE_CATEGORIES)[number] | null {
   const lower = input.toLowerCase().trim()
 
   // 1. Exact key match (e.g. 'transport')
@@ -80,9 +78,7 @@ function resolveExpenseCategory(
   if (byKey) return byKey
 
   // 2. Key slug match (e.g. 'bank charges' matches key 'bank_charges')
-  const bySlug = EXPENSE_CATEGORIES.find((c) =>
-    lower.includes(c.key.replace(/_/g, ' ')),
-  )
+  const bySlug = EXPENSE_CATEGORIES.find((c) => lower.includes(c.key.replace(/_/g, ' ')))
   if (bySlug) return bySlug
 
   // 3. Label word match (e.g. 'fuel' matches 'Transport & Fuel')
@@ -111,10 +107,7 @@ async function resolveCustomer(
       and(
         eq(customers.businessId, businessId),
         eq(customers.isActive, true),
-        or(
-          ilike(customers.name, `%${identifier}%`),
-          eq(customers.phone, identifier),
-        ),
+        or(ilike(customers.name, `%${identifier}%`), eq(customers.phone, identifier)),
       ),
     )
     .limit(5)
@@ -157,8 +150,7 @@ async function stageRecordSale(
     resolvedCustomerName = matches[0].name
   }
 
-  const items =
-    (input.items as Array<{ name: string; qty: number; unit_price: number }>) ?? []
+  const items = (input.items as Array<{ name: string; qty: number; unit_price: number }>) ?? []
   const discount = (input.discount_amount as number | undefined) ?? 0
   const total = items.reduce((s, i) => s + i.qty * i.unit_price, 0)
   const net = total - discount
@@ -169,9 +161,7 @@ async function stageRecordSale(
 
   const humanReadable = [
     `Sale on ${(input.order_date as string) ?? new Date().toISOString().slice(0, 10)}`,
-    identifier
-      ? `Customer: ${resolvedCustomerName ?? identifier}`
-      : 'Walk-in customer',
+    identifier ? `Customer: ${resolvedCustomerName ?? identifier}` : 'Walk-in customer',
     `Items:\n${itemLines}`,
     discount > 0 ? `Discount: GHS ${discount.toFixed(2)}` : null,
     `Total: GHS ${net.toFixed(2)}`,
@@ -221,8 +211,7 @@ async function stageRecordExpense(
 
   const amount = Number(input.amount)
   const isCapital = category.accountCode === '1500'
-  const expenseDate =
-    (input.expense_date as string) ?? new Date().toISOString().slice(0, 10)
+  const expenseDate = (input.expense_date as string) ?? new Date().toISOString().slice(0, 10)
 
   const humanReadable = [
     `Expense on ${expenseDate}`,
@@ -267,8 +256,7 @@ async function stageRecordPayment(
   const identifier = input.customer_name_or_phone as string
   const amount = Number(input.amount)
   const paymentMethod = input.payment_method as string
-  const paymentDate =
-    (input.payment_date as string) ?? new Date().toISOString().slice(0, 10)
+  const paymentDate = (input.payment_date as string) ?? new Date().toISOString().slice(0, 10)
   const invoiceNumber = input.invoice_number as string | undefined
 
   // Resolve customer
@@ -323,8 +311,7 @@ async function stageRecordPayment(
     ? (openInvoices.find((o) => o.orderNumber === invoiceNumber) ?? openInvoices[0])
     : openInvoices[0]
 
-  const remaining =
-    Number(targetInvoice.totalAmount) - Number(targetInvoice.amountPaid)
+  const remaining = Number(targetInvoice.totalAmount) - Number(targetInvoice.amountPaid)
   const overpaymentWarning = amount > remaining
 
   const humanReadable = [
@@ -332,9 +319,7 @@ async function stageRecordPayment(
     `Invoice: ${targetInvoice.orderNumber} (outstanding: GHS ${remaining.toFixed(2)})`,
     `Amount received: GHS ${amount.toFixed(2)}`,
     `Payment method: ${paymentMethod}`,
-    overpaymentWarning
-      ? `Payment exceeds balance by GHS ${(amount - remaining).toFixed(2)}`
-      : null,
+    overpaymentWarning ? `Payment exceeds balance by GHS ${(amount - remaining).toFixed(2)}` : null,
     openInvoices.length > 1
       ? `Note: ${customer.name} has ${openInvoices.length} open invoices. Payment applied to oldest.`
       : null,
@@ -391,9 +376,7 @@ async function stageAddCustomer(
     `Add new customer: ${name}`,
     `Phone: ${phone}`,
     input.location ? `Location: ${input.location as string}` : null,
-    creditLimit > 0
-      ? `Credit limit: GHS ${creditLimit.toFixed(2)}`
-      : 'No credit (cash only)',
+    creditLimit > 0 ? `Credit limit: GHS ${creditLimit.toFixed(2)}` : 'No credit (cash only)',
   ]
     .filter(Boolean)
     .join('\n')
@@ -428,12 +411,7 @@ async function stageUpdateCustomer(
   const matches = await db
     .select({ id: customers.id, name: customers.name })
     .from(customers)
-    .where(
-      and(
-        eq(customers.businessId, businessId),
-        ilike(customers.name, `%${identifier}%`),
-      ),
-    )
+    .where(and(eq(customers.businessId, businessId), ilike(customers.name, `%${identifier}%`)))
     .limit(3)
 
   if (matches.length === 0) {
@@ -482,12 +460,7 @@ async function stageAddSupplier(
   const existing = await db
     .select({ id: suppliers.id })
     .from(suppliers)
-    .where(
-      and(
-        eq(suppliers.businessId, businessId),
-        eq(suppliers.phone, phone),
-      ),
-    )
+    .where(and(eq(suppliers.businessId, businessId), eq(suppliers.phone, phone)))
     .limit(1)
 
   if (existing.length > 0) {

@@ -4,7 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { reverseGrn, type GrnWithLinesAndJournal } from '@/actions/grn'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { formatGhs, formatDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -292,8 +299,7 @@ export default function GrnDetail({ grn, role }: { grn: GrnWithLinesAndJournal; 
                   <span className="font-medium">Reference:</span> {grn.journalSummary.reference}
                 </p>
                 <p>
-                  <span className="font-medium">Description:</span>{' '}
-                  {grn.journalSummary.description}
+                  <span className="font-medium">Description:</span> {grn.journalSummary.description}
                 </p>
               </CardContent>
             )}

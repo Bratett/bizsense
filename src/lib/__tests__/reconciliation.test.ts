@@ -147,7 +147,16 @@ describe('runLedgerReconciliation', () => {
     // candidate orders (selectDistinct) → 1 order with journal entry;
     // COGS line check → empty (no COGS line); dedup → empty (new issue)
     configureDb(
-      [[], [], [], [], [{ id: 'cogs-acct-1' }], [{ id: 'order-x', journalEntryId: 'je-x' }], [], []],
+      [
+        [],
+        [],
+        [],
+        [],
+        [{ id: 'cogs-acct-1' }],
+        [{ id: 'order-x', journalEntryId: 'je-x' }],
+        [],
+        [],
+      ],
       insertCaptured,
     )
 
@@ -169,7 +178,15 @@ describe('runLedgerReconciliation', () => {
     // Checks 1-4 → empty; COGS account → found;
     // candidate orders → 1 order; COGS line check → found (has COGS line)
     configureDb(
-      [[], [], [], [], [{ id: 'cogs-acct-1' }], [{ id: 'order-y', journalEntryId: 'je-y' }], [{ id: 'jl-1' }]],
+      [
+        [],
+        [],
+        [],
+        [],
+        [{ id: 'cogs-acct-1' }],
+        [{ id: 'order-y', journalEntryId: 'je-y' }],
+        [{ id: 'jl-1' }],
+      ],
       insertCaptured,
     )
 

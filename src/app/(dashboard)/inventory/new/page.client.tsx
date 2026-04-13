@@ -219,17 +219,14 @@ export default function NewProductForm({ categories }: { categories: string[] })
             <p className="text-sm font-medium text-gray-900">Track Inventory</p>
             <p className="text-xs text-gray-500">Monitor stock levels for this product</p>
           </div>
-          <Switch
-            checked={trackInventory}
-            onCheckedChange={setTrackInventory}
-          />
+          <Switch checked={trackInventory} onCheckedChange={setTrackInventory} />
         </div>
 
         {!trackInventory && (
           <Alert>
             <AlertDescription>
-              Stock levels will not be tracked for this product. Use this for services or products you
-              don&apos;t physically stock.
+              Stock levels will not be tracked for this product. Use this for services or products
+              you don&apos;t physically stock.
             </AlertDescription>
           </Alert>
         )}
@@ -238,7 +235,9 @@ export default function NewProductForm({ categories }: { categories: string[] })
         {trackInventory && (
           <div className="space-y-1.5">
             <Label htmlFor="reorderLevel">Reorder Level</Label>
-            <p className="text-xs text-muted-foreground">Alert me when stock falls below this quantity</p>
+            <p className="text-xs text-muted-foreground">
+              Alert me when stock falls below this quantity
+            </p>
             <Input
               id="reorderLevel"
               type="text"

@@ -3,7 +3,14 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { OrderDetail } from '@/actions/orders'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import InvoiceButton from '@/components/InvoiceButton.client'
 import { formatGhs, formatDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
@@ -34,14 +41,10 @@ function PaymentStatusBadge({
     return <StatusBadge variant="paid">Paid</StatusBadge>
   }
   if (paymentStatus === 'unpaid') {
-    return (
-      <StatusBadge variant="unpaid">Unpaid &middot; GHS {outstanding.toFixed(2)}</StatusBadge>
-    )
+    return <StatusBadge variant="unpaid">Unpaid &middot; GHS {outstanding.toFixed(2)}</StatusBadge>
   }
   return (
-    <StatusBadge variant="partial">
-      Partial &middot; GHS {outstanding.toFixed(2)} due
-    </StatusBadge>
+    <StatusBadge variant="partial">Partial &middot; GHS {outstanding.toFixed(2)} due</StatusBadge>
   )
 }
 

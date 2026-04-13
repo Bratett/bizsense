@@ -65,9 +65,7 @@ export default function StocktakeHistoryView({ history }: { history: StocktakeHi
                       <span>Total variance: {formatGhs(item.totalVarianceValue)}</span>
                     )}
                   </div>
-                  {item.notes && (
-                    <p className="mt-1 text-xs text-muted-foreground">{item.notes}</p>
-                  )}
+                  {item.notes && <p className="mt-1 text-xs text-muted-foreground">{item.notes}</p>}
                 </CardContent>
               </Card>
             )

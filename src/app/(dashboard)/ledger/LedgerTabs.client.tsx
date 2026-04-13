@@ -178,7 +178,10 @@ export default function LedgerTabs({
             actions={
               isDev ? (
                 <div className="flex flex-wrap gap-2 items-center">
-                  <Badge variant="outline" className="font-mono text-[10px] border-yellow-300 bg-yellow-100 text-yellow-700">
+                  <Badge
+                    variant="outline"
+                    className="font-mono text-[10px] border-yellow-300 bg-yellow-100 text-yellow-700"
+                  >
                     DEV MODE
                   </Badge>
 
@@ -194,7 +197,12 @@ export default function LedgerTabs({
                       router.refresh()
                     }}
                   >
-                    <Button type="submit" variant="outline" size="sm" className="font-mono border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      size="sm"
+                      className="font-mono border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
+                    >
                       Seed CoA + Tax
                     </Button>
                   </form>
@@ -211,7 +219,9 @@ export default function LedgerTabs({
                     </Button>
                   </form>
 
-                  {seedStatus && <span className="text-xs text-gray-500 font-mono">{seedStatus}</span>}
+                  {seedStatus && (
+                    <span className="text-xs text-gray-500 font-mono">{seedStatus}</span>
+                  )}
                 </div>
               ) : undefined
             }
@@ -220,10 +230,7 @@ export default function LedgerTabs({
 
         {/* Tab bar */}
         <div className="max-w-7xl mx-auto mt-3">
-          <Tabs
-            value={tab}
-            onValueChange={(val) => navigate({ tab: val as string })}
-          >
+          <Tabs value={tab} onValueChange={(val) => navigate({ tab: val as string })}>
             <TabsList variant="line">
               <TabsTrigger value="journal">Journal Entries</TabsTrigger>
               <TabsTrigger value="trial-balance">Trial Balance</TabsTrigger>
@@ -308,7 +315,9 @@ function JournalEntriesTab({
             <Label className="text-xs text-muted-foreground">Source</Label>
             <select
               value={filters.sourceType ?? ''}
-              onChange={(e) => navigate({ sourceType: e.target.value || undefined, page: undefined })}
+              onChange={(e) =>
+                navigate({ sourceType: e.target.value || undefined, page: undefined })
+              }
               className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none"
             >
               <option value="">All sources</option>
@@ -452,16 +461,14 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
         <TableCell className="text-xs text-muted-foreground">
           {formatDate(entry.entryDate)}
         </TableCell>
-        <TableCell className="text-xs text-muted-foreground font-mono">{entry.reference ?? '–'}</TableCell>
-        <TableCell className="text-xs max-w-[200px] truncate">
-          {entry.description ?? '–'}
+        <TableCell className="text-xs text-muted-foreground font-mono">
+          {entry.reference ?? '–'}
         </TableCell>
+        <TableCell className="text-xs max-w-[200px] truncate">{entry.description ?? '–'}</TableCell>
         <TableCell>
           <div className="flex items-center gap-1 flex-wrap">
             <span className="text-xs text-muted-foreground">{sourceLabel(entry.sourceType)}</span>
-            {entry.aiGenerated && (
-              <StatusBadge variant="ai">AI</StatusBadge>
-            )}
+            {entry.aiGenerated && <StatusBadge variant="ai">AI</StatusBadge>}
             {entry.sourceType === 'reversal' && (
               <StatusBadge variant="reversal">REVERSAL</StatusBadge>
             )}
@@ -529,7 +536,9 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
                       </th>
                     )}
                     <th className="text-left px-3 py-2 font-medium text-muted-foreground">Code</th>
-                    <th className="text-left px-3 py-2 font-medium text-muted-foreground">Account Name</th>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                      Account Name
+                    </th>
                     <th className="text-right px-3 py-2 font-medium text-muted-foreground font-mono tabular-nums">
                       Debit (GHS)
                     </th>
@@ -549,7 +558,9 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
                           </span>
                         </td>
                       )}
-                      <td className="px-3 py-1.5 font-mono text-muted-foreground">{line.accountCode}</td>
+                      <td className="px-3 py-1.5 font-mono text-muted-foreground">
+                        {line.accountCode}
+                      </td>
                       <td className="px-3 py-1.5">{line.accountName}</td>
                       <td className="px-3 py-1.5 font-mono tabular-nums text-right">
                         {fmtGHS(line.debitAmount)}
@@ -707,8 +718,8 @@ function TrialBalanceTab({
         <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="text-sm text-red-800 font-medium">
-              <span className="text-red-600">&#10007;</span> Trial Balance does not balance — difference:{' '}
-              <span className="font-mono">GHS {fmtGHS(diff)}</span>
+              <span className="text-red-600">&#10007;</span> Trial Balance does not balance —
+              difference: <span className="font-mono">GHS {fmtGHS(diff)}</span>
             </div>
             <form
               action={async () => {
@@ -731,8 +742,12 @@ function TrialBalanceTab({
               <TableHead className="text-xs font-mono">Code</TableHead>
               <TableHead className="text-xs">Account Name</TableHead>
               <TableHead className="text-xs">Type</TableHead>
-              <TableHead className="text-right text-xs font-mono tabular-nums">Total Debits</TableHead>
-              <TableHead className="text-right text-xs font-mono tabular-nums">Total Credits</TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">
+                Total Debits
+              </TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">
+                Total Credits
+              </TableHead>
               <TableHead className="text-right text-xs font-mono tabular-nums">Balance</TableHead>
             </TableRow>
           </TableHeader>
@@ -740,9 +755,7 @@ function TrialBalanceTab({
             {TYPE_ORDER.map((type) => {
               const typeRows = grouped[type]
               if (typeRows.length === 0) return null
-              return (
-                <TrialBalanceTypeGroup key={type} type={type} typeRows={typeRows} />
-              )
+              return <TrialBalanceTypeGroup key={type} type={type} typeRows={typeRows} />
             })}
             {rows.length === 0 && (
               <TableRow>
@@ -796,10 +809,7 @@ function TrialBalanceTypeGroup({
   return (
     <>
       <TableRow className="bg-muted border-y">
-        <TableCell
-          colSpan={6}
-          className="text-xs font-semibold uppercase tracking-wide"
-        >
+        <TableCell colSpan={6} className="text-xs font-semibold uppercase tracking-wide">
           {TYPE_LABEL[type]}
         </TableCell>
       </TableRow>

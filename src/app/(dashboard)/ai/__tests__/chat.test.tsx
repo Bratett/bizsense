@@ -6,7 +6,15 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
 vi.mock('next/link', () => ({
-  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+  default: ({
+    href,
+    children,
+    className,
+  }: {
+    href: string
+    children: React.ReactNode
+    className?: string
+  }) => (
     <a href={href} className={className}>
       {children}
     </a>
@@ -346,9 +354,9 @@ describe('AiChatClient — session ID', () => {
     })
     await waitFor(() => screen.getByText('Response 2'))
 
-    const calls = vi.mocked(global.fetch).mock.calls.filter(
-      ([url]) => (url as string) === '/api/ai/chat',
-    )
+    const calls = vi
+      .mocked(global.fetch)
+      .mock.calls.filter(([url]) => (url as string) === '/api/ai/chat')
     expect(calls.length).toBe(2)
 
     const body1 = JSON.parse((calls[0][1] as RequestInit).body as string)

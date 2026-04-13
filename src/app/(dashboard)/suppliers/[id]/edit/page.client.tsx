@@ -8,7 +8,14 @@ import {
   type SupplierActionResult,
   type SupplierWithBalance,
 } from '@/actions/suppliers'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,7 +46,9 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`/suppliers/${supplier.id}`} />}>{supplier.name}</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={`/suppliers/${supplier.id}`} />}>
+              {supplier.name}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -102,12 +111,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
         {/* Email */}
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            defaultValue={supplier.email ?? ''}
-          />
+          <Input id="email" name="email" type="email" defaultValue={supplier.email ?? ''} />
         </div>
 
         {/* Location */}

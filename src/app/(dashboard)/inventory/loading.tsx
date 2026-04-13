@@ -17,7 +17,10 @@ export default function InventoryLoading() {
         </div>
         <div className="space-y-2">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
+            >
               <div className="flex-1">
                 <Skeleton className="h-4 w-40" />
                 <Skeleton className="mt-1.5 h-3 w-24" />

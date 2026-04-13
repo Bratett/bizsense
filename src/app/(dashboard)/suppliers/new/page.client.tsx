@@ -76,12 +76,7 @@ export default function NewSupplierForm() {
         {/* Email */}
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="e.g. info@supplier.com"
-          />
+          <Input id="email" name="email" type="email" placeholder="e.g. info@supplier.com" />
         </div>
 
         {/* Location */}
@@ -110,23 +105,13 @@ export default function NewSupplierForm() {
         {/* Bank Name */}
         <div className="space-y-1.5">
           <Label htmlFor="bankName">Bank Name</Label>
-          <Input
-            id="bankName"
-            name="bankName"
-            type="text"
-            placeholder="e.g. GCB Bank"
-          />
+          <Input id="bankName" name="bankName" type="text" placeholder="e.g. GCB Bank" />
         </div>
 
         {/* Bank Account */}
         <div className="space-y-1.5">
           <Label htmlFor="bankAccount">Bank Account Number</Label>
-          <Input
-            id="bankAccount"
-            name="bankAccount"
-            type="text"
-            placeholder="e.g. 1234567890"
-          />
+          <Input id="bankAccount" name="bankAccount" type="text" placeholder="e.g. 1234567890" />
         </div>
 
         {/* Credit Terms */}

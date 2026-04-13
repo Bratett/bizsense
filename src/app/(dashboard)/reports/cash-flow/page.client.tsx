@@ -120,7 +120,9 @@ function CashSection({ section }: { section: CashFlowSection }) {
       )}
       {section.lines.map((line, i) => (
         <TableRow key={i}>
-          <TableCell className="py-1.5 pl-6 text-sm text-foreground/80">{line.description}</TableCell>
+          <TableCell className="py-1.5 pl-6 text-sm text-foreground/80">
+            {line.description}
+          </TableCell>
           <TableCell
             className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
               line.amount >= 0 ? 'text-green-700' : 'text-red-600'
@@ -240,41 +242,47 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
       {/* Report table */}
       <Card>
         <CardContent className="p-0">
-        <Table>
-          <TableBody>
-            <CashSection section={data.operating} />
-            <CashSection section={data.investing} />
-            <CashSection section={data.financing} />
+          <Table>
+            <TableBody>
+              <CashSection section={data.operating} />
+              <CashSection section={data.investing} />
+              <CashSection section={data.financing} />
 
-            {/* Net change */}
-            <TableRow className="border-t-2 border-gray-300 bg-muted/50">
-              <TableCell className="py-3 pl-4 text-sm font-bold text-foreground">Net Change in Cash</TableCell>
-              <TableCell
-                className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
-                  data.netChange >= 0 ? 'text-green-700' : 'text-red-600'
-                }`}
-              >
-                {formatGhs(data.netChange)}
-              </TableCell>
-            </TableRow>
+              {/* Net change */}
+              <TableRow className="border-t-2 border-gray-300 bg-muted/50">
+                <TableCell className="py-3 pl-4 text-sm font-bold text-foreground">
+                  Net Change in Cash
+                </TableCell>
+                <TableCell
+                  className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
+                    data.netChange >= 0 ? 'text-green-700' : 'text-red-600'
+                  }`}
+                >
+                  {formatGhs(data.netChange)}
+                </TableCell>
+              </TableRow>
 
-            {/* Opening balance */}
-            <TableRow>
-              <TableCell className="py-2 pl-4 text-sm text-foreground/80">Opening Cash Balance</TableCell>
-              <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground">
-                {formatGhs(data.openingCashBalance)}
-              </TableCell>
-            </TableRow>
+              {/* Opening balance */}
+              <TableRow>
+                <TableCell className="py-2 pl-4 text-sm text-foreground/80">
+                  Opening Cash Balance
+                </TableCell>
+                <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground">
+                  {formatGhs(data.openingCashBalance)}
+                </TableCell>
+              </TableRow>
 
-            {/* Closing balance (arithmetic) */}
-            <TableRow className="font-semibold">
-              <TableCell className="py-2.5 pl-4 text-sm text-foreground">Closing Cash Balance</TableCell>
-              <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-foreground">
-                {formatGhs(data.closingCashBalance)}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+              {/* Closing balance (arithmetic) */}
+              <TableRow className="font-semibold">
+                <TableCell className="py-2.5 pl-4 text-sm text-foreground">
+                  Closing Cash Balance
+                </TableCell>
+                <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-foreground">
+                  {formatGhs(data.closingCashBalance)}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 

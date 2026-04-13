@@ -126,47 +126,57 @@ export default function Step4Receivables({ onComplete, onBack }: Props) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-          {customerImportMessage && (
-            <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
-              {customerImportMessage}
-            </div>
-          )}
+            {customerImportMessage && (
+              <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+                {customerImportMessage}
+              </div>
+            )}
 
-          <div className="flex flex-col gap-3">
-            <Button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
-              size="lg"
-            >
-              Yes, add invoices
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowInvoiceCsvModal(true)}
-              className="w-full"
-              size="lg"
-            >
-              Import invoices from CSV
-            </Button>
-            <Button
-              type="button"
-              variant="link"
-              onClick={() => setShowCustomerCsvModal(true)}
-              className="text-sm font-medium text-green-700 hover:text-green-800"
-            >
-              Import customers from CSV
-            </Button>
-            <div className="flex items-center justify-between">
-              <Button type="button" variant="ghost" onClick={onBack} className="text-sm text-muted-foreground">
-                Back
+            <div className="flex flex-col gap-3">
+              <Button
+                type="button"
+                onClick={() => setShowForm(true)}
+                className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+                size="lg"
+              >
+                Yes, add invoices
               </Button>
-              <Button type="button" variant="ghost" onClick={onComplete} className="text-sm text-muted-foreground/60">
-                Skip this step
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowInvoiceCsvModal(true)}
+                className="w-full"
+                size="lg"
+              >
+                Import invoices from CSV
               </Button>
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => setShowCustomerCsvModal(true)}
+                className="text-sm font-medium text-green-700 hover:text-green-800"
+              >
+                Import customers from CSV
+              </Button>
+              <div className="flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onBack}
+                  className="text-sm text-muted-foreground"
+                >
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onComplete}
+                  className="text-sm text-muted-foreground/60"
+                >
+                  Skip this step
+                </Button>
+              </div>
             </div>
-          </div>
           </CardContent>
         </Card>
 
@@ -223,138 +233,153 @@ export default function Step4Receivables({ onComplete, onBack }: Props) {
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>Outstanding Invoices</CardTitle>
-        <Button type="button" variant="ghost" onClick={onComplete} disabled={isPending} className="text-sm text-muted-foreground/60">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onComplete}
+          disabled={isPending}
+          className="text-sm text-muted-foreground/60"
+        >
           Skip this step
         </Button>
       </CardHeader>
       <CardContent>
-      <p className="mt-1 text-sm text-gray-500">Add customers who still owe you money.</p>
+        <p className="mt-1 text-sm text-gray-500">Add customers who still owe you money.</p>
 
-      {error && (
-        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-
-      <div className="mt-4 flex flex-col gap-4">
-        {rows.map((row, i) => (
-          <div key={i} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-500">Invoice {i + 1}</span>
-              {rows.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeRow(i)}
-                  disabled={isPending}
-                  className="text-xs text-gray-400 hover:text-red-500"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={row.customerName}
-                onChange={(e) => updateRow(i, 'customerName', e.target.value)}
-                disabled={isPending}
-                placeholder="Customer Name *"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                           placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  value={row.phone}
-                  onChange={(e) => updateRow(i, 'phone', e.target.value)}
-                  disabled={isPending}
-                  placeholder="Phone"
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                             placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                />
-                <div className="relative">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                    GHS
-                  </span>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    value={row.amount}
-                    onChange={(e) => updateRow(i, 'amount', e.target.value)}
-                    disabled={isPending}
-                    placeholder="Amount *"
-                    className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm text-right text-gray-900
-                               placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-0.5">
-                  <label className="text-xs text-gray-500">Invoice Date *</label>
-                  <input
-                    type="date"
-                    value={row.invoiceDate}
-                    onChange={(e) => updateRow(i, 'invoiceDate', e.target.value)}
-                    disabled={isPending}
-                    className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                               focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <label className="text-xs text-gray-500">Due Date</label>
-                  <input
-                    type="date"
-                    value={row.dueDate}
-                    onChange={(e) => updateRow(i, 'dueDate', e.target.value)}
-                    disabled={isPending}
-                    className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                               focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
-                </div>
-              </div>
-            </div>
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+            {error}
           </div>
-        ))}
-
-        {rows.length < 100 && (
-          <button
-            type="button"
-            onClick={addRow}
-            disabled={isPending}
-            className="text-sm font-medium text-green-700 hover:text-green-800"
-          >
-            + Add another invoice
-          </button>
         )}
 
-        {/* Total */}
-        <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
-          <span className="text-sm font-medium text-gray-700">Total Receivables</span>
-          <span className="text-base font-semibold text-gray-900">
-            GHS{' '}
-            {total.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-        </div>
+        <div className="mt-4 flex flex-col gap-4">
+          {rows.map((row, i) => (
+            <div key={i} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">Invoice {i + 1}</span>
+                {rows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(i)}
+                    disabled={isPending}
+                    className="text-xs text-gray-400 hover:text-red-500"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={row.customerName}
+                  onChange={(e) => updateRow(i, 'customerName', e.target.value)}
+                  disabled={isPending}
+                  placeholder="Customer Name *"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                           placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={row.phone}
+                    onChange={(e) => updateRow(i, 'phone', e.target.value)}
+                    disabled={isPending}
+                    placeholder="Phone"
+                    className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                             placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                  />
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                      GHS
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      value={row.amount}
+                      onChange={(e) => updateRow(i, 'amount', e.target.value)}
+                      disabled={isPending}
+                      placeholder="Amount *"
+                      className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm text-right text-gray-900
+                               placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-xs text-gray-500">Invoice Date *</label>
+                    <input
+                      type="date"
+                      value={row.invoiceDate}
+                      onChange={(e) => updateRow(i, 'invoiceDate', e.target.value)}
+                      disabled={isPending}
+                      className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                               focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-xs text-gray-500">Due Date</label>
+                    <input
+                      type="date"
+                      value={row.dueDate}
+                      onChange={(e) => updateRow(i, 'dueDate', e.target.value)}
+                      disabled={isPending}
+                      className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                               focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
 
-        {/* Actions */}
-        <div className="mt-2 flex flex-col gap-2">
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isPending}
-            className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
-            size="lg"
-          >
-            {isPending ? 'Saving\u2026' : 'Continue'}
-          </Button>
-          <Button type="button" variant="ghost" onClick={onBack} disabled={isPending} className="text-sm text-muted-foreground">
-            Back
-          </Button>
+          {rows.length < 100 && (
+            <button
+              type="button"
+              onClick={addRow}
+              disabled={isPending}
+              className="text-sm font-medium text-green-700 hover:text-green-800"
+            >
+              + Add another invoice
+            </button>
+          )}
+
+          {/* Total */}
+          <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
+            <span className="text-sm font-medium text-gray-700">Total Receivables</span>
+            <span className="text-base font-semibold text-gray-900">
+              GHS{' '}
+              {total.toLocaleString('en-GH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-2 flex flex-col gap-2">
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isPending}
+              className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+              size="lg"
+            >
+              {isPending ? 'Saving\u2026' : 'Continue'}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onBack}
+              disabled={isPending}
+              className="text-sm text-muted-foreground"
+            >
+              Back
+            </Button>
+          </div>
         </div>
-      </div>
       </CardContent>
     </Card>
   )

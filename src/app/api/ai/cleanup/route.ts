@@ -15,9 +15,7 @@ export async function GET() {
   const { rowCount } = await db
     .update(pendingAiActions)
     .set({ status: 'expired', updatedAt: new Date() })
-    .where(
-      and(eq(pendingAiActions.status, 'pending'), lt(pendingAiActions.expiresAt, new Date())),
-    )
+    .where(and(eq(pendingAiActions.status, 'pending'), lt(pendingAiActions.expiresAt, new Date())))
 
   return NextResponse.json({ ok: true, expired: rowCount ?? 0 })
 }

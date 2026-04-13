@@ -208,15 +208,15 @@ export default function ProductList({
                           {product.sku}
                         </span>
                       )}
-                      {product.category && (
-                        <Badge variant="secondary">{product.category}</Badge>
-                      )}
+                      {product.category && <Badge variant="secondary">{product.category}</Badge>}
                     </div>
                   </div>
 
                   {/* Stock + value */}
                   <div className="ml-3 flex-shrink-0 text-right">
-                    <p className={`text-sm font-semibold tabular-nums ${STATUS_TEXT[status.color]}`}>
+                    <p
+                      className={`text-sm font-semibold tabular-nums ${STATUS_TEXT[status.color]}`}
+                    >
                       {product.trackInventory
                         ? `${product.currentStock} ${product.unit ?? 'units'}`
                         : 'N/A'}
@@ -233,7 +233,13 @@ export default function ProductList({
                     )}
                   </div>
 
-                  <svg className="h-4 w-4 flex-shrink-0 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <svg
+                    className="h-4 w-4 flex-shrink-0 text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -246,7 +252,8 @@ export default function ProductList({
       {/* Footer count */}
       {filtered.length > 0 && (
         <p className="mt-4 text-center text-xs text-gray-400">
-          Showing {filtered.length} of {initialProducts.length} product{initialProducts.length !== 1 ? 's' : ''}
+          Showing {filtered.length} of {initialProducts.length} product
+          {initialProducts.length !== 1 ? 's' : ''}
         </p>
       )}
     </div>

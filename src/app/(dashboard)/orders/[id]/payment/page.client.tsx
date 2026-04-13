@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { recordPaymentReceived } from '@/actions/payments'
 import type { OrderDetail } from '@/actions/orders'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { formatGhs } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -99,7 +106,9 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`/orders/${order.id}`} />}>{order.orderNumber}</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={`/orders/${order.id}`} />}>
+              {order.orderNumber}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

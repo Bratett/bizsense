@@ -110,11 +110,7 @@ export default function ExpenseList({
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Expenses"
-        actions={
-          <Button render={<Link href="/expenses/new" />}>
-            Record Expense
-          </Button>
-        }
+        actions={<Button render={<Link href="/expenses/new" />}>Record Expense</Button>}
       />
 
       {/* Error banner */}
@@ -234,9 +230,7 @@ export default function ExpenseList({
                           {STATUS_LABELS[expense.approvalStatus]}
                         </StatusBadge>
                       )}
-                      {expense.isCapitalExpense && (
-                        <Badge variant="secondary">Asset</Badge>
-                      )}
+                      {expense.isCapitalExpense && <Badge variant="secondary">Asset</Badge>}
                     </div>
                     <p className="mt-0.5 text-xs text-gray-500">
                       {formatDate(expense.expenseDate)} &middot;{' '}
@@ -262,7 +256,8 @@ export default function ExpenseList({
           <CardContent>
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Total (approved): <span className="font-semibold text-foreground">{formatGhs(total)}</span>
+                Total (approved):{' '}
+                <span className="font-semibold text-foreground">{formatGhs(total)}</span>
               </p>
               <p className="text-sm text-muted-foreground">
                 {filtered.length} expense{filtered.length !== 1 ? 's' : ''}

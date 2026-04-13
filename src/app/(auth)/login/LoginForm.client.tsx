@@ -58,7 +58,12 @@ export default function LoginForm() {
       </div>
 
       {/* Submit */}
-      <Button type="submit" disabled={isPending} size="lg" className="mt-1 h-11 text-base font-semibold">
+      <Button
+        type="submit"
+        disabled={isPending}
+        size="lg"
+        className="mt-1 h-11 text-base font-semibold"
+      >
         {isPending ? 'Signing in\u2026' : 'Sign in'}
       </Button>
     </form>

@@ -8,7 +8,14 @@ import {
   type CustomerActionResult,
   type CustomerWithBalance,
 } from '@/actions/customers'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,7 +46,9 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`/customers/${customer.id}`} />}>{customer.name}</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={`/customers/${customer.id}`} />}>
+              {customer.name}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

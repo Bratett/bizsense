@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { deactivateCustomer, type CustomerWithBalance } from '@/actions/customers'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -38,11 +45,7 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
   const balance = customer.outstandingBalance
   const utilizationPct = creditLimit > 0 ? Math.min((balance / creditLimit) * 100, 100) : 0
   const utilizationColor =
-    utilizationPct >= 80
-      ? 'bg-red-500'
-      : utilizationPct >= 50
-        ? 'bg-amber-500'
-        : 'bg-green-600'
+    utilizationPct >= 80 ? 'bg-red-500' : utilizationPct >= 50 ? 'bg-amber-500' : 'bg-green-600'
 
   const balanceIsZero = balance === 0
   const color = avatarColor(customer.name)
@@ -94,9 +97,23 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
                   )}
                   {customer.location && (
                     <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+                        />
                       </svg>
                       {customer.location}
                     </div>
@@ -113,8 +130,18 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
                       className="flex items-center gap-3 rounded-lg p-1.5 text-sm hover:bg-muted"
                     >
                       <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-700">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+                          />
                         </svg>
                       </span>
                       <div className="min-w-0">
@@ -129,21 +156,43 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
                       className="flex items-center gap-3 rounded-lg p-1.5 text-sm hover:bg-muted"
                     >
                       <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+                          />
                         </svg>
                       </span>
                       <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">EMAIL</p>
-                        <p className="truncate text-sm font-medium text-foreground">{customer.email}</p>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {customer.email}
+                        </p>
                       </div>
                     </a>
                   )}
                   {customer.momoNumber && (
                     <div className="flex items-center gap-3 rounded-lg p-1.5">
                       <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3"
+                          />
                         </svg>
                       </span>
                       <div className="min-w-0">
@@ -159,10 +208,16 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
                   <>
                     <Separator className="my-4" />
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Credit Utilization</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Credit Utilization
+                      </p>
                       <div className="mt-2 flex items-baseline justify-between">
-                        <span className="text-base font-bold text-foreground">{formatGhs(balance)}</span>
-                        <span className="text-xs text-muted-foreground">of {formatGhs(creditLimit)}</span>
+                        <span className="text-base font-bold text-foreground">
+                          {formatGhs(balance)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          of {formatGhs(creditLimit)}
+                        </span>
                       </div>
                       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                         <div
@@ -176,9 +231,22 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
 
                 {/* Action buttons */}
                 <div className="mt-5 space-y-2">
-                  <Button render={<Link href={`/orders/new?customerId=${customer.id}`} />} className="h-11 w-full text-sm font-semibold">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                  <Button
+                    render={<Link href={`/orders/new?customerId=${customer.id}`} />}
+                    className="h-11 w-full text-sm font-semibold"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                      />
                     </svg>
                     New Sale
                   </Button>
@@ -187,8 +255,18 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
                     render={<Link href={`/customers/${customer.id}/edit`} />}
                     className="h-10 w-full text-sm font-semibold"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"
+                      />
                     </svg>
                     Edit
                   </Button>
@@ -203,13 +281,19 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {/* Outstanding Balance */}
               <Card
-                className={balanceIsZero ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}
+                className={
+                  balanceIsZero ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'
+                }
               >
                 <CardContent>
-                  <p className={`text-xs font-semibold uppercase tracking-wider ${balanceIsZero ? 'text-green-600' : 'text-amber-600'}`}>
+                  <p
+                    className={`text-xs font-semibold uppercase tracking-wider ${balanceIsZero ? 'text-green-600' : 'text-amber-600'}`}
+                  >
                     Outstanding
                   </p>
-                  <p className={`mt-1 text-2xl font-bold tabular-nums ${balanceIsZero ? 'text-green-700' : 'text-amber-700'}`}>
+                  <p
+                    className={`mt-1 text-2xl font-bold tabular-nums ${balanceIsZero ? 'text-green-700' : 'text-amber-700'}`}
+                  >
                     {formatGhs(balance)}
                   </p>
                 </CardContent>
@@ -218,7 +302,9 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
               {/* Credit Limit */}
               <Card>
                 <CardContent>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Credit Limit</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Credit Limit
+                  </p>
                   <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
                     {creditLimit > 0 ? `${formatGhs(creditLimit)}` : 'None'}
                   </p>
@@ -228,7 +314,9 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
               {/* Customer Since */}
               <Card>
                 <CardContent>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Customer Since</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Customer Since
+                  </p>
                   <p className="mt-1 text-base font-bold text-foreground">
                     {customer.createdAt.toLocaleDateString('en-GH', {
                       day: 'numeric',
@@ -249,14 +337,14 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
               </CardHeader>
               <CardContent>
                 <dl className="divide-y divide-border">
-                  {customer.notes && (
-                    <ProfileRow label="Notes" value={customer.notes} />
-                  )}
+                  {customer.notes && <ProfileRow label="Notes" value={customer.notes} />}
                   <ProfileRow label="Name" value={customer.name} />
                   {customer.phone && <ProfileRow label="Phone" value={customer.phone} />}
                   {customer.email && <ProfileRow label="Email" value={customer.email} />}
                   {customer.location && <ProfileRow label="Location" value={customer.location} />}
-                  {customer.momoNumber && <ProfileRow label="MoMo Number" value={customer.momoNumber} />}
+                  {customer.momoNumber && (
+                    <ProfileRow label="MoMo Number" value={customer.momoNumber} />
+                  )}
                   <ProfileRow
                     label="Credit Limit"
                     value={creditLimit > 0 ? `${formatGhs(creditLimit)}` : 'None'}
@@ -267,11 +355,7 @@ export default function CustomerDetail({ customer }: { customer: CustomerWithBal
 
             {/* Deactivate */}
             {customer.isActive && (
-              <Button
-                variant="destructive"
-                onClick={() => setShowConfirm(true)}
-                className="h-11"
-              >
+              <Button variant="destructive" onClick={() => setShowConfirm(true)} className="h-11">
                 Deactivate Customer
               </Button>
             )}

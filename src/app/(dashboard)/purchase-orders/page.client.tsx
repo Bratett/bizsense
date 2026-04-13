@@ -106,18 +106,11 @@ export default function PurchaseOrderList({
           )}
 
           {filtered.length === 0 && initialPos.length > 0 && (
-            <EmptyState
-              icon={<Package className="h-10 w-10" />}
-              title="No purchase orders match"
-            />
+            <EmptyState icon={<Package className="h-10 w-10" />} title="No purchase orders match" />
           )}
 
           {filtered.map((po) => (
-            <Link
-              key={po.id}
-              href={`/purchase-orders/${po.id}`}
-              className="block"
-            >
+            <Link key={po.id} href={`/purchase-orders/${po.id}`} className="block">
               <Card className="transition-colors hover:bg-muted/50">
                 <CardContent>
                   <div className="flex items-start justify-between gap-3">

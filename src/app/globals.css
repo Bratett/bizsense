@@ -1,6 +1,6 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -69,46 +69,46 @@
      ================================================================ */
 
   /* Core brand — Deep Forest Green */
-  --primary: oklch(0.4815 0.1069 161.21);       /* #00704A */
-  --primary-foreground: oklch(1 0 0);           /* White */
-  --primary-dark: oklch(0.3973 0.0873 161.88);  /* #005538 */
+  --primary: oklch(0.4815 0.1069 161.21); /* #00704A */
+  --primary-foreground: oklch(1 0 0); /* White */
+  --primary-dark: oklch(0.3973 0.0873 161.88); /* #005538 */
   --primary-light: oklch(0.9588 0.0158 166.73); /* #E8F5EF */
 
   /* Accent — Gold */
-  --accent: oklch(0.7837 0.1587 72.99);         /* #F5A623 */
-  --accent-foreground: oklch(0.205 0 0);        /* Dark text */
+  --accent: oklch(0.7837 0.1587 72.99); /* #F5A623 */
+  --accent-foreground: oklch(0.205 0 0); /* Dark text */
 
   /* Destructive — Danger Red */
-  --destructive: oklch(0.5785 0.2063 29.01);    /* #D93025 */
+  --destructive: oklch(0.5785 0.2063 29.01); /* #D93025 */
 
   /* Warning — Orange */
-  --warning: oklch(0.756 0.165 68.85);          /* #F29900 */
-  --warning-foreground: oklch(0.205 0 0);       /* Dark text */
+  --warning: oklch(0.756 0.165 68.85); /* #F29900 */
+  --warning-foreground: oklch(0.205 0 0); /* Dark text */
 
   /* Secondary — light neutral for secondary buttons (shadcn neutral base, intentional) */
-  --secondary: oklch(0.97 0 0);                 /* ~#F7F7F7 — not from DESIGN.md, inherited from shadcn neutral */
-  --secondary-foreground: oklch(0.205 0 0);     /* Dark text */
+  --secondary: oklch(0.97 0 0); /* ~#F7F7F7 — not from DESIGN.md, inherited from shadcn neutral */
+  --secondary-foreground: oklch(0.205 0 0); /* Dark text */
 
   /* Neutral scale */
-  --background: oklch(1 0 0);                   /* #FFFFFF */
-  --foreground: oklch(0.2101 0.0318 264.66);    /* #111827 */
-  --card: oklch(1 0 0);                         /* #FFFFFF */
+  --background: oklch(1 0 0); /* #FFFFFF */
+  --foreground: oklch(0.2101 0.0318 264.66); /* #111827 */
+  --card: oklch(1 0 0); /* #FFFFFF */
   --card-foreground: oklch(0.2101 0.0318 264.66); /* #111827 */
-  --popover: oklch(1 0 0);                      /* #FFFFFF */
+  --popover: oklch(1 0 0); /* #FFFFFF */
   --popover-foreground: oklch(0.2101 0.0318 264.66); /* #111827 */
-  --muted: oklch(0.967 0.0029 264.54);          /* #F3F4F6 */
+  --muted: oklch(0.967 0.0029 264.54); /* #F3F4F6 */
   --muted-foreground: oklch(0.3729 0.0306 259.73); /* #374151 */
-  --border: oklch(0.8717 0.0093 258.34);        /* #D1D5DB */
-  --input: oklch(0.8717 0.0093 258.34);         /* #D1D5DB */
-  --ring: oklch(0.4815 0.1069 161.21);          /* #00704A — focus ring matches primary */
-  --radius: 0.5rem;                             /* 8px — DESIGN.md spec */
+  --border: oklch(0.8717 0.0093 258.34); /* #D1D5DB */
+  --input: oklch(0.8717 0.0093 258.34); /* #D1D5DB */
+  --ring: oklch(0.4815 0.1069 161.21); /* #00704A — focus ring matches primary */
+  --radius: 0.5rem; /* 8px — DESIGN.md spec */
 
   /* Chart colors — BizSense green palette */
-  --chart-1: oklch(0.4815 0.1069 161.21);       /* Primary green #00704A */
-  --chart-2: oklch(0.5785 0.2063 29.01);        /* Red (expenses) #D93025 */
-  --chart-3: oklch(0.7837 0.1587 72.99);        /* Gold (pending) #F5A623 */
-  --chart-4: oklch(0.3973 0.0873 161.88);       /* Dark green #005538 */
-  --chart-5: oklch(0.556 0 0);                  /* Neutral */
+  --chart-1: oklch(0.4815 0.1069 161.21); /* Primary green #00704A */
+  --chart-2: oklch(0.5785 0.2063 29.01); /* Red (expenses) #D93025 */
+  --chart-3: oklch(0.7837 0.1587 72.99); /* Gold (pending) #F5A623 */
+  --chart-4: oklch(0.3973 0.0873 161.88); /* Dark green #005538 */
+  --chart-5: oklch(0.556 0 0); /* Neutral */
 
   /* Sidebar — matches primary brand */
   --sidebar: oklch(1 0 0);
@@ -123,25 +123,25 @@
   /* ================================================================
      BizSense Status Badge Tokens (used by StatusBadge component)
      ================================================================ */
-  --badge-paid-bg: #E8F5EF;
-  --badge-paid-text: #00704A;
-  --badge-pending-bg: #FEF3C7;
-  --badge-pending-text: #B45309;
-  --badge-overdue-bg: #FEE2E2;
-  --badge-overdue-text: #DC2626;
-  --badge-draft-bg: #F3F4F6;
-  --badge-draft-text: #6B7280;
-  --badge-ai-bg: #EEF2FF;
-  --badge-ai-text: #4338CA;
-  --badge-reversal-bg: #FEF3C7;
-  --badge-reversal-text: #B45309;
+  --badge-paid-bg: #e8f5ef;
+  --badge-paid-text: #00704a;
+  --badge-pending-bg: #fef3c7;
+  --badge-pending-text: #b45309;
+  --badge-overdue-bg: #fee2e2;
+  --badge-overdue-text: #dc2626;
+  --badge-draft-bg: #f3f4f6;
+  --badge-draft-text: #6b7280;
+  --badge-ai-bg: #eef2ff;
+  --badge-ai-text: #4338ca;
+  --badge-reversal-bg: #fef3c7;
+  --badge-reversal-text: #b45309;
 
   /* Shadows — DESIGN.md spec */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-modal: 0 4px 24px rgba(0, 0, 0, 0.15);
 
   /* WhatsApp brand */
-  --whatsapp: #25D366;
+  --whatsapp: #25d366;
 }
 
 /* No dark mode — BizSense is light-only */

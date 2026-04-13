@@ -7,7 +7,14 @@ import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { ExpenseReport, ExpenseReportLine } from '@/lib/reports/expenses'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -147,84 +154,84 @@ export default function ExpenseReportTable({ data }: { data: ExpenseReport }) {
       {/* Table */}
       <Card>
         <CardContent className="p-0">
-        {data.lines.length === 0 ? (
-          <p className="py-16 text-center text-sm text-muted-foreground/60">
-            No expenses recorded in this period.
-          </p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="py-3 pl-4">Category</TableHead>
-                <TableHead className="py-3">Code</TableHead>
-                <TableHead className="py-3 pr-4 text-right">Count</TableHead>
-                <TableHead className="py-3 pr-4 text-right">
-                  {hasPrior ? 'This Period' : 'Amount (GHS)'}
-                </TableHead>
-                {hasPrior && (
-                  <TableHead className="py-3 pr-4 text-right text-amber-600">
-                    Prior Period
+          {data.lines.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground/60">
+              No expenses recorded in this period.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="py-3 pl-4">Category</TableHead>
+                  <TableHead className="py-3">Code</TableHead>
+                  <TableHead className="py-3 pr-4 text-right">Count</TableHead>
+                  <TableHead className="py-3 pr-4 text-right">
+                    {hasPrior ? 'This Period' : 'Amount (GHS)'}
                   </TableHead>
-                )}
-                {hasPrior && (
-                  <TableHead className="py-3 pr-4 text-right">Change</TableHead>
-                )}
-                <TableHead className="py-3 pr-4 text-right">Receipts</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.lines.map((line) => (
-                <TableRow key={line.accountId} className="hover:bg-muted/30">
-                  <TableCell className="py-2.5 pl-4 text-sm font-medium text-foreground/80">
-                    {line.category}
-                  </TableCell>
-                  <TableCell className="py-2.5 text-sm font-mono text-muted-foreground/60">{line.accountCode}</TableCell>
-                  <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-muted-foreground">
-                    {line.transactionCount}
-                  </TableCell>
-                  <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-foreground">
-                    {formatGhs(line.totalAmount)}
-                  </TableCell>
                   {hasPrior && (
-                    <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-amber-600">
-                      {line.priorAmount !== undefined ? formatGhs(line.priorAmount) : '—'}
-                    </TableCell>
+                    <TableHead className="py-3 pr-4 text-right text-amber-600">
+                      Prior Period
+                    </TableHead>
                   )}
-                  {hasPrior && (
-                    <TableCell className="py-2.5 pr-4 text-right text-sm">
-                      <ChangeBadge pct={line.changePercent} />
-                    </TableCell>
-                  )}
-                  <TableCell className="py-2.5 pr-4 text-right text-sm">
-                    <Link
-                      href={`/expenses?category=${encodeURIComponent(line.accountCode)}`}
-                      className="text-green-700 hover:underline"
-                    >
-                      View
-                    </Link>
-                  </TableCell>
+                  {hasPrior && <TableHead className="py-3 pr-4 text-right">Change</TableHead>}
+                  <TableHead className="py-3 pr-4 text-right">Receipts</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-            <tfoot>
-              <TableRow className="border-t-2 bg-muted/50 font-semibold">
-                <TableCell className="py-3 pl-4 text-sm text-foreground" colSpan={3}>
-                  Grand Total
-                </TableCell>
-                <TableCell className="py-3 pr-4 text-right text-sm tabular-nums text-foreground">
-                  {formatGhs(data.grandTotal)}
-                </TableCell>
-                {hasPrior && (
-                  <TableCell className="py-3 pr-4 text-right text-sm tabular-nums text-amber-600">
-                    {data.priorTotal !== undefined ? formatGhs(data.priorTotal) : '—'}
+              </TableHeader>
+              <TableBody>
+                {data.lines.map((line) => (
+                  <TableRow key={line.accountId} className="hover:bg-muted/30">
+                    <TableCell className="py-2.5 pl-4 text-sm font-medium text-foreground/80">
+                      {line.category}
+                    </TableCell>
+                    <TableCell className="py-2.5 text-sm font-mono text-muted-foreground/60">
+                      {line.accountCode}
+                    </TableCell>
+                    <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-muted-foreground">
+                      {line.transactionCount}
+                    </TableCell>
+                    <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-foreground">
+                      {formatGhs(line.totalAmount)}
+                    </TableCell>
+                    {hasPrior && (
+                      <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-amber-600">
+                        {line.priorAmount !== undefined ? formatGhs(line.priorAmount) : '—'}
+                      </TableCell>
+                    )}
+                    {hasPrior && (
+                      <TableCell className="py-2.5 pr-4 text-right text-sm">
+                        <ChangeBadge pct={line.changePercent} />
+                      </TableCell>
+                    )}
+                    <TableCell className="py-2.5 pr-4 text-right text-sm">
+                      <Link
+                        href={`/expenses?category=${encodeURIComponent(line.accountCode)}`}
+                        className="text-green-700 hover:underline"
+                      >
+                        View
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <tfoot>
+                <TableRow className="border-t-2 bg-muted/50 font-semibold">
+                  <TableCell className="py-3 pl-4 text-sm text-foreground" colSpan={3}>
+                    Grand Total
                   </TableCell>
-                )}
-                {hasPrior && <TableCell></TableCell>}
-                <TableCell></TableCell>
-              </TableRow>
-            </tfoot>
-          </Table>
-        )}
+                  <TableCell className="py-3 pr-4 text-right text-sm tabular-nums text-foreground">
+                    {formatGhs(data.grandTotal)}
+                  </TableCell>
+                  {hasPrior && (
+                    <TableCell className="py-3 pr-4 text-right text-sm tabular-nums text-amber-600">
+                      {data.priorTotal !== undefined ? formatGhs(data.priorTotal) : '—'}
+                    </TableCell>
+                  )}
+                  {hasPrior && <TableCell></TableCell>}
+                  <TableCell></TableCell>
+                </TableRow>
+              </tfoot>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -42,11 +42,7 @@ export default function GrnList({ initialGrns }: { initialGrns: GrnWithSupplier[
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Goods Received"
-        actions={
-          <Button render={<Link href="/grn/new" />}>
-            + New GRN
-          </Button>
-        }
+        actions={<Button render={<Link href="/grn/new" />}>+ New GRN</Button>}
       />
 
       {/* Search */}
@@ -100,11 +96,15 @@ export default function GrnList({ initialGrns }: { initialGrns: GrnWithSupplier[
                       {grn.status === 'confirmed' ? 'Confirmed' : 'Draft'}
                     </StatusBadge>
                   </div>
-                  <p className="mt-0.5 truncate text-sm text-muted-foreground">{grn.supplierName}</p>
+                  <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                    {grn.supplierName}
+                  </p>
                   <p className="text-xs text-muted-foreground">{formatDate(grn.receivedDate)}</p>
                 </div>
                 <div className="ml-4 shrink-0 text-right">
-                  <p className="text-sm font-semibold text-foreground">{formatGhs(grn.totalCost)}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {formatGhs(grn.totalCost)}
+                  </p>
                   {grn.poId && <p className="text-xs text-muted-foreground">From PO</p>}
                 </div>
               </Card>

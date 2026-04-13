@@ -7,7 +7,14 @@ import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { TrialBalanceReport, TrialBalanceLine } from '@/lib/reports/trialBalance'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -148,61 +155,57 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
       {/* Table */}
       <Card>
         <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="py-3 pl-4 w-20">
-                Code
-              </TableHead>
-              <TableHead className="py-3">
-                Account Name
-              </TableHead>
-              <TableHead className="py-3">
-                Type
-              </TableHead>
-              <TableHead className="py-3 pr-4 text-right">
-                Debits (GHS)
-              </TableHead>
-              <TableHead className="py-3 pr-4 text-right">
-                Credits (GHS)
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.lines.map((line) => (
-              <TableRow key={line.accountId} className="hover:bg-muted/30">
-                <TableCell className="py-2 pl-4 text-sm font-mono text-muted-foreground">{line.accountCode}</TableCell>
-                <TableCell className="py-2 text-sm text-foreground/80">{line.accountName}</TableCell>
-                <TableCell className="py-2 text-xs capitalize text-muted-foreground/60">{line.accountType}</TableCell>
-                <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground/80">
-                  {line.cumulativeDebits > 0 ? line.cumulativeDebits.toFixed(2) : ''}
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="py-3 pl-4 w-20">Code</TableHead>
+                <TableHead className="py-3">Account Name</TableHead>
+                <TableHead className="py-3">Type</TableHead>
+                <TableHead className="py-3 pr-4 text-right">Debits (GHS)</TableHead>
+                <TableHead className="py-3 pr-4 text-right">Credits (GHS)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.lines.map((line) => (
+                <TableRow key={line.accountId} className="hover:bg-muted/30">
+                  <TableCell className="py-2 pl-4 text-sm font-mono text-muted-foreground">
+                    {line.accountCode}
+                  </TableCell>
+                  <TableCell className="py-2 text-sm text-foreground/80">
+                    {line.accountName}
+                  </TableCell>
+                  <TableCell className="py-2 text-xs capitalize text-muted-foreground/60">
+                    {line.accountType}
+                  </TableCell>
+                  <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground/80">
+                    {line.cumulativeDebits > 0 ? line.cumulativeDebits.toFixed(2) : ''}
+                  </TableCell>
+                  <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground/80">
+                    {line.cumulativeCredits > 0 ? line.cumulativeCredits.toFixed(2) : ''}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <tfoot>
+              <TableRow
+                className={`border-t-2 font-bold ${isBalanced ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}
+              >
+                <TableCell className="py-3 pl-4 text-sm"></TableCell>
+                <TableCell className="py-3 text-sm text-foreground">TOTAL</TableCell>
+                <TableCell></TableCell>
+                <TableCell
+                  className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
+                >
+                  {data.totalDebits.toFixed(2)}
                 </TableCell>
-                <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground/80">
-                  {line.cumulativeCredits > 0 ? line.cumulativeCredits.toFixed(2) : ''}
+                <TableCell
+                  className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
+                >
+                  {data.totalCredits.toFixed(2)}
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-          <tfoot>
-            <TableRow
-              className={`border-t-2 font-bold ${isBalanced ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}
-            >
-              <TableCell className="py-3 pl-4 text-sm"></TableCell>
-              <TableCell className="py-3 text-sm text-foreground">TOTAL</TableCell>
-              <TableCell></TableCell>
-              <TableCell
-                className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
-              >
-                {data.totalDebits.toFixed(2)}
-              </TableCell>
-              <TableCell
-                className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
-              >
-                {data.totalCredits.toFixed(2)}
-              </TableCell>
-            </TableRow>
-          </tfoot>
-        </Table>
+            </tfoot>
+          </Table>
         </CardContent>
       </Card>
     </div>

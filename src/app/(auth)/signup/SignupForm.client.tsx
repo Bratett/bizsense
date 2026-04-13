@@ -118,7 +118,12 @@ export default function SignupForm() {
       </div>
 
       {/* Submit */}
-      <Button type="submit" disabled={isPending} size="lg" className="mt-1 h-11 text-base font-semibold">
+      <Button
+        type="submit"
+        disabled={isPending}
+        size="lg"
+        className="mt-1 h-11 text-base font-semibold"
+      >
         {isPending ? 'Creating account\u2026' : 'Create Account'}
       </Button>
     </form>

@@ -41,8 +41,8 @@ export default function BackfillView() {
               missing journal entry lines.
             </li>
             <li>
-              This corrects the ledger so that your Profit &amp; Loss report reflects the true cost of
-              goods sold.
+              This corrects the ledger so that your Profit &amp; Loss report reflects the true cost
+              of goods sold.
             </li>
             <li>
               Running this multiple times is safe -- orders that have already been backfilled are
@@ -68,11 +68,7 @@ export default function BackfillView() {
 
       {/* Run Button */}
       {!result && (
-        <Button
-          onClick={handleRun}
-          disabled={isPending}
-          className="mt-4 w-full"
-        >
+        <Button onClick={handleRun} disabled={isPending} className="mt-4 w-full">
           {isPending ? 'Running Backfill...' : 'Run COGS Backfill'}
         </Button>
       )}
@@ -105,9 +101,7 @@ export default function BackfillView() {
           {result.errors.length > 0 && (
             <Alert variant="destructive">
               <AlertDescription>
-                <h3 className="text-sm font-semibold">
-                  Errors ({result.errors.length})
-                </h3>
+                <h3 className="text-sm font-semibold">Errors ({result.errors.length})</h3>
                 <div className="mt-2 space-y-2">
                   {result.errors.map((err, i) => (
                     <div key={i} className="text-sm">
@@ -125,12 +119,7 @@ export default function BackfillView() {
             </Alert>
           )}
 
-          <Button
-            variant="outline"
-            onClick={handleRun}
-            disabled={isPending}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={handleRun} disabled={isPending} className="w-full">
             {isPending ? 'Running...' : 'Run Again'}
           </Button>
         </div>

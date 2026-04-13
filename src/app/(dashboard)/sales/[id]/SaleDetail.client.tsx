@@ -6,7 +6,14 @@ import { useRouter } from 'next/navigation'
 import { Ban, CheckCircle, Clock, Mail, Phone } from 'lucide-react'
 import type { OrderDetail } from '@/actions/orders'
 import { reverseOrder } from '@/actions/orders'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import type { PaymentListItem } from '@/actions/payments'
 import InvoiceButton from '@/components/InvoiceButton.client'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
@@ -140,9 +147,7 @@ export default function SaleDetail({
           title={`Sale #${order.orderNumber}`}
           subtitle={`Issued on ${formatDate(order.orderDate)}`}
           actions={
-            <StatusBadge
-              variant={isCancelled ? 'cancelled' : isPaid ? 'paid' : 'pending'}
-            >
+            <StatusBadge variant={isCancelled ? 'cancelled' : isPaid ? 'paid' : 'pending'}>
               {isCancelled ? 'VOIDED' : isPaid ? 'PAID' : 'PENDING'}
             </StatusBadge>
           }
@@ -213,9 +218,7 @@ export default function SaleDetail({
                   <TableBody>
                     {order.lines.map((line) => (
                       <TableRow key={line.id}>
-                        <TableCell className="font-medium">
-                          {line.description ?? 'Item'}
-                        </TableCell>
+                        <TableCell className="font-medium">{line.description ?? 'Item'}</TableCell>
                         <TableCell className="text-center tabular-nums">
                           {Number(line.quantity)}
                         </TableCell>
@@ -292,7 +295,9 @@ export default function SaleDetail({
                         </div>
                         <div>
                           <p className="text-sm font-medium text-foreground">{event.label}</p>
-                          <p className="text-xs text-muted-foreground">{formatTimestamp(event.date)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatTimestamp(event.date)}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -315,16 +320,12 @@ export default function SaleDetail({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium tabular-nums">
-                      {formatGhs(order.subtotal)}
-                    </span>
+                    <span className="font-medium tabular-nums">{formatGhs(order.subtotal)}</span>
                   </div>
                   {Number(order.taxAmount ?? 0) > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tax (VAT 15%)</span>
-                      <span className="font-medium tabular-nums">
-                        {formatGhs(order.taxAmount)}
-                      </span>
+                      <span className="font-medium tabular-nums">{formatGhs(order.taxAmount)}</span>
                     </div>
                   )}
                   {discountAmount > 0 && (
@@ -495,11 +496,7 @@ export default function SaleDetail({
                 <Button variant="outline" onClick={() => setShowVoidModal(false)}>
                   Cancel
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleVoidSale}
-                  disabled={isPending}
-                >
+                <Button variant="destructive" onClick={handleVoidSale} disabled={isPending}>
                   {isPending ? 'Voiding...' : 'Void Sale'}
                 </Button>
               </div>

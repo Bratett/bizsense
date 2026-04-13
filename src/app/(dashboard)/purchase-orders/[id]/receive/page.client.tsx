@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createGrn, confirmGrn } from '@/actions/grn'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { generateGrnNumber } from '@/lib/grnNumber'
 import type { PoWithLinesAndGrns } from '@/actions/purchaseOrders'
 import { formatGhs } from '@/lib/format'
@@ -172,11 +179,15 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
       <Breadcrumb className="mb-4">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href="/purchase-orders" />}>Purchase Orders</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href="/purchase-orders" />}>
+              Purchase Orders
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`/purchase-orders/${po.id}`} />}>{po.poNumber}</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={`/purchase-orders/${po.id}`} />}>
+              {po.poNumber}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

@@ -383,8 +383,8 @@ export default function StocktakeView({
             <h3 className="text-lg font-semibold text-foreground">Confirm Stocktake</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               This will post {varianceLineCount} stock adjustment
-              {varianceLineCount !== 1 ? 's' : ''} totalling {formatGhs(totalVarianceValue)}.
-              This cannot be undone.
+              {varianceLineCount !== 1 ? 's' : ''} totalling {formatGhs(totalVarianceValue)}. This
+              cannot be undone.
             </p>
             <div className="mt-5 flex gap-3">
               <Button

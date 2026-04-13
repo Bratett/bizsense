@@ -5,7 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { markPoSent, cancelPurchaseOrder } from '@/actions/purchaseOrders'
 import type { PoWithLinesAndGrns } from '@/actions/purchaseOrders'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -97,7 +104,9 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
         <Breadcrumb className="mb-4">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link href="/purchase-orders" />}>Purchase Orders</BreadcrumbLink>
+              <BreadcrumbLink render={<Link href="/purchase-orders" />}>
+                Purchase Orders
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -206,7 +215,9 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
                     <p className="text-xs text-muted-foreground">
                       {formatDate(grn.receivedDate)} &middot;{' '}
                       <span
-                        className={grn.status === 'confirmed' ? 'text-green-600' : 'text-muted-foreground'}
+                        className={
+                          grn.status === 'confirmed' ? 'text-green-600' : 'text-muted-foreground'
+                        }
                       >
                         {grn.status}
                       </span>
@@ -225,7 +236,9 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
         {po.notes && (
           <Card className="mt-4">
             <CardContent>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Notes
+              </p>
               <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{po.notes}</p>
             </CardContent>
           </Card>

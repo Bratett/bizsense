@@ -41,10 +41,7 @@ export async function handleReadTool(
 
 // ─── query_sales ──────────────────────────────────────────────────────────────
 
-async function querySales(
-  input: Record<string, unknown>,
-  businessId: string,
-): Promise<string> {
+async function querySales(input: Record<string, unknown>, businessId: string): Promise<string> {
   const { from, to } = resolvePeriod(
     input.period as string,
     input.date_from as string | undefined,
@@ -66,16 +63,16 @@ async function querySales(
     const matched = await db
       .select({ id: customers.id })
       .from(customers)
-      .where(
-        and(
-          eq(customers.businessId, businessId),
-          ilike(customers.name, `%${customerName}%`),
-        ),
-      )
+      .where(and(eq(customers.businessId, businessId), ilike(customers.name, `%${customerName}%`)))
     if (matched.length === 0) {
       return JSON.stringify({ message: `No customer found matching "${customerName}".` })
     }
-    baseConditions.push(inArray(orders.customerId, matched.map((c) => c.id)))
+    baseConditions.push(
+      inArray(
+        orders.customerId,
+        matched.map((c) => c.id),
+      ),
+    )
   }
 
   if (groupBy === 'product') {
@@ -176,10 +173,7 @@ async function querySales(
 
 // ─── query_expenses ───────────────────────────────────────────────────────────
 
-async function queryExpenses(
-  input: Record<string, unknown>,
-  businessId: string,
-): Promise<string> {
+async function queryExpenses(input: Record<string, unknown>, businessId: string): Promise<string> {
   const { from, to } = resolvePeriod(
     input.period as string,
     input.date_from as string | undefined,
@@ -267,11 +261,13 @@ async function queryExpenses(
 
 async function getCashPosition(businessId: string): Promise<string> {
   const today = new Date().toISOString().slice(0, 10)
-  const balances = await getAccountBalances(
-    businessId,
-    { type: 'asOf', date: today },
-    ['1001', '1002', '1003', '1004', '1005'],
-  )
+  const balances = await getAccountBalances(businessId, { type: 'asOf', date: today }, [
+    '1001',
+    '1002',
+    '1003',
+    '1004',
+    '1005',
+  ])
 
   const accounts = balances.map((a) => ({
     name: a.accountName,
@@ -292,10 +288,7 @@ async function getCashPosition(businessId: string): Promise<string> {
 
 // ─── get_profit ───────────────────────────────────────────────────────────────
 
-async function getProfit(
-  input: Record<string, unknown>,
-  businessId: string,
-): Promise<string> {
+async function getProfit(input: Record<string, unknown>, businessId: string): Promise<string> {
   const { from, to } = resolvePeriod(
     input.period as string,
     input.date_from as string | undefined,
@@ -331,8 +324,7 @@ async function getProfit(
     expensesFormatted: formatGhs(expensesTotal),
     netProfit,
     netProfitFormatted: formatGhs(netProfit),
-    grossMarginPct:
-      revenue > 0 ? Math.round((grossProfit / revenue) * 100 * 10) / 10 : 0,
+    grossMarginPct: revenue > 0 ? Math.round((grossProfit / revenue) * 100 * 10) / 10 : 0,
     netMarginPct: revenue > 0 ? Math.round((netProfit / revenue) * 100 * 10) / 10 : 0,
   })
 }
@@ -404,10 +396,7 @@ async function getCustomerBalance(
 
 // ─── check_stock ──────────────────────────────────────────────────────────────
 
-async function checkStock(
-  input: Record<string, unknown>,
-  businessId: string,
-): Promise<string> {
+async function checkStock(input: Record<string, unknown>, businessId: string): Promise<string> {
   const productName = input.product_name as string | undefined
 
   if (productName) {

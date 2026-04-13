@@ -66,7 +66,6 @@ function parseNum(s: string): number {
   return isNaN(n) ? 0 : n
 }
 
-
 function todayISO(): string {
   return new Date().toISOString().split('T')[0]
 }
@@ -364,7 +363,9 @@ export default function NewOrderForm({
             )}
           >
             <p className="font-medium">Walk-in / No customer</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">Quick sale without customer record</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Quick sale without customer record
+            </p>
           </button>
 
           {/* Customer search */}
@@ -395,11 +396,7 @@ export default function NewOrderForm({
             ))}
           </div>
 
-          <Button
-            size="lg"
-            className="mt-4 w-full"
-            onClick={() => setCurrentStep(1)}
-          >
+          <Button size="lg" className="mt-4 w-full" onClick={() => setCurrentStep(1)}>
             Next
           </Button>
         </div>
@@ -492,11 +489,7 @@ export default function NewOrderForm({
             </Card>
           ))}
 
-          <Button
-            variant="outline"
-            className="w-full border-dashed"
-            onClick={addLine}
-          >
+          <Button variant="outline" className="w-full border-dashed" onClick={addLine}>
             + Add Item
           </Button>
 
@@ -532,8 +525,8 @@ export default function NewOrderForm({
                   <Alert className="mt-2 border-amber-300 bg-amber-50">
                     <AlertDescription>
                       <p className="text-sm text-amber-800">
-                        This rate looks unusual. Last recorded rate: GHS {lastStoredRate!.toFixed(4)}.
-                        Continue?
+                        This rate looks unusual. Last recorded rate: GHS{' '}
+                        {lastStoredRate!.toFixed(4)}. Continue?
                       </p>
                       <div className="mt-2 flex gap-2">
                         <Button
@@ -780,8 +773,8 @@ export default function NewOrderForm({
           {paymentMode === 'unpaid' && !needsCustomerForCredit && selectedCustomer && (
             <Alert className="border-blue-200 bg-blue-50 text-blue-800">
               <AlertDescription>
-                Invoice will be recorded to <strong>{selectedCustomer.name}</strong>. Payment expected
-                later.
+                Invoice will be recorded to <strong>{selectedCustomer.name}</strong>. Payment
+                expected later.
               </AlertDescription>
             </Alert>
           )}

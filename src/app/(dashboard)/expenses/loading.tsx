@@ -11,7 +11,10 @@ export default function ExpensesLoading() {
         <Skeleton className="h-10 w-full rounded-lg" />
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
+            >
               <div className="flex items-center gap-3">
                 <Skeleton className="h-9 w-9 rounded-lg" />
                 <div>

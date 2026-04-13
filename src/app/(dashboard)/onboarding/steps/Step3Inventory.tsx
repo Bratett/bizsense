@@ -116,33 +116,43 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-          <div className="flex flex-col gap-3">
-            <Button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
-              size="lg"
-            >
-              Yes, add products
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowCsvModal(true)}
-              className="w-full"
-              size="lg"
-            >
-              Import from CSV
-            </Button>
-            <div className="flex items-center justify-between">
-              <Button type="button" variant="ghost" onClick={onBack} className="text-sm text-muted-foreground">
-                Back
+            <div className="flex flex-col gap-3">
+              <Button
+                type="button"
+                onClick={() => setShowForm(true)}
+                className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+                size="lg"
+              >
+                Yes, add products
               </Button>
-              <Button type="button" variant="ghost" onClick={onComplete} className="text-sm text-muted-foreground/60">
-                Skip this step
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCsvModal(true)}
+                className="w-full"
+                size="lg"
+              >
+                Import from CSV
               </Button>
+              <div className="flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onBack}
+                  className="text-sm text-muted-foreground"
+                >
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onComplete}
+                  className="text-sm text-muted-foreground/60"
+                >
+                  Skip this step
+                </Button>
+              </div>
             </div>
-          </div>
           </CardContent>
         </Card>
         <CsvImportModal
@@ -174,161 +184,173 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>Opening Stock</CardTitle>
-        <Button type="button" variant="ghost" onClick={onComplete} disabled={isPending} className="text-sm text-muted-foreground/60">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onComplete}
+          disabled={isPending}
+          className="text-sm text-muted-foreground/60"
+        >
           Skip this step
         </Button>
       </CardHeader>
       <CardContent>
-      <p className="mt-1 text-sm text-gray-500">
-        Add your current products. You can add more after setup.
-      </p>
+        <p className="mt-1 text-sm text-gray-500">
+          Add your current products. You can add more after setup.
+        </p>
 
-      {error && (
-        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-
-      <div className="mt-4 flex flex-col gap-4">
-        {rows.map((row, i) => (
-          <div key={i} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-500">Product {i + 1}</span>
-              {rows.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeRow(i)}
-                  disabled={isPending}
-                  className="text-xs text-gray-400 hover:text-red-500"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={row.name}
-                onChange={(e) => updateRow(i, 'name', e.target.value)}
-                disabled={isPending}
-                placeholder="Product Name *"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                           placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  value={row.sku}
-                  onChange={(e) => updateRow(i, 'sku', e.target.value)}
-                  disabled={isPending}
-                  placeholder="SKU (auto)"
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                             placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                />
-                <input
-                  type="text"
-                  value={row.category}
-                  onChange={(e) => updateRow(i, 'category', e.target.value)}
-                  disabled={isPending}
-                  placeholder="Category"
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                             placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <select
-                  value={row.unit}
-                  onChange={(e) => updateRow(i, 'unit', e.target.value)}
-                  disabled={isPending}
-                  className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
-                             focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                >
-                  {UNITS.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-                <div className="relative">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="1"
-                    value={row.qtyOnHand}
-                    onChange={(e) => updateRow(i, 'qtyOnHand', e.target.value)}
-                    disabled={isPending}
-                    placeholder="Qty *"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-right text-gray-900
-                               placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
-                </div>
-                <div className="relative">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                    GHS
-                  </span>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    value={row.costPrice}
-                    onChange={(e) => updateRow(i, 'costPrice', e.target.value)}
-                    disabled={isPending}
-                    placeholder="Cost *"
-                    className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm text-right text-gray-900
-                               placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
-                </div>
-              </div>
-            </div>
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+            {error}
           </div>
-        ))}
-
-        {rows.length < 50 && (
-          <button
-            type="button"
-            onClick={addRow}
-            disabled={isPending}
-            className="text-sm font-medium text-green-700 hover:text-green-800"
-          >
-            + Add another product
-          </button>
-        )}
-        {rows.length >= 40 && rows.length < 50 && (
-          <p className="text-xs text-amber-600">
-            You can add up to 50 products during setup. More can be added after.
-          </p>
         )}
 
-        {/* Total */}
-        <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
-          <span className="text-sm font-medium text-gray-700">Total Inventory Value</span>
-          <span className="text-base font-semibold text-gray-900">
-            GHS{' '}
-            {totalValue.toLocaleString('en-GH', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </span>
-        </div>
+        <div className="mt-4 flex flex-col gap-4">
+          {rows.map((row, i) => (
+            <div key={i} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">Product {i + 1}</span>
+                {rows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(i)}
+                    disabled={isPending}
+                    className="text-xs text-gray-400 hover:text-red-500"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={row.name}
+                  onChange={(e) => updateRow(i, 'name', e.target.value)}
+                  disabled={isPending}
+                  placeholder="Product Name *"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                           placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={row.sku}
+                    onChange={(e) => updateRow(i, 'sku', e.target.value)}
+                    disabled={isPending}
+                    placeholder="SKU (auto)"
+                    className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                             placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                  />
+                  <input
+                    type="text"
+                    value={row.category}
+                    onChange={(e) => updateRow(i, 'category', e.target.value)}
+                    disabled={isPending}
+                    placeholder="Category"
+                    className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                             placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <select
+                    value={row.unit}
+                    onChange={(e) => updateRow(i, 'unit', e.target.value)}
+                    disabled={isPending}
+                    className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900
+                             focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                  >
+                    {UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="1"
+                      value={row.qtyOnHand}
+                      onChange={(e) => updateRow(i, 'qtyOnHand', e.target.value)}
+                      disabled={isPending}
+                      placeholder="Qty *"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-right text-gray-900
+                               placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                    />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                      GHS
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      value={row.costPrice}
+                      onChange={(e) => updateRow(i, 'costPrice', e.target.value)}
+                      disabled={isPending}
+                      placeholder="Cost *"
+                      className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-3 text-sm text-right text-gray-900
+                               placeholder:text-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
 
-        {/* Actions */}
-        <div className="mt-2 flex flex-col gap-2">
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isPending}
-            className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
-            size="lg"
-          >
-            {isPending ? 'Saving\u2026' : 'Continue'}
-          </Button>
-          <Button type="button" variant="ghost" onClick={onBack} disabled={isPending} className="text-sm text-muted-foreground">
-            Back
-          </Button>
+          {rows.length < 50 && (
+            <button
+              type="button"
+              onClick={addRow}
+              disabled={isPending}
+              className="text-sm font-medium text-green-700 hover:text-green-800"
+            >
+              + Add another product
+            </button>
+          )}
+          {rows.length >= 40 && rows.length < 50 && (
+            <p className="text-xs text-amber-600">
+              You can add up to 50 products during setup. More can be added after.
+            </p>
+          )}
+
+          {/* Total */}
+          <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
+            <span className="text-sm font-medium text-gray-700">Total Inventory Value</span>
+            <span className="text-base font-semibold text-gray-900">
+              GHS{' '}
+              {totalValue.toLocaleString('en-GH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-2 flex flex-col gap-2">
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isPending}
+              className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+              size="lg"
+            >
+              {isPending ? 'Saving\u2026' : 'Continue'}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onBack}
+              disabled={isPending}
+              className="text-sm text-muted-foreground"
+            >
+              Back
+            </Button>
+          </div>
         </div>
-      </div>
       </CardContent>
     </Card>
   )

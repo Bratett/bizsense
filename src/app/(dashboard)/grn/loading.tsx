@@ -10,7 +10,10 @@ export default function GRNLoading() {
         </div>
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
+            >
               <div>
                 <Skeleton className="h-4 w-28" />
                 <Skeleton className="mt-1.5 h-3 w-36" />

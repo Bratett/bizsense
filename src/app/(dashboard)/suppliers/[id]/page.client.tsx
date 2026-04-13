@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { deactivateSupplier, type SupplierWithBalance } from '@/actions/suppliers'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { getSupplierStatementData } from '@/actions/supplierPayments'
 import { formatGhs, avatarColor, initials } from '@/lib/format'
 import { PageHeader } from '@/components/ui/page-header'
@@ -15,7 +22,16 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
-import { Pencil, Download, ClipboardList, MapPin, Phone, Mail, Smartphone, Building2 } from 'lucide-react'
+import {
+  Pencil,
+  Download,
+  ClipboardList,
+  MapPin,
+  Phone,
+  Mail,
+  Smartphone,
+  Building2,
+} from 'lucide-react'
 
 export default function SupplierDetail({ supplier }: { supplier: SupplierWithBalance }) {
   const router = useRouter()
@@ -84,10 +100,7 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
         </Breadcrumb>
 
         {/* Back nav */}
-        <PageHeader
-          title={supplier.name}
-          backHref="/suppliers"
-        />
+        <PageHeader title={supplier.name} backHref="/suppliers" />
 
         {/* Deactivate error */}
         {deactivateError && (
@@ -111,7 +124,9 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
                   </Avatar>
                   <h2 className="mt-3 text-lg font-semibold text-foreground">{supplier.name}</h2>
                   {!supplier.isActive && (
-                    <Badge variant="secondary" className="mt-1">Inactive</Badge>
+                    <Badge variant="secondary" className="mt-1">
+                      Inactive
+                    </Badge>
                   )}
                   {supplier.location && (
                     <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
@@ -149,7 +164,9 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
                       </span>
                       <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">EMAIL</p>
-                        <p className="truncate text-sm font-medium text-foreground">{supplier.email}</p>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {supplier.email}
+                        </p>
                       </div>
                     </a>
                   )}
@@ -174,7 +191,9 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
                         <p className="text-sm font-medium text-foreground">
                           {supplier.bankName}
                           {supplier.bankAccount && (
-                            <span className="ml-1 text-xs text-muted-foreground">· {supplier.bankAccount}</span>
+                            <span className="ml-1 text-xs text-muted-foreground">
+                              · {supplier.bankAccount}
+                            </span>
                           )}
                         </p>
                       </div>
@@ -183,11 +202,13 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
                 </div>
 
                 {/* Credit Terms chip */}
-                {(supplier.creditTermsDays !== null && supplier.creditTermsDays !== undefined) && (
+                {supplier.creditTermsDays !== null && supplier.creditTermsDays !== undefined && (
                   <>
                     <Separator className="my-4" />
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-muted-foreground">Credit Terms</span>
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Credit Terms
+                      </span>
                       <Badge variant="secondary">
                         {supplier.creditTermsDays === 0
                           ? 'Payment on receipt'
@@ -199,11 +220,18 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
 
                 {/* Action buttons */}
                 <div className="mt-5 space-y-2">
-                  <Button className="w-full" render={<Link href={`/purchase-orders/new?supplierId=${supplier.id}`} />}>
+                  <Button
+                    className="w-full"
+                    render={<Link href={`/purchase-orders/new?supplierId=${supplier.id}`} />}
+                  >
                     <ClipboardList className="h-4 w-4" />
                     Create PO
                   </Button>
-                  <Button variant="outline" className="w-full" render={<Link href={`/suppliers/${supplier.id}/edit`} />}>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    render={<Link href={`/suppliers/${supplier.id}/edit`} />}
+                  >
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
@@ -232,10 +260,20 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
                   balanceIsZero ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50',
                 )}
               >
-                <p className={cn('text-xs font-semibold uppercase tracking-wider', balanceIsZero ? 'text-green-600' : 'text-amber-600')}>
+                <p
+                  className={cn(
+                    'text-xs font-semibold uppercase tracking-wider',
+                    balanceIsZero ? 'text-green-600' : 'text-amber-600',
+                  )}
+                >
                   Outstanding Payable
                 </p>
-                <p className={cn('mt-1 text-2xl font-bold tabular-nums', balanceIsZero ? 'text-green-700' : 'text-amber-700')}>
+                <p
+                  className={cn(
+                    'mt-1 text-2xl font-bold tabular-nums',
+                    balanceIsZero ? 'text-green-700' : 'text-amber-700',
+                  )}
+                >
                   {formatGhs(supplier.outstandingPayable)}
                 </p>
               </div>
@@ -243,7 +281,9 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
               {/* Credit Terms */}
               <Card>
                 <CardContent>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Credit Terms</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Credit Terms
+                  </p>
                   <p className="mt-1 text-base font-bold text-foreground">
                     {supplier.creditTermsDays === 0
                       ? 'On receipt'
@@ -255,7 +295,9 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
               {/* Supplier Since */}
               <Card>
                 <CardContent>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Supplier Since</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Supplier Since
+                  </p>
                   <p className="mt-1 text-base font-bold text-foreground">
                     {supplier.createdAt.toLocaleDateString('en-GH', {
                       day: 'numeric',
@@ -280,9 +322,13 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
                   {supplier.phone && <ProfileRow label="Phone" value={supplier.phone} />}
                   {supplier.email && <ProfileRow label="Email" value={supplier.email} />}
                   {supplier.location && <ProfileRow label="Location" value={supplier.location} />}
-                  {supplier.momoNumber && <ProfileRow label="MoMo Number" value={supplier.momoNumber} />}
+                  {supplier.momoNumber && (
+                    <ProfileRow label="MoMo Number" value={supplier.momoNumber} />
+                  )}
                   {supplier.bankName && <ProfileRow label="Bank Name" value={supplier.bankName} />}
-                  {supplier.bankAccount && <ProfileRow label="Bank Account" value={supplier.bankAccount} />}
+                  {supplier.bankAccount && (
+                    <ProfileRow label="Bank Account" value={supplier.bankAccount} />
+                  )}
                   <ProfileRow
                     label="Credit Terms"
                     value={
@@ -298,11 +344,7 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
 
             {/* Deactivate */}
             {supplier.isActive && (
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={() => setShowConfirm(true)}
-              >
+              <Button variant="destructive" className="w-full" onClick={() => setShowConfirm(true)}>
                 Deactivate Supplier
               </Button>
             )}
@@ -317,8 +359,8 @@ export default function SupplierDetail({ supplier }: { supplier: SupplierWithBal
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-foreground">Deactivate Supplier?</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                {supplier.name} will be hidden from your supplier list. You can reactivate them later
-                from settings.
+                {supplier.name} will be hidden from your supplier list. You can reactivate them
+                later from settings.
               </p>
               <div className="mt-6 flex gap-3">
                 <Button

@@ -4,7 +4,14 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { updateProduct, type ProductDetail, type UpdateProductInput } from '@/actions/products'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -77,7 +84,9 @@ export default function EditProductForm({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`/inventory/${product.id}`} />}>{product.name}</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href={`/inventory/${product.id}`} />}>
+              {product.name}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -190,17 +199,16 @@ export default function EditProductForm({
             <p className="text-sm font-medium text-foreground">Track Inventory</p>
             <p className="text-xs text-muted-foreground">Monitor stock levels for this product</p>
           </div>
-          <Switch
-            checked={trackInventory}
-            onCheckedChange={setTrackInventory}
-          />
+          <Switch checked={trackInventory} onCheckedChange={setTrackInventory} />
         </div>
 
         {/* Reorder Level */}
         {trackInventory && (
           <div className="space-y-1.5">
             <Label htmlFor="reorderLevel">Reorder Level</Label>
-            <p className="text-xs text-muted-foreground">Alert me when stock falls below this quantity</p>
+            <p className="text-xs text-muted-foreground">
+              Alert me when stock falls below this quantity
+            </p>
             <Input
               id="reorderLevel"
               type="text"

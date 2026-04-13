@@ -177,13 +177,11 @@ export function ConfirmationCard({ pendingAction, onConfirm, onReject }: Confirm
         {isExpired ? (
           <p className="text-sm text-red-600">This action has expired. Please ask again.</p>
         ) : (
-          humanReadable
-            .split('\n')
-            .map((line, i) => (
-              <p key={i} className="text-sm text-gray-800">
-                {line}
-              </p>
-            ))
+          humanReadable.split('\n').map((line, i) => (
+            <p key={i} className="text-sm text-gray-800">
+              {line}
+            </p>
+          ))
         )}
       </div>
 
