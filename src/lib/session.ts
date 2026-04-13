@@ -1,3 +1,6 @@
+import { eq } from 'drizzle-orm'
+import { db } from '@/db'
+import { users } from '@/db/schema'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export type UserRole = 'owner' | 'manager' | 'accountant' | 'cashier'
@@ -12,6 +15,18 @@ export interface AppSession {
   }
 }
 
+/**
+ * getServerSession — resolves the authenticated user and their business context.
+ *
+ * businessId and role are read from the `users` table — the authoritative source.
+ * user_metadata is used only by middleware for fast routing; it is not trusted here
+ * for business logic. This means a role change in the `users` table takes effect on
+ * the next request without requiring a Supabase auth metadata update.
+ *
+ * Throws 'Unauthenticated' if no valid Supabase session exists.
+ * Throws 'No business associated with this account' if the users table has no row
+ * for this auth user (should not happen after signup, but guards against edge cases).
+ */
 export async function getServerSession(): Promise<AppSession> {
   const supabase = await createSupabaseServerClient()
   const {
@@ -23,11 +38,16 @@ export async function getServerSession(): Promise<AppSession> {
     throw new Error('Unauthenticated')
   }
 
-  const businessId = user.user_metadata?.businessId as string | undefined
-  const role = (user.user_metadata?.role ?? 'cashier') as UserRole
-  const fullName = (user.user_metadata?.fullName as string | null) ?? null
+  const [userRecord] = await db
+    .select({
+      businessId: users.businessId,
+      role: users.role,
+      fullName: users.fullName,
+    })
+    .from(users)
+    .where(eq(users.id, user.id))
 
-  if (!businessId) {
+  if (!userRecord) {
     throw new Error('No business associated with this account')
   }
 
@@ -35,9 +55,9 @@ export async function getServerSession(): Promise<AppSession> {
     user: {
       id: user.id,
       email: user.email!,
-      businessId,
-      role,
-      fullName,
+      businessId: userRecord.businessId,
+      role: userRecord.role as UserRole,
+      fullName: userRecord.fullName,
     },
   }
 }

@@ -7,6 +7,15 @@ import { createGrn, confirmGrn } from '@/actions/grn'
 import { generateGrnNumber } from '@/lib/grnNumber'
 import type { SupplierListItem } from '@/actions/suppliers'
 import type { ProductListItem } from '@/actions/products'
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import { PageHeader } from '@/components/ui/page-header'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -33,13 +42,6 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 function parseNum(s: string): number {
   const n = parseFloat(s)
   return isNaN(n) ? 0 : n
-}
-
-function formatGHS(amount: number): string {
-  return `GHS ${amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
 }
 
 function todayISO(): string {
@@ -169,32 +171,30 @@ export default function WalkInGrnForm({
     lines.every((l) => l.productId && parseNum(l.quantityReceived) > 0 && parseNum(l.unitCost) >= 0)
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <Link href="/grn" className="text-sm text-gray-500 hover:text-gray-700">
-          ← Goods Received
-        </Link>
-        <h1 className="mt-4 text-xl font-semibold text-gray-900">Record Delivery (Walk-in)</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          No purchase order needed — add the products you received directly.
-        </p>
+    <div className="mx-auto max-w-2xl">
+      <PageHeader
+        title="Record Delivery (Walk-in)"
+        subtitle="No purchase order needed -- add the products you received directly."
+        backHref="/grn"
+      />
 
-        <div className="mt-6 space-y-4">
-          {/* Supplier */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-medium text-gray-700">Supplier</h2>
-            <input
+      <div className="space-y-4">
+        {/* Supplier */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Supplier</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Input
               type="text"
-              placeholder="Search supplier…"
+              placeholder="Search supplier..."
               value={supplierSearch}
               onChange={(e) => setSupplierSearch(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {supplierSearch && (
-              <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+              <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-border bg-background shadow-sm">
                 {filteredSuppliers.length === 0 ? (
-                  <p className="px-3 py-2 text-sm text-gray-400">No suppliers found.</p>
+                  <p className="px-3 py-2 text-sm text-muted-foreground">No suppliers found.</p>
                 ) : (
                   filteredSuppliers.map((s) => (
                     <button
@@ -204,7 +204,7 @@ export default function WalkInGrnForm({
                         setSupplierId(s.id)
                         setSupplierSearch(s.name)
                       }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
                     >
                       {s.name}
                     </button>
@@ -213,37 +213,43 @@ export default function WalkInGrnForm({
               </div>
             )}
             {selectedSupplier && !supplierSearch.includes(selectedSupplier.name) ? null : (
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {selectedSupplier ? `Selected: ${selectedSupplier.name}` : ''}
               </p>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Date */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <label className="block text-sm font-medium text-gray-700">Date Received</label>
-            <input
+        {/* Date */}
+        <Card>
+          <CardContent>
+            <Label>Date Received</Label>
+            <Input
               type="date"
               value={receivedDate}
               max={todayISO()}
               onChange={(e) => setReceivedDate(e.target.value)}
-              className="mt-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-auto"
             />
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Line items */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-medium text-gray-700">Items Received</h2>
-            <div className="mt-3 space-y-3">
+        {/* Line items */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Items Received</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
               {lines.map((line) => (
                 <div key={line.key} className="flex items-start gap-2">
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <select
                       value={line.productId}
                       onChange={(e) => updateLine(line.key, 'productId', e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
-                      <option value="">Select product…</option>
+                      <option value="">Select product...</option>
                       {products.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
@@ -252,89 +258,83 @@ export default function WalkInGrnForm({
                       ))}
                     </select>
                     {fieldErrors[`line_${lines.indexOf(line)}_productId`] && (
-                      <p className="mt-0.5 text-xs text-red-600">
+                      <p className="mt-0.5 text-xs text-destructive">
                         {fieldErrors[`line_${lines.indexOf(line)}_productId`]}
                       </p>
                     )}
                   </div>
-                  <input
+                  <Input
                     type="number"
                     min="0.01"
                     step="0.01"
                     placeholder="Qty"
                     value={line.quantityReceived}
                     onChange={(e) => updateLine(line.key, 'quantityReceived', e.target.value)}
-                    className="w-20 rounded-lg border border-gray-200 px-2 py-2 text-right text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-20 text-right"
                   />
-                  <input
+                  <Input
                     type="number"
                     min="0"
                     step="0.01"
                     placeholder="Cost"
                     value={line.unitCost}
                     onChange={(e) => updateLine(line.key, 'unitCost', e.target.value)}
-                    className="w-28 rounded-lg border border-gray-200 px-2 py-2 text-right text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-28 text-right"
                   />
                   {lines.length > 1 && (
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => removeLine(line.key)}
-                      className="mt-1 text-gray-400 hover:text-red-500"
+                      className="mt-0.5 text-muted-foreground hover:text-destructive"
                     >
-                      ×
-                    </button>
+                      &times;
+                    </Button>
                   )}
                 </div>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={addLine}
-              className="mt-3 text-sm text-blue-600 hover:text-blue-700"
-            >
+            <Button variant="link" onClick={addLine} className="mt-3 px-0">
               + Add item
-            </button>
+            </Button>
 
             {/* Total */}
-            <div className="mt-4 border-t border-gray-100 pt-3 text-right">
-              <span className="text-sm font-semibold text-gray-900">
-                Total: {formatGHS(totalCost)}
+            <Separator className="mt-4" />
+            <div className="pt-3 text-right">
+              <span className="text-sm font-semibold text-foreground">
+                Total: {formatGhs(totalCost)}
               </span>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Payment type */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-medium text-gray-700">Payment</h2>
-            <div className="mt-2 flex gap-3">
-              <button
-                type="button"
+        {/* Payment type */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <Button
+                variant={paymentType === 'credit' ? 'default' : 'outline'}
+                className="flex-1"
                 onClick={() => setPaymentType('credit')}
-                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                  paymentType === 'credit'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
               >
-                On Credit — create payable
-              </button>
-              <button
-                type="button"
+                On Credit -- create payable
+              </Button>
+              <Button
+                variant={paymentType === 'cash' ? 'default' : 'outline'}
+                className="flex-1"
                 onClick={() => setPaymentType('cash')}
-                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                  paymentType === 'cash'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
               >
                 Paid now
-              </button>
+              </Button>
             </div>
             {paymentType === 'cash' && (
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-3 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>
@@ -343,77 +343,73 @@ export default function WalkInGrnForm({
                 ))}
               </select>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Notes */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
-            <textarea
+        {/* Notes */}
+        <Card>
+          <CardContent>
+            <Label>Notes (optional)</Label>
+            <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1"
             />
-          </div>
+          </CardContent>
+        </Card>
 
-          {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
-          )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          {/* Confirm dialog */}
-          {confirmMode && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-medium text-amber-800">Confirm Receipt</p>
-              <p className="mt-1 text-sm text-amber-700">
+        {/* Confirm dialog */}
+        {confirmMode && (
+          <Alert>
+            <AlertDescription>
+              <p className="font-medium">Confirm Receipt</p>
+              <p className="mt-1 text-sm">
                 Confirming will add inventory and{' '}
                 {paymentType === 'credit'
-                  ? `create a payable of ${formatGHS(totalCost)} to ${selectedSupplier?.name ?? 'supplier'}`
-                  : `record a payment of ${formatGHS(totalCost)}`}
+                  ? `create a payable of ${formatGhs(totalCost)} to ${selectedSupplier?.name ?? 'supplier'}`
+                  : `record a payment of ${formatGhs(totalCost)}`}
                 .
               </p>
               <div className="mt-3 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setConfirmMode(false)}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
-                >
+                <Button variant="outline" onClick={() => setConfirmMode(false)}>
                   Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => handleSubmit(true)}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {isPending ? 'Confirming…' : 'Yes, Confirm Receipt'}
-                </button>
+                </Button>
+                <Button disabled={isPending} onClick={() => handleSubmit(true)}>
+                  {isPending ? 'Confirming...' : 'Yes, Confirm Receipt'}
+                </Button>
               </div>
-            </div>
-          )}
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Actions */}
-          {!confirmMode && (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                disabled={!canSubmit || isPending}
-                onClick={() => handleSubmit(false)}
-                className="flex-1 rounded-lg border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              >
-                {isPending ? 'Saving…' : 'Save as Draft'}
-              </button>
-              <button
-                type="button"
-                disabled={!canSubmit || isPending}
-                onClick={() => setConfirmMode(true)}
-                className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                Confirm Receipt
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Actions */}
+        {!confirmMode && (
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1 py-3"
+              disabled={!canSubmit || isPending}
+              onClick={() => handleSubmit(false)}
+            >
+              {isPending ? 'Saving...' : 'Save as Draft'}
+            </Button>
+            <Button
+              className="flex-1 py-3"
+              disabled={!canSubmit || isPending}
+              onClick={() => setConfirmMode(true)}
+            >
+              Confirm Receipt
+            </Button>
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   )
 }

@@ -29,7 +29,7 @@ import { db } from '@/db'
 import { getOrderById } from '@/actions/orders'
 import { calculateTax } from '@/lib/tax'
 import { getInvoiceData } from '@/actions/invoices'
-import { formatGHS } from '../invoice-document'
+import { formatGhs as formatGHS } from '@/lib/format'
 import type { InvoiceData } from '../types'
 
 // ─── Test constants ─────────────────────────────────────────────────────────
@@ -197,7 +197,7 @@ describe('formatGHS', () => {
   })
 
   it('formats negative amounts', () => {
-    expect(formatGHS(-50)).toBe('GHS -50.00')
+    expect(formatGHS(-50)).toBe('(GHS 50.00)')
   })
 })
 

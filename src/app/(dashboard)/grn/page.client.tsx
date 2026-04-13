@@ -2,7 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Package } from 'lucide-react'
 import type { GrnWithSupplier } from '@/actions/grn'
+import { formatGhs, formatDate } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { EmptyState } from '@/components/ui/empty-state'
+import { PageHeader } from '@/components/ui/page-header'
+import { SearchInput } from '@/components/ui/search-input'
 
 type GrnStatus = 'all' | 'draft' | 'confirmed'
 
@@ -12,36 +20,9 @@ const STATUS_TABS: { key: GrnStatus; label: string }[] = [
   { key: 'confirmed', label: 'Confirmed' },
 ]
 
-const STATUS_BADGE: Record<string, { label: string; classes: string }> = {
-  draft: { label: 'Draft', classes: 'bg-gray-100 text-gray-600' },
-  confirmed: { label: 'Confirmed', classes: 'bg-green-100 text-green-700' },
-}
-
-function formatGHS(amount: string | null): string {
-  if (!amount) return 'GHS 0.00'
-  return `GHS ${Number(amount).toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-GH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_BADGE[status] ?? { label: status, classes: 'bg-gray-100 text-gray-600' }
-  return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cfg.classes}`}>
-      {cfg.label}
-    </span>
-  )
+const STATUS_VARIANT: Record<string, 'draft' | 'approved'> = {
+  draft: 'draft',
+  confirmed: 'approved',
 }
 
 export default function GrnList({ initialGrns }: { initialGrns: GrnWithSupplier[] }) {
@@ -58,91 +39,79 @@ export default function GrnList({ initialGrns }: { initialGrns: GrnWithSupplier[
   })
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">Goods Received</h1>
-          <Link
-            href="/grn/new"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+    <div className="mx-auto max-w-4xl">
+      <PageHeader
+        title="Goods Received"
+        actions={<Button render={<Link href="/grn/new" />}>+ New GRN</Button>}
+      />
+
+      {/* Search */}
+      <SearchInput
+        placeholder="Search by GRN number or supplier..."
+        value={search}
+        onChange={setSearch}
+      />
+
+      {/* Status tabs */}
+      <div className="mt-4 flex gap-2 overflow-x-auto">
+        {STATUS_TABS.map((tab) => (
+          <Button
+            key={tab.key}
+            variant={activeTab === tab.key ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab(tab.key)}
+            className="shrink-0 rounded-full"
           >
-            + New GRN
-          </Link>
-        </div>
+            {tab.label}
+          </Button>
+        ))}
+      </div>
 
-        {/* Search */}
-        <div className="mt-4">
-          <input
-            type="text"
-            placeholder="Search by GRN number or supplier…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Status tabs */}
-        <div className="mt-4 flex gap-2 overflow-x-auto">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* List */}
-        <div className="mt-4 space-y-2">
-          {filtered.length === 0 ? (
-            <div className="rounded-xl bg-white p-8 text-center text-gray-400">
-              {search ? 'No GRNs match your search.' : 'No goods received notes yet.'}
-              {!search && (
-                <div className="mt-3">
-                  <Link href="/grn/new" className="text-sm text-blue-600 hover:underline">
-                    Record a walk-in delivery
-                  </Link>
-                  {' or '}
-                  <Link href="/purchase-orders" className="text-sm text-blue-600 hover:underline">
-                    receive goods against a PO
-                  </Link>
-                  .
-                </div>
-              )}
-            </div>
+      {/* List */}
+      <div className="mt-4 space-y-2">
+        {filtered.length === 0 ? (
+          search ? (
+            <EmptyState
+              icon={<Package className="h-10 w-10" />}
+              title="No GRNs match your search"
+            />
           ) : (
-            filtered.map((grn) => (
-              <Link
-                key={grn.id}
-                href={`/grn/${grn.id}`}
-                className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-              >
+            <EmptyState
+              icon={<Package className="h-10 w-10" />}
+              title="No goods received notes yet"
+              subtitle="Record a walk-in delivery or receive goods against a PO."
+              action={{ label: 'Record Delivery', href: '/grn/new' }}
+            />
+          )
+        ) : (
+          filtered.map((grn) => (
+            <Link key={grn.id} href={`/grn/${grn.id}`}>
+              <Card className="flex items-center justify-between p-4 transition-shadow hover:shadow-md">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-medium text-gray-900">
+                    <span className="font-mono text-sm font-medium text-foreground">
                       {grn.grnNumber}
                     </span>
-                    <StatusBadge status={grn.status} />
+                    <StatusBadge variant={STATUS_VARIANT[grn.status] ?? 'draft'}>
+                      {grn.status === 'confirmed' ? 'Confirmed' : 'Draft'}
+                    </StatusBadge>
                   </div>
-                  <p className="mt-0.5 truncate text-sm text-gray-500">{grn.supplierName}</p>
-                  <p className="text-xs text-gray-400">{formatDate(grn.receivedDate)}</p>
+                  <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                    {grn.supplierName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{formatDate(grn.receivedDate)}</p>
                 </div>
                 <div className="ml-4 shrink-0 text-right">
-                  <p className="text-sm font-semibold text-gray-900">{formatGHS(grn.totalCost)}</p>
-                  {grn.poId && <p className="text-xs text-gray-400">From PO</p>}
+                  <p className="text-sm font-semibold text-foreground">
+                    {formatGhs(grn.totalCost)}
+                  </p>
+                  {grn.poId && <p className="text-xs text-muted-foreground">From PO</p>}
                 </div>
-              </Link>
-            ))
-          )}
-        </div>
+              </Card>
+            </Link>
+          ))
+        )}
       </div>
-    </main>
+    </div>
   )
 }

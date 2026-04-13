@@ -11,6 +11,15 @@ import {
 } from '@/actions/expenses'
 import { EXPENSE_CATEGORIES } from '@/lib/expenses/categories'
 import type { UserRole } from '@/lib/session'
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { MoneyInput } from '@/components/ui/money-input'
+import { Switch } from '@/components/ui/switch'
+import { PageHeader } from '@/components/ui/page-header'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -32,13 +41,6 @@ const PAYMENT_OPTIONS: PaymentOption[] = [
 
 function todayISO(): string {
   return new Date().toISOString().split('T')[0]
-}
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -136,7 +138,7 @@ export default function NewExpenseForm({
         if (result.success) {
           const catLabel = EXPENSE_CATEGORIES.find((c) => c.key === category)?.label ?? category
 
-          setSuccess(`Expense recorded. GHS ${formatGHS(amountNum)} ${catLabel} on ${expenseDate}.`)
+          setSuccess(`Expense recorded. ${formatGhs(amountNum)} ${catLabel} on ${expenseDate}.`)
 
           // Reset form
           setCategory('')
@@ -166,65 +168,50 @@ export default function NewExpenseForm({
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <Link
-          href="/expenses"
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Back to expenses"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">Record Expense</h1>
-      </div>
+      <PageHeader title="Record Expense" backHref="/expenses" />
 
       {/* Cashier info */}
       {userRole === 'cashier' && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          This expense will be submitted for approval by a manager or owner.
-        </div>
+        <Alert className="mb-4 border-amber-200 bg-amber-50 text-amber-800">
+          <AlertDescription>
+            This expense will be submitted for approval by a manager or owner.
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Success message */}
       {success && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-          {success}
-        </div>
+        <Alert className="mb-4 border-green-200 bg-green-50 text-green-800">
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       {/* Error banner */}
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <div className="space-y-4">
         {/* Date */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">Expense Date</label>
-          <input
+        <div className="space-y-1.5">
+          <Label>Expense Date</Label>
+          <Input
             type="date"
             value={expenseDate}
             onChange={(e) => setExpenseDate(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="h-10"
+            aria-invalid={!!fieldErrors.expenseDate}
           />
           {fieldErrors.expenseDate && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.expenseDate}</p>
+            <p className="text-sm text-destructive">{fieldErrors.expenseDate}</p>
           )}
         </div>
 
         {/* Category grid */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">Category</label>
+        <div className="space-y-1.5">
+          <Label>Category</Label>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {EXPENSE_CATEGORIES.map((cat) => (
               <button
@@ -233,16 +220,16 @@ export default function NewExpenseForm({
                 onClick={() => setCategory(cat.key)}
                 className={`rounded-xl border p-3 text-left transition-colors ${
                   category === cat.key
-                    ? 'border-green-600 bg-green-50 ring-2 ring-green-100'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-primary bg-primary/5 ring-2 ring-ring/50'
+                    : 'border-input bg-card hover:border-muted-foreground/30'
                 }`}
               >
-                <p className="text-sm font-medium text-gray-900">{cat.label}</p>
+                <p className="text-sm font-medium text-foreground">{cat.label}</p>
               </button>
             ))}
           </div>
           {fieldErrors.category && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.category}</p>
+            <p className="text-sm text-destructive">{fieldErrors.category}</p>
           )}
         </div>
 
@@ -266,60 +253,40 @@ export default function NewExpenseForm({
         )}
 
         {/* Amount */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">Amount (GHS)</label>
-          <input
-            type="number"
-            inputMode="decimal"
-            min="0.01"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-lg font-semibold text-gray-900 placeholder-gray-300 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-          />
-          {fieldErrors.amount && <p className="mt-1 text-xs text-red-600">{fieldErrors.amount}</p>}
-        </div>
+        <MoneyInput
+          label="Amount"
+          currency="GHS"
+          value={amount}
+          onChange={setAmount}
+          placeholder="0.00"
+          error={fieldErrors.amount}
+        />
 
         {/* VAT toggle */}
         {vatRegistered && !isCapital && (
-          <div className="rounded-lg border border-gray-200 bg-white p-3">
+          <div className="rounded-lg border border-input bg-card p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">This purchase includes VAT</p>
-                <p className="text-xs text-gray-400">Reverse-calculate input VAT</p>
+                <p className="text-sm font-medium text-foreground">This purchase includes VAT</p>
+                <p className="text-xs text-muted-foreground">Reverse-calculate input VAT</p>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={includesVat}
-                onClick={() => setIncludesVat(!includesVat)}
-                className={`relative h-6 w-11 rounded-full transition-colors ${
-                  includesVat ? 'bg-green-600' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                    includesVat ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+              <Switch checked={includesVat} onCheckedChange={setIncludesVat} />
             </div>
 
             {/* VAT breakdown */}
             {includesVat && vatPreview && amountNum > 0 && (
-              <div className="mt-3 flex gap-4 rounded-lg bg-gray-50 p-2 text-xs text-gray-600">
-                <span>Net: GHS {formatGHS(vatPreview.netAmount)}</span>
-                <span>VAT: GHS {formatGHS(vatPreview.vatAmount)}</span>
-                <span>Total: GHS {formatGHS(amountNum)}</span>
+              <div className="mt-3 flex gap-4 rounded-lg bg-muted p-2 text-xs text-muted-foreground">
+                <span>Net: {formatGhs(vatPreview.netAmount)}</span>
+                <span>VAT: {formatGhs(vatPreview.vatAmount)}</span>
+                <span>Total: {formatGhs(amountNum)}</span>
               </div>
             )}
           </div>
         )}
 
         {/* Payment method */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">Payment Method</label>
+        <div className="space-y-1.5">
+          <Label>Payment Method</Label>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {PAYMENT_OPTIONS.map((opt) => (
               <button
@@ -328,107 +295,98 @@ export default function NewExpenseForm({
                 onClick={() => setPaymentMethod(opt.value)}
                 className={`rounded-xl border p-3 text-center transition-colors ${
                   paymentMethod === opt.value
-                    ? 'border-green-600 bg-green-50 ring-2 ring-green-100'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-primary bg-primary/5 ring-2 ring-ring/50'
+                    : 'border-input bg-card hover:border-muted-foreground/30'
                 }`}
               >
-                <p className="text-sm font-medium text-gray-900">{opt.label}</p>
+                <p className="text-sm font-medium text-foreground">{opt.label}</p>
               </button>
             ))}
           </div>
           {fieldErrors.paymentMethod && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.paymentMethod}</p>
+            <p className="text-sm text-destructive">{fieldErrors.paymentMethod}</p>
           )}
         </div>
 
         {/* MoMo reference */}
         {paymentMethod.startsWith('momo_') && (
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              MoMo Reference <span className="text-red-500">*</span>
-            </label>
-            <input
+          <div className="space-y-1.5">
+            <Label>
+              MoMo Reference <span className="text-destructive">*</span>
+            </Label>
+            <Input
               type="text"
               value={momoReference}
               onChange={(e) => setMomoReference(e.target.value)}
               placeholder="Transaction reference"
-              className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                fieldErrors.momoReference
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                  : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-              }`}
+              className="h-10"
+              aria-invalid={!!fieldErrors.momoReference}
             />
             {fieldErrors.momoReference && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.momoReference}</p>
+              <p className="text-sm text-destructive">{fieldErrors.momoReference}</p>
             )}
           </div>
         )}
 
         {/* Bank reference */}
         {paymentMethod === 'bank' && (
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Bank Reference <span className="text-red-500">*</span>
-            </label>
-            <input
+          <div className="space-y-1.5">
+            <Label>
+              Bank Reference <span className="text-destructive">*</span>
+            </Label>
+            <Input
               type="text"
               value={bankReference}
               onChange={(e) => setBankReference(e.target.value)}
               placeholder="Transfer reference"
-              className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                fieldErrors.bankReference
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                  : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-              }`}
+              className="h-10"
+              aria-invalid={!!fieldErrors.bankReference}
             />
             {fieldErrors.bankReference && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.bankReference}</p>
+              <p className="text-sm text-destructive">{fieldErrors.bankReference}</p>
             )}
           </div>
         )}
 
         {/* Description */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">
-            Description <span className="text-red-500">*</span>
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label>
+            Description <span className="text-destructive">*</span>
+          </Label>
+          <Input
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g. Fuel for delivery van, September rent"
-            className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-              fieldErrors.description
-                ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-            }`}
+            className="h-10"
+            aria-invalid={!!fieldErrors.description}
           />
           {fieldErrors.description && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.description}</p>
+            <p className="text-sm text-destructive">{fieldErrors.description}</p>
           )}
         </div>
 
         {/* Receipt capture */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">Receipt (optional)</label>
+        <div className="space-y-1.5">
+          <Label>Receipt (optional)</Label>
           {receiptPreview ? (
             <div className="mt-2 flex items-start gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={receiptPreview}
                 alt="Receipt preview"
-                className="h-[100px] w-[120px] rounded-lg border border-gray-200 object-cover"
+                className="h-[100px] w-[120px] rounded-lg border border-input object-cover"
               />
-              <button
-                type="button"
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={() => {
                   setReceiptPreview(null)
                   setReceiptFile(null)
                 }}
-                className="text-sm text-red-600 hover:text-red-800"
               >
                 Remove
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="mt-2 flex gap-3">
@@ -499,40 +457,25 @@ export default function NewExpenseForm({
         </div>
 
         {/* Notes */}
-        <div>
-          <label className="text-sm font-medium text-gray-700">Notes (optional)</label>
-          <textarea
+        <div className="space-y-1.5">
+          <Label>Notes (optional)</Label>
+          <Textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             placeholder="Any additional notes"
           />
         </div>
 
         {/* Recurring expense toggle */}
         {!isCapital && (
-          <div className="rounded-lg border border-gray-200 bg-white p-3">
+          <div className="rounded-lg border border-input bg-card p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Recurring expense?</p>
-                <p className="text-xs text-gray-400">Auto-posts on schedule</p>
+                <p className="text-sm font-medium text-foreground">Recurring expense?</p>
+                <p className="text-xs text-muted-foreground">Auto-posts on schedule</p>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isRecurring}
-                onClick={() => setIsRecurring(!isRecurring)}
-                className={`relative h-6 w-11 rounded-full transition-colors ${
-                  isRecurring ? 'bg-green-600' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                    isRecurring ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+              <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
             </div>
 
             {isRecurring && (
@@ -544,8 +487,8 @@ export default function NewExpenseForm({
                     onClick={() => setRecurrenceFrequency(freq)}
                     className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                       recurrenceFrequency === freq
-                        ? 'border-green-600 bg-green-50 text-green-700'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-input bg-card text-muted-foreground hover:border-muted-foreground/30'
                     }`}
                   >
                     {freq === 'biweekly'
@@ -559,19 +502,18 @@ export default function NewExpenseForm({
         )}
 
         {/* Submit */}
-        <button
-          type="button"
+        <Button
+          size="lg"
+          className="w-full py-3 text-base"
           onClick={handleSubmit}
           disabled={isPending || !canSubmit}
-          className="w-full rounded-lg bg-green-700 px-4 py-[13px] text-base font-semibold text-white hover:bg-green-800 active:bg-green-900 disabled:opacity-60"
-          style={{ minHeight: 52 }}
         >
           {isPending
             ? 'Saving...'
             : userRole === 'cashier'
               ? 'Submit for Approval'
               : 'Record Expense'}
-        </button>
+        </Button>
       </div>
     </>
   )

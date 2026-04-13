@@ -7,8 +7,17 @@ import { createPurchaseOrder, markPoSent, type CreatePoInput } from '@/actions/p
 import { recordFxRate } from '@/actions/fx'
 import type { SupplierListItem } from '@/actions/suppliers'
 import { generatePoNumber } from '@/lib/poNumber'
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import { PageHeader } from '@/components/ui/page-header'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────���───────────────────────────────────────��──────────────
 
 type LineItem = {
   key: number
@@ -19,25 +28,18 @@ type LineItem = {
 
 const STEPS = ['Supplier', 'Items', 'Review'] as const
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ─────��───────────────────────────────────────────────────────────
 
 function parseNum(s: string): number {
   const n = parseFloat(s)
   return isNaN(n) ? 0 : n
 }
 
-function formatGHS(amount: number): string {
-  return `GHS ${amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
-
 function todayISO(): string {
   return new Date().toISOString().split('T')[0]
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Component ──────────���────────────────────────────────────────────────────
 
 export default function NewPurchaseOrderForm({
   suppliers,
@@ -51,10 +53,10 @@ export default function NewPurchaseOrderForm({
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  // ─── Step state ─────────────────────────────────────────────────────────────
+  // ─── Step state ─���───────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(0)
 
-  // ─── Step 1: Supplier & Dates ────────────────────────────────────────────────
+  // ─── Step 1: Supplier & Dates ───────────���────────────────────────────────────
   const [supplierId, setSupplierId] = useState('')
   const [supplierSearch, setSupplierSearch] = useState('')
   const [orderDate, setOrderDate] = useState(todayISO())
@@ -64,13 +66,13 @@ export default function NewPurchaseOrderForm({
   const [fxRateConfirmed, setFxRateConfirmed] = useState(false)
   const [notes, setNotes] = useState('')
 
-  // ─── Step 2: Line items ──────────────────────────────────────────────────────
+  // ─��─ Step 2: Line items ──────────────────────────────────���───────────────────
   const [lineKeyCounter, setLineKeyCounter] = useState(1)
   const [lines, setLines] = useState<LineItem[]>([
     { key: 0, description: '', quantity: '1', unitCost: '' },
   ])
 
-  // ─── Computed ────────────────────────────────────────────────────────────────
+  // ─── Computed ────────���───────────────────────────────────────────────────────
   const fxRateNum = parseNum(fxRate)
   const selectedSupplier = suppliers.find((s) => s.id === supplierId)
 
@@ -87,7 +89,7 @@ export default function NewPurchaseOrderForm({
     latestUsdRate && fxRateNum > 0 ? Math.abs(fxRateNum - latestUsdRate) / latestUsdRate : 0
   const showFxWarning = currency === 'USD' && fxDeviation > 0.2
 
-  // ─── Line handlers ───────────────────────────────────────────────────────────
+  // ─── Line handlers ──────���────────────────────────────────────────────────────
   const addLine = useCallback(() => {
     setLines((prev) => [
       ...prev,
@@ -104,7 +106,7 @@ export default function NewPurchaseOrderForm({
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, [field]: value } : l)))
   }, [])
 
-  // ─── Step validation ─────────────────────────────────────────────────────────
+  // ─── Step validation ─────────��───────────────────────────────────────────────
   function validateStep1(): boolean {
     const errs: Record<string, string> = {}
     if (!supplierId) errs['supplierId'] = 'Please select a supplier.'
@@ -130,7 +132,7 @@ export default function NewPurchaseOrderForm({
     return Object.keys(errs).length === 0
   }
 
-  // ─── Submit ──────────────────────────────────────────────────────────────────
+  // ─── Submit ────���────────────────────────────────────���────────────────────────
   async function handleSubmit(sendToSupplier: boolean) {
     setError(null)
     setFieldErrors({})
@@ -192,32 +194,15 @@ export default function NewPurchaseOrderForm({
     })
   }
 
-  // ─── Supplier filter ─────────────────────────────────────────────────────────
+  // ��── Supplier filter ─────���────────────────────────────���──────────────────────
   const filteredSuppliers = suppliers.filter(
     (s) => !supplierSearch || s.name.toLowerCase().includes(supplierSearch.toLowerCase()),
   )
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
+  // ─── Render ──────────────────────────────────────────────��───────────────────
   return (
     <div>
-      {/* Back link */}
-      <div className="mb-4 flex items-center gap-2">
-        <Link
-          href="/purchase-orders"
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">New Purchase Order</h1>
-      </div>
+      <PageHeader title="New Purchase Order" backHref="/purchase-orders" />
 
       {/* Step indicators */}
       <div className="mb-6 flex items-center gap-2">
@@ -226,49 +211,50 @@ export default function NewPurchaseOrderForm({
             <div
               className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                 i === currentStep
-                  ? 'bg-green-700 text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : i < currentStep
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-400'
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-muted text-muted-foreground'
               }`}
             >
               {i + 1}
             </div>
             <span
               className={`text-sm ${
-                i === currentStep ? 'font-medium text-gray-900' : 'text-gray-400'
+                i === currentStep ? 'font-medium text-foreground' : 'text-muted-foreground'
               }`}
             >
               {label}
             </span>
-            {i < STEPS.length - 1 && <span className="text-gray-300">/</span>}
+            {i < STEPS.length - 1 && <span className="text-muted-foreground">/</span>}
           </div>
         ))}
       </div>
 
       {/* Error banner */}
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {/* ─── Step 1: Supplier & Dates ─────────────────────────────────────────── */}
+      {/* ─── Step 1: Supplier & Dates ─────���───────────────────────────────────── */}
       {currentStep === 0 && (
         <div className="space-y-4">
           {/* Supplier search */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Supplier</label>
-            <input
+            <Label className="mb-1">Supplier</Label>
+            <Input
               type="search"
               placeholder="Search suppliers..."
               value={supplierSearch}
               onChange={(e) => setSupplierSearch(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             />
             {fieldErrors['supplierId'] && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors['supplierId']}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors['supplierId']}</p>
             )}
             {filteredSuppliers.length > 0 && (
-              <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+              <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-card shadow-sm">
                 {filteredSuppliers.map((s) => (
                   <button
                     key={s.id}
@@ -277,12 +263,12 @@ export default function NewPurchaseOrderForm({
                       setSupplierId(s.id)
                       setSupplierSearch(s.name)
                     }}
-                    className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm hover:bg-gray-50 ${
-                      supplierId === s.id ? 'bg-green-50 text-green-700' : 'text-gray-900'
+                    className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm hover:bg-muted ${
+                      supplierId === s.id ? 'bg-primary/10 text-primary' : 'text-foreground'
                     }`}
                   >
                     <span>{s.name}</span>
-                    {s.phone && <span className="text-xs text-gray-400">{s.phone}</span>}
+                    {s.phone && <span className="text-xs text-muted-foreground">{s.phone}</span>}
                   </button>
                 ))}
               </div>
@@ -291,48 +277,41 @@ export default function NewPurchaseOrderForm({
 
           {/* Order date */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Order Date</label>
-            <input
-              type="date"
-              value={orderDate}
-              onChange={(e) => setOrderDate(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-            />
+            <Label className="mb-1">Order Date</Label>
+            <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} />
             {fieldErrors['orderDate'] && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors['orderDate']}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors['orderDate']}</p>
             )}
           </div>
 
           {/* Expected date */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Expected Delivery Date <span className="font-normal text-gray-400">(optional)</span>
-            </label>
-            <input
+            <Label className="mb-1">
+              Expected Delivery Date{' '}
+              <span className="font-normal text-muted-foreground">(optional)</span>
+            </Label>
+            <Input
               type="date"
               value={expectedDate}
               onChange={(e) => setExpectedDate(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             />
           </div>
 
           {/* Currency */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Currency</label>
+            <Label className="mb-1">Currency</Label>
             <div className="flex gap-2">
               {(['GHS', 'USD'] as const).map((c) => (
-                <button
+                <Button
                   key={c}
                   type="button"
+                  variant={currency === c ? 'default' : 'outline'}
                   onClick={() => setCurrency(c)}
-                  className={`flex-1 rounded-lg border py-3 text-sm font-medium transition-colors ${
-                    currency === c
-                      ? 'border-green-600 bg-green-50 text-green-700'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className="flex-1"
+                  size="lg"
                 >
                   {c}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -340,10 +319,8 @@ export default function NewPurchaseOrderForm({
           {/* FX rate (USD only) */}
           {currency === 'USD' && (
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                Exchange Rate (USD → GHS)
-              </label>
-              <input
+              <Label className="mb-1">Exchange Rate (USD → GHS)</Label>
+              <Input
                 type="number"
                 min="0"
                 step="0.0001"
@@ -353,144 +330,150 @@ export default function NewPurchaseOrderForm({
                   setFxRate(e.target.value)
                   setFxRateConfirmed(false)
                 }}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
               />
               {fieldErrors['fxRate'] && (
-                <p className="mt-1 text-xs text-red-600">{fieldErrors['fxRate']}</p>
+                <p className="mt-1 text-xs text-destructive">{fieldErrors['fxRate']}</p>
               )}
               {showFxWarning && (
-                <div className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                  <p>
-                    This rate deviates {(fxDeviation * 100).toFixed(1)}% from the last recorded rate
-                    ({latestUsdRate?.toFixed(4)}).
-                  </p>
-                  <label className="mt-2 flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={fxRateConfirmed}
-                      onChange={(e) => setFxRateConfirmed(e.target.checked)}
-                      className="rounded"
-                    />
-                    <span>I confirm this rate is correct</span>
-                  </label>
-                </div>
+                <Alert className="mt-2">
+                  <AlertDescription>
+                    <p>
+                      This rate deviates {(fxDeviation * 100).toFixed(1)}% from the last recorded
+                      rate ({latestUsdRate?.toFixed(4)}).
+                    </p>
+                    <label className="mt-2 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={fxRateConfirmed}
+                        onChange={(e) => setFxRateConfirmed(e.target.checked)}
+                        className="rounded"
+                      />
+                      <span>I confirm this rate is correct</span>
+                    </label>
+                  </AlertDescription>
+                </Alert>
               )}
               {fxRateNum > 0 && !showFxWarning && (
-                <p className="mt-1 text-xs text-gray-500">USD 1 = GHS {fxRateNum.toFixed(4)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  USD 1 = GHS {fxRateNum.toFixed(4)}
+                </p>
               )}
             </div>
           )}
 
           {/* Notes */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Notes <span className="font-normal text-gray-400">(optional)</span>
-            </label>
-            <textarea
+            <Label className="mb-1">
+              Notes <span className="font-normal text-muted-foreground">(optional)</span>
+            </Label>
+            <Textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any special instructions..."
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             />
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={() => validateStep1() && setCurrentStep(1)}
-            className="w-full rounded-lg bg-green-700 py-3 text-sm font-semibold text-white hover:bg-green-800"
+            className="w-full"
+            size="lg"
           >
             Next: Line Items
-          </button>
+          </Button>
         </div>
       )}
 
-      {/* ─── Step 2: Line Items ───────────────────────────────────────────────── */}
+      {/* ─── Step 2: Line Items ────��──────────────────────────────────��───────── */}
       {currentStep === 1 && (
         <div className="space-y-4">
           {lines.map((line, idx) => (
-            <div
-              key={line.key}
-              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Item {idx + 1}</span>
-                {lines.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeLine(line.key)}
-                    className="rounded p-1 text-gray-400 hover:text-red-500"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
+            <Card key={line.key}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Item {idx + 1}</CardTitle>
+                  {lines.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => removeLine(line.key)}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              <div className="space-y-2">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
                 <div>
-                  <input
+                  <Input
                     type="text"
                     placeholder="Description"
                     value={line.description}
                     onChange={(e) => updateLine(line.key, 'description', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-100"
                   />
                   {fieldErrors[`line_${idx}_description`] && (
-                    <p className="mt-0.5 text-xs text-red-600">
+                    <p className="mt-0.5 text-xs text-destructive">
                       {fieldErrors[`line_${idx}_description`]}
                     </p>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <input
+                    <Input
                       type="number"
                       min="0.01"
                       step="0.01"
                       placeholder="Qty"
                       value={line.quantity}
                       onChange={(e) => updateLine(line.key, 'quantity', e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-100"
                     />
                     {fieldErrors[`line_${idx}_quantity`] && (
-                      <p className="mt-0.5 text-xs text-red-600">
+                      <p className="mt-0.5 text-xs text-destructive">
                         {fieldErrors[`line_${idx}_quantity`]}
                       </p>
                     )}
                   </div>
                   <div className="flex-1">
-                    <input
+                    <Input
                       type="number"
                       min="0"
                       step="0.01"
                       placeholder={`Unit Cost (${currency})`}
                       value={line.unitCost}
                       onChange={(e) => updateLine(line.key, 'unitCost', e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-100"
                     />
                   </div>
                 </div>
-                <div className="text-right text-sm text-gray-500">
+                <div className="text-right text-sm text-muted-foreground">
                   Line total:{' '}
-                  <span className="font-medium text-gray-900">
-                    {formatGHS(computedLines[idx]?.lineTotal ?? 0)}
+                  <span className="font-medium text-foreground">
+                    {formatGhs(computedLines[idx]?.lineTotal ?? 0)}
                   </span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={addLine}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-3 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700"
+            className="w-full border-dashed"
+            size="lg"
           >
             <svg
               className="h-4 w-4"
@@ -502,122 +485,141 @@ export default function NewPurchaseOrderForm({
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Add Item
-          </button>
+          </Button>
 
           {/* Running total */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Total</span>
-              <span className="text-base font-semibold text-gray-900">{formatGHS(total)}</span>
-            </div>
-          </div>
+          <Card>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Total</span>
+                <span className="text-base font-semibold text-foreground">{formatGhs(total)}</span>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="flex gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setCurrentStep(0)}
-              className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-1"
+              size="lg"
             >
               Back
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => validateStep2() && setCurrentStep(2)}
-              className="flex-1 rounded-lg bg-green-700 py-3 text-sm font-semibold text-white hover:bg-green-800"
+              className="flex-1"
+              size="lg"
             >
               Review
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* ─── Step 3: Review ───────────────────────────────────────────────────── */}
+      {/* ─── Step 3: Review ────���─────────────────────────────────────���────────── */}
       {currentStep === 2 && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-gray-900">Summary</h2>
-            <dl className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Supplier</dt>
-                <dd className="font-medium text-gray-900">{selectedSupplier?.name ?? '—'}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Order Date</dt>
-                <dd className="text-gray-900">{orderDate}</dd>
-              </div>
-              {expectedDate && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Expected</dt>
-                  <dd className="text-gray-900">{expectedDate}</dd>
+                  <dt className="text-muted-foreground">Supplier</dt>
+                  <dd className="font-medium text-foreground">{selectedSupplier?.name ?? '—'}</dd>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Currency</dt>
-                <dd className="text-gray-900">{currency}</dd>
-              </div>
-              {currency === 'USD' && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">FX Rate</dt>
-                  <dd className="text-gray-900">USD 1 = GHS {fxRateNum.toFixed(4)}</dd>
+                  <dt className="text-muted-foreground">Order Date</dt>
+                  <dd className="text-foreground">{orderDate}</dd>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Items</dt>
-                <dd className="text-gray-900">
-                  {lines.length} line{lines.length !== 1 ? 's' : ''}
-                </dd>
-              </div>
-              <div className="flex justify-between border-t border-gray-100 pt-2">
-                <dt className="font-medium text-gray-900">Total</dt>
-                <dd className="font-semibold text-gray-900">{formatGHS(total)}</dd>
-              </div>
-            </dl>
-          </div>
+                {expectedDate && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Expected</dt>
+                    <dd className="text-foreground">{expectedDate}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Currency</dt>
+                  <dd className="text-foreground">{currency}</dd>
+                </div>
+                {currency === 'USD' && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">FX Rate</dt>
+                    <dd className="text-foreground">USD 1 = GHS {fxRateNum.toFixed(4)}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Items</dt>
+                  <dd className="text-foreground">
+                    {lines.length} line{lines.length !== 1 ? 's' : ''}
+                  </dd>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between">
+                  <dt className="font-medium text-foreground">Total</dt>
+                  <dd className="font-semibold text-foreground">{formatGhs(total)}</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
 
           {/* Line summary */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 className="mb-2 text-sm font-semibold text-gray-900">Line Items</h2>
-            <div className="space-y-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Line Items</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
               {lines.map((l, i) => (
                 <div key={l.key} className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700 truncate">{l.description || `Item ${i + 1}`}</span>
-                  <span className="ml-2 flex-shrink-0 text-gray-500">
+                  <span className="truncate text-muted-foreground">
+                    {l.description || `Item ${i + 1}`}
+                  </span>
+                  <span className="ml-2 flex-shrink-0 text-muted-foreground">
                     {l.quantity} × {currency} {l.unitCost || '0'} ={' '}
-                    <span className="font-medium text-gray-900">
-                      {formatGHS(computedLines[i]?.lineTotal ?? 0)}
+                    <span className="font-medium text-foreground">
+                      {formatGhs(computedLines[i]?.lineTotal ?? 0)}
                     </span>
                   </span>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           <div className="flex gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setCurrentStep(1)}
-              className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-1"
+              size="lg"
             >
               Back
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               disabled={isPending}
               onClick={() => handleSubmit(false)}
-              className="flex-1 rounded-lg border border-green-700 py-3 text-sm font-medium text-green-700 hover:bg-green-50 disabled:opacity-50"
+              className="flex-1"
+              size="lg"
             >
               Save as Draft
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               disabled={isPending}
               onClick={() => handleSubmit(true)}
-              className="flex-1 rounded-lg bg-green-700 py-3 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-50"
+              className="flex-1"
+              size="lg"
             >
               {selectedSupplier?.phone ? 'Send via WhatsApp' : 'Send'}
-            </button>
+            </Button>
           </div>
-          {isPending && <p className="text-center text-sm text-gray-500">Saving...</p>}
+          {isPending && <p className="text-center text-sm text-muted-foreground">Saving...</p>}
         </div>
       )}
     </div>

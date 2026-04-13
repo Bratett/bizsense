@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { formatGhs, formatDate } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
 import { ArAgingDocument } from '@/lib/pdf/arAging'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import type { ArAgingReport, ArAgingCustomer, ArAgingLine } from '@/lib/reports/arAging'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -56,19 +59,18 @@ function AgeBadge({ bucket }: { bucket: ArAgingLine['bucket'] }) {
   )
 }
 
-function buildWhatsAppLink(
-  phone: string | null,
+function buildWhatsAppMessage(
   name: string,
   orderNumber: string,
   outstanding: number,
   dueDate: string,
 ): string {
-  if (!phone) return '#'
-  const text = encodeURIComponent(
-    `Hello ${name}, your invoice ${orderNumber} for GHS ${outstanding.toFixed(2)} was due on ${dueDate}. Please arrange payment. Thank you.`,
-  )
+  return `Hello ${name}, your invoice ${orderNumber} for GHS ${outstanding.toFixed(2)} was due on ${dueDate}. Please arrange payment. Thank you.`
+}
+
+function formatWhatsAppPhone(phone: string): string {
   const digits = phone.replace(/\D/g, '')
-  return `https://wa.me/${digits.startsWith('0') ? '233' + digits.slice(1) : digits}?text=${text}`
+  return digits.startsWith('0') ? '233' + digits.slice(1) : digits
 }
 
 // ─── Customer section ─────────────────────────────────────────────────────────
@@ -143,21 +145,18 @@ function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
           {hasPhone && (
             <div className="px-4 py-2 flex gap-2">
               {customer.invoices.slice(0, 1).map((inv) => (
-                <a
+                <WhatsAppButton
                   key={`wa-${inv.orderId}`}
-                  href={buildWhatsAppLink(
-                    customer.customerPhone,
+                  phone={formatWhatsAppPhone(customer.customerPhone!)}
+                  message={buildWhatsAppMessage(
                     customer.customerName,
                     inv.orderNumber,
                     inv.outstanding,
                     inv.dueDate,
                   )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-md border border-green-300 bg-white px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50"
-                >
-                  Send Reminder (WhatsApp)
-                </a>
+                  label="Send Reminder (WhatsApp)"
+                  className="h-auto px-3 py-1.5 text-xs"
+                />
               ))}
             </div>
           )}
@@ -312,15 +311,12 @@ export default function ArAgingClient({
           const colorKey = bucketColorKeys[i]
           const color = BUCKET_COLORS[colorKey]
           return (
-            <div
-              key={b.key}
-              className={`rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${color.card}`}
-            >
-              <p className="text-xs font-medium text-gray-500">{b.label}</p>
+            <Card key={b.key} className={`p-4 ${color.card}`}>
+              <p className="text-xs font-medium text-muted-foreground">{b.label}</p>
               <p className={`mt-2 text-lg font-semibold tabular-nums ${color.text}`}>
                 {formatGhs(b.amount)}
               </p>
-            </div>
+            </Card>
           )
         })}
       </div>
@@ -338,35 +334,28 @@ export default function ArAgingClient({
           </span>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={handleCsv}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
+          <Button variant="outline" onClick={handleCsv}>
             Download CSV
-          </button>
-          <button
-            onClick={handlePdf}
-            disabled={pdfLoading}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          >
+          </Button>
+          <Button variant="outline" onClick={handlePdf} disabled={pdfLoading}>
             {pdfLoading ? 'Generating…' : 'Download PDF'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Customer list */}
       {report.customers.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
-          <p className="text-sm text-gray-500">
+        <Card className="px-6 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
             No outstanding receivables as at {report.asOfDate}.
           </p>
-        </div>
+        </Card>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <Card className="overflow-hidden">
           {report.customers.map((c) => (
             <CustomerRow key={c.customerId ?? 'walk-in'} customer={c} />
           ))}
-        </div>
+        </Card>
       )}
     </div>
   )

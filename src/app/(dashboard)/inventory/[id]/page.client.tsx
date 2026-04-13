@@ -4,26 +4,32 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { deactivateProduct, type ProductDetail, type InventoryMovement } from '@/actions/products'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import type { UserRole } from '@/lib/session'
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatGHS(amount: string | number): string {
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount
-  return num.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
+import { formatGhs, formatDate } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { EmptyState } from '@/components/ui/empty-state'
+import { PageHeader } from '@/components/ui/page-header'
+import { Pencil, Trash2, ListOrdered } from 'lucide-react'
 
 const TYPE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   opening: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Opening' },
@@ -36,12 +42,32 @@ const TYPE_STYLES: Record<string, { bg: string; text: string; label: string }> =
 
 function stockStatusInfo(product: ProductDetail) {
   if (!product.trackInventory)
-    return { dot: 'bg-gray-400', label: 'Not tracked', textColor: 'text-gray-600' }
+    return {
+      dot: 'bg-gray-400',
+      label: 'Not tracked',
+      textColor: 'text-gray-600',
+      badge: 'bg-gray-100 text-gray-600',
+    }
   if (product.currentStock <= 0)
-    return { dot: 'bg-red-500', label: 'Out of stock', textColor: 'text-red-600' }
+    return {
+      dot: 'bg-red-500',
+      label: 'Out of Stock',
+      textColor: 'text-red-600',
+      badge: 'bg-red-100 text-red-700',
+    }
   if (product.reorderLevel > 0 && product.currentStock <= product.reorderLevel)
-    return { dot: 'bg-amber-500', label: 'Low stock', textColor: 'text-amber-600' }
-  return { dot: 'bg-green-500', label: 'In stock', textColor: 'text-green-600' }
+    return {
+      dot: 'bg-amber-500',
+      label: 'Low Stock',
+      textColor: 'text-amber-600',
+      badge: 'bg-amber-100 text-amber-700',
+    }
+  return {
+    dot: 'bg-green-500',
+    label: 'Optimal Level',
+    textColor: 'text-green-600',
+    badge: 'bg-green-100 text-green-700',
+  }
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -62,6 +88,17 @@ export default function ProductDetailView({
   const canDeactivate = userRole === 'owner' || userRole === 'manager'
   const canAdjust = userRole === 'owner' || userRole === 'manager'
 
+  const costPrice = parseFloat(product.costPrice ?? '0')
+  const sellingPrice = parseFloat(product.sellingPrice ?? '0')
+  const grossMargin = sellingPrice - costPrice
+  const grossMarginPct = sellingPrice > 0 ? (grossMargin / sellingPrice) * 100 : 0
+
+  // Stock visualizer
+  const reorder = product.reorderLevel > 0 ? product.reorderLevel : 0
+  const maxBar = Math.max(product.currentStock * 1.5, reorder * 3, 1)
+  const stockBarPct = Math.min((product.currentStock / maxBar) * 100, 100)
+  const reorderMarkerPct = Math.min((reorder / maxBar) * 100, 100)
+
   const handleDeactivate = () => {
     setError(null)
     startTransition(async () => {
@@ -77,205 +114,272 @@ export default function ProductDetailView({
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Link href="/inventory" className="text-gray-600 hover:text-gray-900">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </Link>
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-semibold text-gray-900">{product.name}</h1>
-          <div className="mt-0.5 flex items-center gap-2">
-            {product.sku && (
-              <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-mono text-gray-600">
-                {product.sku}
-              </span>
+    <div className="mx-auto max-w-5xl">
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/inventory" />}>Inventory</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader
+        title={product.name}
+        subtitle={product.sku ? `SKU: ${product.sku}` : undefined}
+        backHref="/inventory"
+        actions={
+          <>
+            {canDeactivate && product.isActive && (
+              <Button variant="destructive" onClick={() => setShowDeactivateConfirm(true)}>
+                <Trash2 data-icon="inline-start" />
+                Delete
+              </Button>
             )}
-            {!product.isActive && (
-              <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">
-                Deactivated
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+            <Button render={<Link href={`/inventory/${product.id}/edit`} />}>
+              <Pencil data-icon="inline-start" />
+              Edit Product
+            </Button>
+          </>
+        }
+      />
+
+      {!product.isActive && (
+        <Badge variant="destructive" className="mb-4">
+          Deactivated
+        </Badge>
+      )}
 
       {/* Error */}
       {error && (
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {/* Stock Summary Card */}
-      <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-gray-500">Current Stock</p>
-            <p className={`mt-1 text-2xl font-semibold tabular-nums ${status.textColor}`}>
-              {product.trackInventory
-                ? `${product.currentStock} ${product.unit ?? 'units'}`
-                : 'N/A'}
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className={`inline-block h-2.5 w-2.5 rounded-full ${status.dot}`} />
-            <span className={`text-sm font-medium ${status.textColor}`}>{status.label}</span>
-          </div>
-        </div>
-
-        {product.trackInventory && (
-          <div className="mt-4 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4">
-            <div>
-              <p className="text-xs text-gray-500">Stock Value</p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-gray-900">
-                GHS {formatGHS(product.stockValue)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Reorder Level</p>
-              <p className="mt-0.5 text-sm font-semibold text-gray-900">
-                {product.reorderLevel > 0
-                  ? `${product.reorderLevel} ${product.unit ?? 'units'}`
-                  : 'Not set'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Cost Price</p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-gray-900">
-                GHS {formatGHS(product.costPrice ?? '0')}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Selling Price</p>
-              <p className="mt-0.5 text-sm font-semibold tabular-nums text-gray-900">
-                GHS {formatGHS(product.sellingPrice ?? '0')}
-                {product.sellingPriceUsd && (
-                  <span className="ml-1 text-xs text-gray-500">
-                    / USD {formatGHS(product.sellingPriceUsd)}
-                  </span>
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* ── Left Card: Stock & Pricing ── */}
+        <div className="space-y-4">
+          <Card>
+            <CardContent>
+              {/* Category + unit */}
+              <div className="grid grid-cols-2 gap-4">
+                {product.category && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Category
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">{product.category}</p>
+                  </div>
                 )}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+                {product.unit && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Unit
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">{product.unit}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Track Inventory
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">
+                    {product.trackInventory ? 'Yes' : 'No'}
+                  </p>
+                </div>
+              </div>
 
-      {/* Product Info */}
-      <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="space-y-3">
-          {product.category && (
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Category</span>
-              <span className="text-gray-900">{product.category}</span>
-            </div>
-          )}
-          {product.unit && (
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Unit</span>
-              <span className="text-gray-900">{product.unit}</span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Track Inventory</span>
-            <span className="text-gray-900">{product.trackInventory ? 'Yes' : 'No'}</span>
-          </div>
-          {product.description && (
-            <div className="border-t border-gray-100 pt-3">
-              <p className="text-xs text-gray-500">Description</p>
-              <p className="mt-1 text-sm text-gray-900">{product.description}</p>
+              {product.description && (
+                <>
+                  <Separator className="my-4" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Description
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{product.description}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Stock Visualizer */}
+              {product.trackInventory && (
+                <>
+                  <Separator className="my-4" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Stock Visualizer
+                    </p>
+                    <div className="mt-3 flex items-start justify-between">
+                      <div>
+                        <p className={`text-3xl font-bold tabular-nums ${status.textColor}`}>
+                          {product.currentStock}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{product.unit ?? 'Units'}</p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}
+                      >
+                        {status.label}
+                      </span>
+                    </div>
+
+                    {/* Bar */}
+                    <div className="relative mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className={`h-full rounded-full transition-all ${status.dot}`}
+                        style={{ width: `${stockBarPct}%` }}
+                      />
+                      {reorder > 0 && (
+                        <div
+                          className="absolute top-0 h-full w-0.5 bg-gray-400"
+                          style={{ left: `${reorderMarkerPct}%` }}
+                        />
+                      )}
+                    </div>
+
+                    <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+                      {reorder > 0 && <span>Reorder point: {reorder}</span>}
+                      {product.trackInventory && product.stockValue > 0 && (
+                        <span className="ml-auto">Value: {formatGhs(product.stockValue)}</span>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Pricing & Margins */}
+              {(product.costPrice || product.sellingPrice) && (
+                <>
+                  <Separator className="my-4" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Pricing &amp; Margins
+                    </p>
+                    <div className="mt-3 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Cost Price</span>
+                        <span className="text-sm font-semibold tabular-nums text-foreground">
+                          {formatGhs(product.costPrice ?? '0')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Selling Price</span>
+                        <div className="text-right">
+                          <span className="text-sm font-semibold tabular-nums text-foreground">
+                            {formatGhs(product.sellingPrice ?? '0')}
+                          </span>
+                          {product.sellingPriceUsd && (
+                            <p className="text-xs text-muted-foreground">
+                              / USD {formatGhs(product.sellingPriceUsd)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {grossMargin > 0 && (
+                        <div className="flex items-center justify-between border-t border-gray-100 pt-2.5">
+                          <span className="text-sm text-muted-foreground">Gross Margin</span>
+                          <div className="text-right">
+                            <span className="text-base font-bold tabular-nums text-green-700">
+                              {formatGhs(grossMargin)}
+                            </span>
+                            <p className="text-xs text-green-600">
+                              {grossMarginPct.toFixed(2)}% Profit
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Additional quick actions for tracked products */}
+          {product.trackInventory && product.isActive && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                render={<Link href={`/inventory/${product.id}/opening-stock`} />}
+              >
+                Set Opening Stock
+              </Button>
+              {canAdjust && (
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  render={<Link href={`/inventory/${product.id}/adjust`} />}
+                >
+                  Adjust Stock
+                </Button>
+              )}
             </div>
           )}
         </div>
+
+        {/* ── Right Card: Stock Movement History ── */}
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle>Stock Movement History</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {product.movements.length === 0 ? (
+              <EmptyState
+                icon={<ListOrdered className="h-8 w-8" />}
+                title="No stock movements yet"
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Qty</TableHead>
+                    <TableHead className="text-right">Cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {product.movements.map((m) => (
+                    <MovementRow key={m.id} movement={m} unit={product.unit} />
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+          {product.movements.length > 0 && (
+            <div className="border-t px-4 py-3 text-xs text-muted-foreground">
+              Showing last {product.movements.length} movement
+              {product.movements.length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          href={`/inventory/${product.id}/edit`}
-          className="flex-1 rounded-lg border border-gray-300 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Edit Product
-        </Link>
-        {product.trackInventory && product.isActive && (
-          <Link
-            href={`/inventory/${product.id}/opening-stock`}
-            className="flex-1 rounded-lg border border-blue-300 py-2.5 text-center text-sm font-medium text-blue-700 hover:bg-blue-50"
-          >
-            Set Opening Stock
-          </Link>
-        )}
-        {product.trackInventory && product.isActive && canAdjust && (
-          <Link
-            href={`/inventory/${product.id}/adjust`}
-            className="flex-1 rounded-lg border border-purple-300 py-2.5 text-center text-sm font-medium text-purple-700 hover:bg-purple-50"
-          >
-            Adjust Stock
-          </Link>
-        )}
-        {canDeactivate && product.isActive && (
-          <button
-            type="button"
-            onClick={() => setShowDeactivateConfirm(true)}
-            className="flex-1 rounded-lg border border-red-300 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
-          >
-            Deactivate
-          </button>
-        )}
-      </div>
-
-      {/* Deactivate Confirmation */}
+      {/* Deactivate confirmation */}
       {showDeactivateConfirm && (
-        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="text-sm font-medium text-red-800">
-            Are you sure you want to deactivate &ldquo;{product.name}&rdquo;?
-          </p>
-          <p className="mt-1 text-xs text-red-700">
-            This product will no longer appear in search results or be available for new sales.
-          </p>
-          <div className="mt-3 flex gap-2">
-            <button
-              type="button"
-              onClick={handleDeactivate}
-              disabled={isPending}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-            >
-              {isPending ? 'Deactivating...' : 'Yes, Deactivate'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowDeactivateConfirm(false)}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Movement History */}
-      <div className="mt-6">
-        <h2 className="text-sm font-semibold text-gray-900">Stock Movements</h2>
-        <div className="mt-3 space-y-2">
-          {product.movements.length === 0 ? (
-            <div className="rounded-xl border-2 border-dashed border-gray-200 px-6 py-8 text-center">
-              <p className="text-sm text-gray-500">No stock movements yet</p>
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>
+            <p className="font-semibold">Deactivate &ldquo;{product.name}&rdquo;?</p>
+            <p className="mt-1 text-xs">
+              This product will no longer appear in search results or be available for new sales.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Button variant="destructive" onClick={handleDeactivate} disabled={isPending}>
+                {isPending ? 'Deactivating...' : 'Yes, Deactivate'}
+              </Button>
+              <Button variant="outline" onClick={() => setShowDeactivateConfirm(false)}>
+                Cancel
+              </Button>
             </div>
-          ) : (
-            product.movements.map((m) => (
-              <MovementRow key={m.id} movement={m} unit={product.unit} />
-            ))
-          )}
-        </div>
-      </div>
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }
@@ -290,25 +394,27 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
   const isPositive = qty > 0
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}>
-            {style.label}
-          </span>
-          <span className="text-xs text-gray-500">{formatDate(movement.transactionDate)}</span>
-        </div>
-        <div className="text-right">
-          <span
-            className={`text-sm font-semibold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}
-          >
-            {isPositive ? '+' : ''}
-            {qty} {unit ?? 'units'}
-          </span>
-          <p className="text-xs tabular-nums text-gray-500">@ GHS {formatGHS(movement.unitCost)}</p>
-        </div>
-      </div>
-      {movement.notes && <p className="mt-1 text-xs text-gray-500">{movement.notes}</p>}
-    </div>
+    <TableRow>
+      <TableCell className="text-xs text-muted-foreground">
+        {formatDate(movement.transactionDate)}
+      </TableCell>
+      <TableCell>
+        <Badge variant="secondary" className={`${style.bg} ${style.text}`}>
+          {style.label}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <span
+          className={`text-sm font-semibold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}
+        >
+          {isPositive ? '+' : ''}
+          {qty} {unit ?? 'units'}
+        </span>
+        {movement.notes && <p className="mt-0.5 text-xs text-muted-foreground">{movement.notes}</p>}
+      </TableCell>
+      <TableCell className="text-right text-xs tabular-nums text-muted-foreground">
+        {formatGhs(movement.unitCost)}
+      </TableCell>
+    </TableRow>
   )
 }

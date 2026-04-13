@@ -4,6 +4,16 @@ import { useState } from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type { ProfitAndLoss, PLLine } from '@/lib/reports/pl'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -108,18 +118,20 @@ function LineRow({
   const isZero = line.netBalance === 0
 
   return (
-    <tr className={isZero ? 'opacity-40' : ''}>
-      <td className="py-1.5 pl-4 text-sm text-gray-500 w-16">{line.accountCode}</td>
-      <td className="py-1.5 text-sm text-gray-700">{line.accountName}</td>
-      <td className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-gray-900">
+    <TableRow className={isZero ? 'opacity-40' : ''}>
+      <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground w-16">
+        {line.accountCode}
+      </TableCell>
+      <TableCell className="py-1.5 text-sm text-foreground/80">{line.accountName}</TableCell>
+      <TableCell className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-foreground">
         {formatGhs(line.netBalance)}
-      </td>
+      </TableCell>
       {hasPrior && (
-        <td className="py-1.5 pr-4 text-right text-sm tabular-nums text-amber-600">
+        <TableCell className="py-1.5 pr-4 text-right text-sm tabular-nums text-amber-600">
           {line.priorNetBalance !== undefined ? formatGhs(line.priorNetBalance) : '—'}
-        </td>
+        </TableCell>
       )}
-    </tr>
+    </TableRow>
   )
 }
 
@@ -142,29 +154,29 @@ function Section({
 }) {
   return (
     <>
-      <tr className="bg-gray-50">
-        <td
+      <TableRow className="bg-muted/50">
+        <TableCell
           colSpan={hasPrior ? 4 : 3}
-          className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500"
+          className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
         >
           {title}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
       {lines.map((line) => (
         <LineRow key={line.accountId} line={line} hasPrior={hasPrior} showZero={showZero} />
       ))}
-      <tr className="border-t border-gray-200 font-semibold">
-        <td className="py-2 pl-4 text-sm text-gray-500"></td>
-        <td className="py-2 text-sm text-gray-700">Total {title}</td>
-        <td className="py-2 pr-4 text-right text-sm tabular-nums text-gray-900">
+      <TableRow className="border-t font-semibold">
+        <TableCell className="py-2 pl-4 text-sm text-muted-foreground"></TableCell>
+        <TableCell className="py-2 text-sm text-foreground/80">Total {title}</TableCell>
+        <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground">
           {formatGhs(total)}
-        </td>
+        </TableCell>
         {hasPrior && (
-          <td className="py-2 pr-4 text-right text-sm tabular-nums text-amber-600">
+          <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-amber-600">
             {priorTotal !== undefined ? formatGhs(priorTotal) : '—'}
-          </td>
+          </TableCell>
         )}
-      </tr>
+      </TableRow>
     </>
   )
 }
@@ -256,7 +268,7 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
 
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
           <input
             type="checkbox"
             checked={showZero}
@@ -266,147 +278,143 @@ export default function PLReport({ data }: { data: ProfitAndLoss }) {
           Show zero-balance accounts
         </label>
         <div className="flex gap-2">
-          <button
-            onClick={handleCsv}
-            className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
+          <Button variant="outline" onClick={handleCsv}>
             Download CSV
-          </button>
-          <button
-            onClick={handlePdf}
-            disabled={pdfLoading}
-            className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          >
+          </Button>
+          <Button variant="outline" onClick={handlePdf} disabled={pdfLoading}>
             {pdfLoading ? 'Generating…' : 'Download PDF'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Report table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-16">
-                Code
-              </th>
-              <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Account
-              </th>
-              <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                {hasPrior ? 'This Period' : 'Amount (GHS)'}
-              </th>
-              {hasPrior && (
-                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-amber-600">
-                  Prior Period
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {/* Revenue */}
-            <Section
-              title="Revenue"
-              lines={data.revenue.lines}
-              total={data.revenue.total}
-              priorTotal={data.revenue.priorTotal}
-              hasPrior={hasPrior}
-              showZero={showZero}
-            />
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="py-3 pl-4 w-16">Code</TableHead>
+                <TableHead className="py-3">Account</TableHead>
+                <TableHead className="py-3 pr-4 text-right">
+                  {hasPrior ? 'This Period' : 'Amount (GHS)'}
+                </TableHead>
+                {hasPrior && (
+                  <TableHead className="py-3 pr-4 text-right text-amber-600">
+                    Prior Period
+                  </TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Revenue */}
+              <Section
+                title="Revenue"
+                lines={data.revenue.lines}
+                total={data.revenue.total}
+                priorTotal={data.revenue.priorTotal}
+                hasPrior={hasPrior}
+                showZero={showZero}
+              />
 
-            {/* COGS */}
-            <Section
-              title="Cost of Goods Sold"
-              lines={data.cogs.lines}
-              total={data.cogs.total}
-              priorTotal={data.cogs.priorTotal}
-              hasPrior={hasPrior}
-              showZero={showZero}
-            />
+              {/* COGS */}
+              <Section
+                title="Cost of Goods Sold"
+                lines={data.cogs.lines}
+                total={data.cogs.total}
+                priorTotal={data.cogs.priorTotal}
+                hasPrior={hasPrior}
+                showZero={showZero}
+              />
 
-            {/* Gross Profit */}
-            <tr className="bg-green-50 font-semibold">
-              <td className="py-2.5 pl-4 text-sm"></td>
-              <td className="py-2.5 text-sm text-gray-900">Gross Profit</td>
-              <td
-                className={`py-2.5 pr-4 text-right text-sm tabular-nums ${data.grossProfit < 0 ? 'text-red-600' : 'text-gray-900'}`}
-              >
-                {formatGhs(data.grossProfit)}
-              </td>
-              {hasPrior && (
-                <td className="py-2.5 pr-4 text-right text-sm tabular-nums text-amber-600">
-                  {data.priorGrossProfit !== undefined ? formatGhs(data.priorGrossProfit) : '—'}
-                </td>
-              )}
-            </tr>
-            {/* Gross Margin % */}
-            <tr className="bg-green-50">
-              <td className="pb-2 pl-4 text-xs text-gray-400"></td>
-              <td className="pb-2 text-xs text-gray-500">Gross Margin</td>
-              <td className="pb-2 pr-4 text-right text-xs tabular-nums text-gray-500">
-                {pct(data.grossMarginPct)}
-              </td>
-              {hasPrior && (
-                <td className="pb-2 pr-4 text-right text-xs tabular-nums text-amber-500">
-                  {data.priorGrossProfit !== undefined && data.revenue.priorTotal
-                    ? pct(
-                        Math.round((data.priorGrossProfit / data.revenue.priorTotal) * 10_000) /
-                          100,
-                      )
-                    : '—'}
-                </td>
-              )}
-            </tr>
-
-            {/* Expenses */}
-            <Section
-              title="Operating Expenses"
-              lines={data.expenses.lines}
-              total={data.expenses.total}
-              priorTotal={data.expenses.priorTotal}
-              hasPrior={hasPrior}
-              showZero={showZero}
-            />
-
-            {/* Net Profit */}
-            <tr className="border-t-2 border-gray-300 bg-gray-50">
-              <td className="py-3 pl-4 text-sm"></td>
-              <td className="py-3 text-sm font-bold text-gray-900">
-                Net {data.netProfit >= 0 ? 'Profit' : 'Loss'}
-              </td>
-              <td
-                className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${data.netProfit < 0 ? 'text-red-600' : 'text-gray-900'}`}
-              >
-                {formatGhs(data.netProfit)}
-              </td>
-              {hasPrior && (
-                <td
-                  className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
-                    (data.priorNetProfit ?? 0) < 0 ? 'text-red-500' : 'text-amber-600'
-                  }`}
+              {/* Gross Profit */}
+              <TableRow className="bg-green-50 font-semibold">
+                <TableCell className="py-2.5 pl-4 text-sm"></TableCell>
+                <TableCell className="py-2.5 text-sm text-foreground">Gross Profit</TableCell>
+                <TableCell
+                  className={`py-2.5 pr-4 text-right text-sm tabular-nums ${data.grossProfit < 0 ? 'text-red-600' : 'text-foreground'}`}
                 >
-                  {data.priorNetProfit !== undefined ? formatGhs(data.priorNetProfit) : '—'}
-                </td>
-              )}
-            </tr>
+                  {formatGhs(data.grossProfit)}
+                </TableCell>
+                {hasPrior && (
+                  <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-amber-600">
+                    {data.priorGrossProfit !== undefined ? formatGhs(data.priorGrossProfit) : '—'}
+                  </TableCell>
+                )}
+              </TableRow>
+              {/* Gross Margin % */}
+              <TableRow className="bg-green-50">
+                <TableCell className="pb-2 pl-4 text-xs text-muted-foreground/60"></TableCell>
+                <TableCell className="pb-2 text-xs text-muted-foreground">Gross Margin</TableCell>
+                <TableCell className="pb-2 pr-4 text-right text-xs tabular-nums text-muted-foreground">
+                  {pct(data.grossMarginPct)}
+                </TableCell>
+                {hasPrior && (
+                  <TableCell className="pb-2 pr-4 text-right text-xs tabular-nums text-amber-500">
+                    {data.priorGrossProfit !== undefined && data.revenue.priorTotal
+                      ? pct(
+                          Math.round((data.priorGrossProfit / data.revenue.priorTotal) * 10_000) /
+                            100,
+                        )
+                      : '—'}
+                  </TableCell>
+                )}
+              </TableRow>
 
-            {/* Change % when comparing */}
-            {hasPrior && data.priorNetProfit !== undefined && data.priorNetProfit !== 0 && (
-              <tr className="bg-gray-50">
-                <td></td>
-                <td className="pb-2 text-xs text-gray-400">Change vs prior</td>
-                <td className="pb-2 pr-4 text-right text-xs tabular-nums text-gray-500" colSpan={2}>
-                  {(() => {
-                    const c = changePct(data.netProfit, data.priorNetProfit!)
-                    if (c === null) return '—'
-                    return `${c >= 0 ? '+' : ''}${c.toFixed(1)}%`
-                  })()}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              {/* Expenses */}
+              <Section
+                title="Operating Expenses"
+                lines={data.expenses.lines}
+                total={data.expenses.total}
+                priorTotal={data.expenses.priorTotal}
+                hasPrior={hasPrior}
+                showZero={showZero}
+              />
+
+              {/* Net Profit */}
+              <TableRow className="border-t-2 border-gray-300 bg-muted/50">
+                <TableCell className="py-3 pl-4 text-sm"></TableCell>
+                <TableCell className="py-3 text-sm font-bold text-foreground">
+                  Net {data.netProfit >= 0 ? 'Profit' : 'Loss'}
+                </TableCell>
+                <TableCell
+                  className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${data.netProfit < 0 ? 'text-red-600' : 'text-foreground'}`}
+                >
+                  {formatGhs(data.netProfit)}
+                </TableCell>
+                {hasPrior && (
+                  <TableCell
+                    className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
+                      (data.priorNetProfit ?? 0) < 0 ? 'text-red-500' : 'text-amber-600'
+                    }`}
+                  >
+                    {data.priorNetProfit !== undefined ? formatGhs(data.priorNetProfit) : '—'}
+                  </TableCell>
+                )}
+              </TableRow>
+
+              {/* Change % when comparing */}
+              {hasPrior && data.priorNetProfit !== undefined && data.priorNetProfit !== 0 && (
+                <TableRow className="bg-muted/50">
+                  <TableCell></TableCell>
+                  <TableCell className="pb-2 text-xs text-muted-foreground/60">
+                    Change vs prior
+                  </TableCell>
+                  <TableCell
+                    className="pb-2 pr-4 text-right text-xs tabular-nums text-muted-foreground"
+                    colSpan={2}
+                  >
+                    {(() => {
+                      const c = changePct(data.netProfit, data.priorNetProfit!)
+                      if (c === null) return '—'
+                      return `${c >= 0 ? '+' : ''}${c.toFixed(1)}%`
+                    })()}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }

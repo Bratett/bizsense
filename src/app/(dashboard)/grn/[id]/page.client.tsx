@@ -4,33 +4,36 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { reverseGrn, type GrnWithLinesAndJournal } from '@/actions/grn'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import { formatGhs, formatDate } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { PageHeader } from '@/components/ui/page-header'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatGHS(amount: string | number | null): string {
-  if (amount == null) return 'GHS 0.00'
-  const n = typeof amount === 'string' ? parseFloat(amount) : amount
-  return `GHS ${n.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-GH', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
-const STATUS_BADGE: Record<string, { label: string; classes: string }> = {
-  draft: { label: 'Draft', classes: 'bg-gray-100 text-gray-700' },
-  confirmed: { label: 'Confirmed', classes: 'bg-green-100 text-green-700' },
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_BADGE[status] ?? { label: status, classes: 'bg-gray-100 text-gray-600' }
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-medium ${cfg.classes}`}>
-      {cfg.label}
-    </span>
-  )
+const STATUS_VARIANT: Record<string, 'draft' | 'approved'> = {
+  draft: 'draft',
+  confirmed: 'approved',
 }
 
 // ─── Reversal modal ───────────────────────────────────────────────────────────
@@ -83,9 +86,9 @@ function ReversalModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-gray-900">Reverse GRN — Purchase Return</h2>
-        <p className="mt-1 text-sm text-gray-500">
+      <Card className="w-full max-w-lg p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-foreground">Reverse GRN -- Purchase Return</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Enter quantities to return. A reversal journal entry will be posted.
         </p>
 
@@ -93,13 +96,13 @@ function ReversalModal({
           <div className="space-y-2">
             {grn.lines.map((line, i) => (
               <div key={line.id} className="flex items-center gap-3">
-                <span className="min-w-0 flex-1 truncate text-sm text-gray-700">
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground">
                   {line.productName}
-                  <span className="ml-1 text-xs text-gray-400">
+                  <span className="ml-1 text-xs text-muted-foreground">
                     (max {Number(line.quantityReceived).toFixed(2)})
                   </span>
                 </span>
-                <input
+                <Input
                   type="number"
                   min={0}
                   max={Number(line.quantityReceived)}
@@ -112,48 +115,43 @@ function ReversalModal({
                     )
                     setQuantities((prev) => prev.map((q, idx) => (idx === i ? val : q)))
                   }}
-                  className="w-24 rounded-lg border border-gray-200 px-2 py-1.5 text-right text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-24 text-right"
                 />
               </div>
             ))}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Reason <span className="text-red-500">*</span>
-            </label>
-            <textarea
+            <Label>
+              Reason <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
               placeholder="e.g. Damaged goods, wrong item delivered"
-              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1"
             />
           </div>
 
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
+            <Button variant="outline" type="button" onClick={onClose} disabled={submitting}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting || !hasAnyReturn}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-            >
+            </Button>
+            <Button variant="destructive" type="submit" disabled={submitting || !hasAnyReturn}>
               {submitting
-                ? 'Posting reversal…'
+                ? 'Posting reversal...'
                 : `Return${totalReturning > 0 ? ` ${totalReturning.toFixed(2)} units` : ''}`}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   )
 }
@@ -170,106 +168,129 @@ export default function GrnDetail({ grn, role }: { grn: GrnWithLinesAndJournal; 
   const isCashPayment = grn.journalSummary?.description?.includes('Cash payment') ?? false
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-2xl">
-        {/* Back */}
-        <Link href="/grn" className="text-sm text-gray-500 hover:text-gray-700">
-          ← Goods Received
-        </Link>
+    <div className="mx-auto max-w-2xl">
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/grn" />}>GRN</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{grn.grnNumber}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        {/* Header */}
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-mono text-xl font-semibold text-gray-900">{grn.grnNumber}</h1>
-              <StatusBadge status={grn.status} />
+      <PageHeader
+        title={grn.grnNumber}
+        backHref="/grn"
+        actions={
+          <StatusBadge variant={STATUS_VARIANT[grn.status] ?? 'draft'}>
+            {grn.status === 'confirmed' ? 'Confirmed' : 'Draft'}
+          </StatusBadge>
+        }
+      />
+
+      <div className="space-y-4">
+        {/* Supplier + date info */}
+        <Card>
+          <CardContent className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">{grn.supplierName}</p>
+              {grn.poNumber && (
+                <Link
+                  href={`/purchase-orders/${grn.poId}`}
+                  className="mt-0.5 block text-xs text-primary hover:underline"
+                >
+                  PO: {grn.poNumber}
+                </Link>
+              )}
             </div>
-            <p className="mt-1 text-sm text-gray-500">{grn.supplierName}</p>
-            {grn.poNumber && (
-              <Link
-                href={`/purchase-orders/${grn.poId}`}
-                className="mt-0.5 block text-xs text-blue-600 hover:underline"
-              >
-                PO: {grn.poNumber}
-              </Link>
-            )}
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-400">Received</p>
-            <p className="text-sm font-medium text-gray-700">{formatDate(grn.receivedDate)}</p>
-          </div>
-        </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Received</p>
+              <p className="text-sm font-medium text-foreground">{formatDate(grn.receivedDate)}</p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Lines table */}
-        <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="border-b border-gray-100 bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">Product</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500">Qty</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500">Unit Cost</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Product</TableHead>
+                <TableHead className="px-4 text-right">Qty</TableHead>
+                <TableHead className="px-4 text-right">Unit Cost</TableHead>
+                <TableHead className="px-4 text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {grn.lines.map((line) => (
-                <tr key={line.id}>
-                  <td className="px-4 py-3 text-gray-900">{line.productName}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">
+                <TableRow key={line.id}>
+                  <TableCell className="px-4 text-foreground">{line.productName}</TableCell>
+                  <TableCell className="px-4 text-right">
                     {Number(line.quantityReceived).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-700">{formatGHS(line.unitCost)}</td>
-                  <td className="px-4 py-3 text-right font-medium text-gray-900">
-                    {formatGHS(line.lineTotal)}
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-4 text-right">{formatGhs(line.unitCost)}</TableCell>
+                  <TableCell className="px-4 text-right font-medium text-foreground">
+                    {formatGhs(line.lineTotal)}
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-            <tfoot className="border-t border-gray-200 bg-gray-50">
-              <tr>
-                <td colSpan={3} className="px-4 py-3 text-right font-semibold text-gray-700">
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={3} className="px-4 text-right font-semibold">
                   Total
-                </td>
-                <td className="px-4 py-3 text-right font-bold text-gray-900">
-                  {formatGHS(grn.totalCost)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+                </TableCell>
+                <TableCell className="px-4 text-right font-bold text-foreground">
+                  {formatGhs(grn.totalCost)}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </Card>
 
         {/* Payment type */}
         {grn.status === 'confirmed' && (
-          <div className="mt-4 rounded-xl bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">Payment: </span>
-              {isCashPayment
-                ? `Cash payment — ${formatGHS(grn.totalCost)}`
-                : `Credit — payable to ${grn.supplierName}`}
-            </p>
-          </div>
+          <Card>
+            <CardContent>
+              <p className="text-sm text-foreground">
+                <span className="font-medium">Payment: </span>
+                {isCashPayment
+                  ? `Cash payment -- ${formatGhs(grn.totalCost)}`
+                  : `Credit -- payable to ${grn.supplierName}`}
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         {/* Notes */}
         {grn.notes && (
-          <div className="mt-4 rounded-xl bg-white p-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Notes</p>
-            <p className="mt-1 text-sm text-gray-700">{grn.notes}</p>
-          </div>
+          <Card>
+            <CardContent>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Notes
+              </p>
+              <p className="mt-1 text-sm text-foreground">{grn.notes}</p>
+            </CardContent>
+          </Card>
         )}
 
         {/* Journal entry summary (owner/manager/accountant) */}
         {canSeeJournal && grn.journalEntryId && grn.journalSummary && (
-          <div className="mt-4 overflow-hidden rounded-xl bg-white shadow-sm">
+          <Card>
             <button
               onClick={() => setJournalExpanded((v) => !v)}
               className="flex w-full items-center justify-between px-4 py-3 text-left"
             >
-              <span className="text-sm font-medium text-gray-700">Journal Entry</span>
-              <span className="text-xs text-gray-400">{journalExpanded ? '▲' : '▼'}</span>
+              <span className="text-sm font-medium text-foreground">Journal Entry</span>
+              <span className="text-xs text-muted-foreground">
+                {journalExpanded ? '\u25B2' : '\u25BC'}
+              </span>
             </button>
             {journalExpanded && (
-              <div className="border-t border-gray-100 px-4 pb-4 text-sm text-gray-600 space-y-1">
+              <CardContent className="border-t border-border text-sm text-muted-foreground space-y-1">
                 <p>
                   <span className="font-medium">Date:</span>{' '}
                   {formatDate(grn.journalSummary.entryDate)}
@@ -280,20 +301,17 @@ export default function GrnDetail({ grn, role }: { grn: GrnWithLinesAndJournal; 
                 <p>
                   <span className="font-medium">Description:</span> {grn.journalSummary.description}
                 </p>
-              </div>
+              </CardContent>
             )}
-          </div>
+          </Card>
         )}
 
         {/* Reverse action */}
         {canReverse && (
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={() => setShowReversal(true)}
-              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-            >
+          <div className="flex justify-end">
+            <Button variant="destructive" onClick={() => setShowReversal(true)}>
               Reverse GRN (Purchase Return)
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -308,6 +326,6 @@ export default function GrnDetail({ grn, role }: { grn: GrnWithLinesAndJournal; 
           }}
         />
       )}
-    </main>
+    </div>
   )
 }

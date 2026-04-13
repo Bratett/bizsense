@@ -4,24 +4,7 @@ import { useState, useTransition } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { getReceivablesAging, type ReceivablesAgingData } from '@/actions/sales'
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function formatGHS(amount: number): string {
-  if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(1)}k`
-  }
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
-
-function formatGHSFull(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
+import { formatGhs } from '@/lib/format'
 
 function getInitials(name: string): string {
   return name
@@ -140,7 +123,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
         <button
           onClick={() => {
             if (customer.customerPhone) {
-              const msg = `URGENT: Dear ${customer.customerName}, your account has an overdue balance of GHS ${formatGHSFull(customer.totalBalance)}. Please arrange payment immediately to avoid service interruption.`
+              const msg = `URGENT: Dear ${customer.customerName}, your account has an overdue balance of ${formatGhs(customer.totalBalance)}. Please arrange payment immediately to avoid service interruption.`
               window.open(
                 `https://wa.me/${customer.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`,
                 '_blank',
@@ -158,7 +141,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
         <button
           onClick={() => {
             if (customer.customerPhone) {
-              const msg = `Hi ${customer.customerName}, this is a friendly reminder that you have an outstanding balance of GHS ${formatGHSFull(customer.totalBalance)}. Kindly arrange payment at your earliest convenience. Thank you!`
+              const msg = `Hi ${customer.customerName}, this is a friendly reminder that you have an outstanding balance of ${formatGhs(customer.totalBalance)}. Kindly arrange payment at your earliest convenience. Thank you!`
               window.open(
                 `https://wa.me/${customer.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`,
                 '_blank',
@@ -176,7 +159,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
+      <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
@@ -256,7 +239,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
               className="mt-2 text-2xl font-semibold text-gray-900"
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              GHS {formatGHSFull(data.totalReceivables)}
+              {formatGhs(data.totalReceivables)}
             </p>
           </div>
 
@@ -287,7 +270,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
               className="mt-2 text-2xl font-semibold text-red-600"
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              GHS {formatGHSFull(data.totalOverdue)}
+              {formatGhs(data.totalOverdue)}
             </p>
             <p className="mt-1 text-xs text-gray-500">{data.overduePercentage}% of total balance</p>
           </div>
@@ -351,7 +334,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
                       className="mt-1 text-base font-semibold text-gray-900"
                       style={{ fontVariantNumeric: 'tabular-nums' }}
                     >
-                      GHS {formatGHS(data.agingDistribution[b.key])}
+                      {formatGhs(data.agingDistribution[b.key])}
                     </p>
                   </div>
                 ))}
@@ -445,31 +428,31 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
                         className="whitespace-nowrap px-4 py-3.5 text-right text-sm font-semibold text-gray-900"
                         style={{ fontVariantNumeric: 'tabular-nums' }}
                       >
-                        GHS {formatGHSFull(customer.totalBalance)}
+                        {formatGhs(customer.totalBalance)}
                       </td>
                       <td
                         className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
                         style={{ fontVariantNumeric: 'tabular-nums' }}
                       >
-                        {customer.current > 0 ? formatGHSFull(customer.current) : '—'}
+                        {customer.current > 0 ? formatGhs(customer.current) : '—'}
                       </td>
                       <td
                         className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
                         style={{ fontVariantNumeric: 'tabular-nums' }}
                       >
-                        {customer.days1_30 > 0 ? formatGHSFull(customer.days1_30) : '—'}
+                        {customer.days1_30 > 0 ? formatGhs(customer.days1_30) : '—'}
                       </td>
                       <td
                         className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
                         style={{ fontVariantNumeric: 'tabular-nums' }}
                       >
-                        {customer.days31_60 > 0 ? formatGHSFull(customer.days31_60) : '—'}
+                        {customer.days31_60 > 0 ? formatGhs(customer.days31_60) : '—'}
                       </td>
                       <td
                         className="whitespace-nowrap px-4 py-3.5 text-right text-sm text-gray-600"
                         style={{ fontVariantNumeric: 'tabular-nums' }}
                       >
-                        {customer.days61_90 > 0 ? formatGHSFull(customer.days61_90) : '—'}
+                        {customer.days61_90 > 0 ? formatGhs(customer.days61_90) : '—'}
                       </td>
                       <td
                         className="whitespace-nowrap px-4 py-3.5 text-right text-sm"
@@ -477,7 +460,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
                       >
                         {customer.days90Plus > 0 ? (
                           <span className="font-semibold text-red-600">
-                            {formatGHSFull(customer.days90Plus)}
+                            {formatGhs(customer.days90Plus)}
                           </span>
                         ) : (
                           '—'

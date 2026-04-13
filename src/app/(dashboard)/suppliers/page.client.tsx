@@ -5,13 +5,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { SupplierListItem } from '@/actions/suppliers'
 import SwipeableRow from '@/components/SwipeableRow.client'
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
+import { formatGhs, avatarColor, initials } from '@/lib/format'
+import { PageHeader } from '@/components/ui/page-header'
+import { SearchInput } from '@/components/ui/search-input'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
+import { cn } from '@/lib/utils'
+import { Plus, SlidersHorizontal, Download, Pencil, ChevronRight, Truck } from 'lucide-react'
 
 export default function SupplierList({
   initialSuppliers,
@@ -29,105 +31,172 @@ export default function SupplierList({
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">Suppliers</h1>
-          <Link
-            href="/suppliers/new"
-            className="rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800 active:bg-green-900"
-          >
-            Add Supplier
-          </Link>
+        <PageHeader
+          title="Suppliers"
+          subtitle="Manage your suppliers, purchase orders, and outstanding payables."
+          actions={
+            <Button render={<Link href="/suppliers/new" />}>
+              <Plus className="h-4 w-4" />
+              New Supplier
+            </Button>
+          }
+        />
+
+        {/* Search + Filters */}
+        <div className="mt-6 flex gap-2">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by name or phone..."
+            className="flex-1"
+          />
+          <Button variant="outline">
+            <SlidersHorizontal className="h-4 w-4" />
+            Filters
+          </Button>
+          <Button variant="outline">
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
         </div>
 
-        {/* Search */}
-        <div className="mt-4">
-          <input
-            type="search"
-            placeholder="Search by name or phone"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-          />
-        </div>
+        {/* Column headers (desktop) */}
+        {filtered.length > 0 && (
+          <div className="mt-4 hidden grid-cols-[1fr,140px,160px,160px,80px] items-center gap-4 px-4 md:grid">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Supplier
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Phone
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Location
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Status
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Actions
+            </span>
+          </div>
+        )}
 
         {/* List */}
-        <div className="mt-4 space-y-3">
+        <div className="mt-2 space-y-2">
           {filtered.length === 0 && initialSuppliers.length === 0 && (
-            <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center">
-              <p className="text-gray-500">No suppliers yet.</p>
-              <p className="mt-1 text-sm text-gray-400">Add your first supplier to get started.</p>
-              <Link
-                href="/suppliers/new"
-                className="mt-4 inline-block rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
-              >
-                Add Supplier
-              </Link>
-            </div>
+            <EmptyState
+              icon={<Truck className="h-10 w-10" />}
+              title="No suppliers yet"
+              subtitle="Add your first supplier to manage purchases."
+              action={{ label: 'Add Supplier', href: '/suppliers/new' }}
+            />
           )}
 
           {filtered.length === 0 && initialSuppliers.length > 0 && (
-            <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center">
-              <p className="text-gray-500">No suppliers match your search.</p>
-            </div>
+            <EmptyState
+              icon={<Truck className="h-10 w-10" />}
+              title="No suppliers match your search"
+              subtitle="Try a different name or phone number."
+            />
           )}
 
-          {filtered.map((supplier) => (
-            <SwipeableRow
-              key={supplier.id}
-              actions={[
-                {
-                  label: 'Edit',
-                  color: 'bg-blue-500',
-                  onClick: () => router.push(`/suppliers/${supplier.id}/edit`),
-                },
-              ]}
-            >
-              <Link
-                href={`/suppliers/${supplier.id}`}
-                className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
+          {filtered.map((supplier) => {
+            const color = avatarColor(supplier.name)
+            const inits = initials(supplier.name)
+            return (
+              <SwipeableRow
+                key={supplier.id}
+                actions={[
+                  {
+                    label: 'Edit',
+                    color: 'bg-blue-500',
+                    onClick: () => router.push(`/suppliers/${supplier.id}/edit`),
+                  },
+                ]}
               >
-                <div className="flex items-center justify-between">
+                <Link
+                  href={`/suppliers/${supplier.id}`}
+                  className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
+                >
+                  {/* Avatar */}
+                  <Avatar size="lg">
+                    <AvatarFallback className={cn('text-sm font-bold text-white', color)}>
+                      {inits}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  {/* Name + meta */}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-base font-semibold text-gray-900">
+                    <p className="truncate text-sm font-semibold text-foreground">
                       {supplier.name}
                     </p>
                     {supplier.phone && (
-                      <p className="mt-0.5 text-sm text-gray-500">{supplier.phone}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{supplier.phone}</p>
                     )}
                     {supplier.location && (
-                      <p className="mt-0.5 text-sm text-gray-400">{supplier.location}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground/70">{supplier.location}</p>
                     )}
-                    {/* Badges */}
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    {/* Status badges */}
+                    <div className="mt-2 flex flex-wrap gap-1.5">
                       {supplier.outstandingPayable > 0 && (
-                        <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
-                          GHS {formatGHS(supplier.outstandingPayable)} owed
-                        </span>
+                        <Badge
+                          variant="outline"
+                          className="border-amber-200 bg-amber-50 text-amber-700"
+                        >
+                          {formatGhs(supplier.outstandingPayable)} owed
+                        </Badge>
                       )}
                       {supplier.openPoCount > 0 && (
-                        <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-                          PO {supplier.openPoCount}
-                        </span>
+                        <Badge
+                          variant="outline"
+                          className="border-blue-200 bg-blue-50 text-blue-700"
+                        >
+                          {supplier.openPoCount} open PO{supplier.openPoCount !== 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                      {supplier.outstandingPayable === 0 && supplier.openPoCount === 0 && (
+                        <Badge
+                          variant="outline"
+                          className="border-green-200 bg-green-50 text-green-700"
+                        >
+                          All clear
+                        </Badge>
                       )}
                     </div>
                   </div>
-                  {/* Chevron */}
-                  <svg
-                    className="ml-2 h-5 w-5 flex-shrink-0 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
-            </SwipeableRow>
-          ))}
+
+                  {/* Actions (desktop) */}
+                  <div className="hidden items-center gap-2 md:flex">
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        router.push(`/suppliers/${supplier.id}/edit`)
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground/50" />
+                  </div>
+
+                  {/* Chevron (mobile) */}
+                  <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground/50 md:hidden" />
+                </Link>
+              </SwipeableRow>
+            )
+          })}
         </div>
+
+        {/* Footer count */}
+        {filtered.length > 0 && (
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Showing {filtered.length} of {initialSuppliers.length} supplier
+            {initialSuppliers.length !== 1 ? 's' : ''}
+          </p>
+        )}
       </div>
     </main>
   )

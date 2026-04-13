@@ -3,6 +3,7 @@
 import { useState, useTransition, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { X } from 'lucide-react'
 import {
   createOrder,
   previewOrderTax,
@@ -14,6 +15,18 @@ import { getLatestFxRate, recordFxRate } from '@/actions/fx'
 import type { CustomerListItem } from '@/actions/customers'
 import { generateOrderNumber } from '@/lib/orderNumber'
 import type { TaxCalculationResult } from '@/lib/tax'
+import { formatGhs } from '@/lib/format'
+import { cn } from '@/lib/utils'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import { PageHeader } from '@/components/ui/page-header'
+import { SearchInput } from '@/components/ui/search-input'
+import { MoneyInput } from '@/components/ui/money-input'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -51,13 +64,6 @@ type Step = (typeof STEPS)[number]
 function parseNum(s: string): number {
   const n = parseFloat(s)
   return isNaN(n) ? 0 : n
-}
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
 }
 
 function todayISO(): string {
@@ -309,25 +315,7 @@ export default function NewOrderForm({
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <Link
-          href="/orders"
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Back to orders"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">New Sale</h1>
-      </div>
+      <PageHeader backHref="/orders" title="New Sale" />
 
       {/* Step indicator */}
       <div className="mb-6 flex gap-1">
@@ -336,13 +324,14 @@ export default function NewOrderForm({
             key={step}
             type="button"
             onClick={() => setCurrentStep(i)}
-            className={`flex-1 rounded-full py-1.5 text-center text-xs font-medium transition-colors ${
+            className={cn(
+              'flex-1 rounded-full py-1.5 text-center text-xs font-medium transition-colors',
               i === currentStep
-                ? 'bg-green-700 text-white'
+                ? 'bg-primary text-primary-foreground'
                 : i < currentStep
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-400'
-            }`}
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-muted text-muted-foreground',
+            )}
           >
             {step}
           </button>
@@ -351,9 +340,9 @@ export default function NewOrderForm({
 
       {/* Error banner */}
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Step 0: Customer */}
@@ -366,23 +355,25 @@ export default function NewOrderForm({
               setCustomerId(undefined)
               setCustomerSearch('')
             }}
-            className={`w-full rounded-xl border p-4 text-left transition-colors ${
+            className={cn(
+              'w-full rounded-xl border p-4 text-left transition-colors',
               !customerId
-                ? 'border-green-600 bg-green-50 ring-2 ring-green-100'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+                ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                : 'border-border bg-card hover:border-border/80',
+            )}
           >
-            <p className="font-medium text-gray-900">Walk-in / No customer</p>
-            <p className="mt-0.5 text-sm text-gray-500">Quick sale without customer record</p>
+            <p className="font-medium">Walk-in / No customer</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Quick sale without customer record
+            </p>
           </button>
 
           {/* Customer search */}
-          <input
-            type="search"
-            placeholder="Search customer by name or phone"
+          <SearchInput
             value={customerSearch}
-            onChange={(e) => setCustomerSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            onChange={setCustomerSearch}
+            placeholder="Search customer by name or phone"
+            className="w-full"
           />
 
           {/* Customer list */}
@@ -392,25 +383,22 @@ export default function NewOrderForm({
                 key={c.id}
                 type="button"
                 onClick={() => setCustomerId(c.id)}
-                className={`w-full rounded-xl border p-3 text-left transition-colors ${
+                className={cn(
+                  'w-full rounded-xl border p-3 text-left transition-colors',
                   customerId === c.id
-                    ? 'border-green-600 bg-green-50 ring-2 ring-green-100'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border bg-card hover:border-border/80',
+                )}
               >
-                <p className="font-medium text-gray-900">{c.name}</p>
-                {c.phone && <p className="text-sm text-gray-500">{c.phone}</p>}
+                <p className="font-medium">{c.name}</p>
+                {c.phone && <p className="text-sm text-muted-foreground">{c.phone}</p>}
               </button>
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setCurrentStep(1)}
-            className="mt-4 w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white hover:bg-green-800 active:bg-green-900"
-          >
+          <Button size="lg" className="mt-4 w-full" onClick={() => setCurrentStep(1)}>
             Next
-          </button>
+          </Button>
         </div>
       )}
 
@@ -418,296 +406,309 @@ export default function NewOrderForm({
       {currentStep === 1 && (
         <div className="space-y-4">
           {selectedCustomer && (
-            <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
+            <div className="rounded-lg bg-muted px-3 py-2 text-sm">
               Customer: <span className="font-medium">{selectedCustomer.name}</span>
             </div>
           )}
 
           {/* Line items */}
           {lines.map((line, idx) => (
-            <div
-              key={line.key}
-              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-gray-500">Item {idx + 1}</p>
-                {lines.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeLine(line.key)}
-                    className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
+            <Card key={line.key}>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium text-muted-foreground">Item {idx + 1}</p>
+                  {lines.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => removeLine(line.key)}
+                      className="text-muted-foreground hover:text-destructive"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="mt-2">
+                  <Input
+                    type="text"
+                    placeholder="Description"
+                    value={line.description}
+                    onChange={(e) => updateLine(line.key, 'description', e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+                {fieldErrors[`line_${idx}_description`] && (
+                  <p className="mt-1 text-xs text-destructive">
+                    {fieldErrors[`line_${idx}_description`]}
+                  </p>
                 )}
-              </div>
 
-              <input
-                type="text"
-                placeholder="Description"
-                value={line.description}
-                onChange={(e) => updateLine(line.key, 'description', e.target.value)}
-                className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              />
-              {fieldErrors[`line_${idx}_description`] && (
-                <p className="mt-1 text-xs text-red-600">
-                  {fieldErrors[`line_${idx}_description`]}
-                </p>
-              )}
+                <div className="mt-2 flex gap-2">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-xs text-muted-foreground">Qty</Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min="0.01"
+                      step="any"
+                      value={line.quantity}
+                      onChange={(e) => updateLine(line.key, 'quantity', e.target.value)}
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-xs text-muted-foreground">Price</Label>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      value={line.unitPrice}
+                      onChange={(e) => updateLine(line.key, 'unitPrice', e.target.value)}
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="w-20 space-y-1">
+                    <Label className="text-xs text-muted-foreground">Currency</Label>
+                    <select
+                      value={line.unitPriceCurrency}
+                      onChange={(e) => updateLine(line.key, 'unitPriceCurrency', e.target.value)}
+                      className="h-10 w-full rounded-lg border border-input bg-transparent px-2 text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      <option value="GHS">GHS</option>
+                      <option value="USD">USD</option>
+                    </select>
+                  </div>
+                </div>
 
-              <div className="mt-2 flex gap-2">
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500">Qty</label>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="0.01"
-                    step="any"
-                    value={line.quantity}
-                    onChange={(e) => updateLine(line.key, 'quantity', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
+                <div className="mt-1 text-right text-sm text-muted-foreground">
+                  Line total: {formatGhs(computedLines[idx]?.lineTotal ?? 0)}
                 </div>
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500">Price</label>
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    value={line.unitPrice}
-                    onChange={(e) => updateLine(line.key, 'unitPrice', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  />
-                </div>
-                <div className="w-20">
-                  <label className="text-xs text-gray-500">Currency</label>
-                  <select
-                    value={line.unitPriceCurrency}
-                    onChange={(e) => updateLine(line.key, 'unitPriceCurrency', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-2 py-2 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-                  >
-                    <option value="GHS">GHS</option>
-                    <option value="USD">USD</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-1 text-right text-sm text-gray-500">
-                Line total: GHS {formatGHS(computedLines[idx]?.lineTotal ?? 0)}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
 
-          <button
-            type="button"
-            onClick={addLine}
-            className="w-full rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-50"
-          >
+          <Button variant="outline" className="w-full border-dashed" onClick={addLine}>
             + Add Item
-          </button>
+          </Button>
 
           {/* FX Rate (shown when any USD line exists) */}
           {hasUsdLine && (
-            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
-              <label className="text-sm font-medium text-yellow-800">
-                Exchange Rate &mdash; 1 USD = GHS
-              </label>
-              <input
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.0001"
-                value={fxRate}
-                onChange={(e) => {
-                  setFxRate(e.target.value)
-                  setFxRateConfirmed(false)
-                }}
-                placeholder="e.g. 15.4000"
-                className="mt-1 w-full rounded-lg border border-yellow-300 px-3 py-2 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              />
-              <p className="mt-1 text-xs text-yellow-700">
-                This rate will be locked permanently to this sale.
-              </p>
-              {fieldErrors.fxRate && (
-                <p className="mt-1 text-xs text-red-600">{fieldErrors.fxRate}</p>
-              )}
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertDescription>
+                <Label className="text-sm font-medium text-yellow-800">
+                  Exchange Rate &mdash; 1 USD = GHS
+                </Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.0001"
+                  value={fxRate}
+                  onChange={(e) => {
+                    setFxRate(e.target.value)
+                    setFxRateConfirmed(false)
+                  }}
+                  placeholder="e.g. 15.4000"
+                  className="mt-1 h-10 border-yellow-300"
+                />
+                <p className="mt-1 text-xs text-yellow-700">
+                  This rate will be locked permanently to this sale.
+                </p>
+                {fieldErrors.fxRate && (
+                  <p className="mt-1 text-xs text-destructive">{fieldErrors.fxRate}</p>
+                )}
 
-              {/* 20% deviation warning */}
-              {fxDeviationWarning && !fxRateConfirmed && (
-                <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
-                  <p className="text-sm text-amber-800">
-                    This rate looks unusual. Last recorded rate: GHS {lastStoredRate!.toFixed(4)}.
-                    Continue?
-                  </p>
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setFxRateConfirmed(true)}
-                      className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFxRate(lastStoredRate!.toFixed(4))}
-                      className="rounded-lg border border-amber-300 px-3 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100"
-                    >
-                      Use Last Rate
-                    </button>
-                  </div>
-                </div>
-              )}
-              {fxDeviationWarning && fxRateConfirmed && (
-                <p className="mt-1 text-xs text-amber-600">Rate deviation confirmed.</p>
-              )}
-            </div>
+                {/* 20% deviation warning */}
+                {fxDeviationWarning && !fxRateConfirmed && (
+                  <Alert className="mt-2 border-amber-300 bg-amber-50">
+                    <AlertDescription>
+                      <p className="text-sm text-amber-800">
+                        This rate looks unusual. Last recorded rate: GHS{' '}
+                        {lastStoredRate!.toFixed(4)}. Continue?
+                      </p>
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => setFxRateConfirmed(true)}
+                          className="bg-amber-600 hover:bg-amber-700"
+                        >
+                          Confirm
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setFxRate(lastStoredRate!.toFixed(4))}
+                          className="border-amber-300 text-amber-800 hover:bg-amber-100"
+                        >
+                          Use Last Rate
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {fxDeviationWarning && fxRateConfirmed && (
+                  <p className="mt-1 text-xs text-amber-600">Rate deviation confirmed.</p>
+                )}
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Order date */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Order Date</label>
-            <input
+          <div className="space-y-1.5">
+            <Label>Order Date</Label>
+            <Input
               type="date"
               value={orderDate}
               onChange={(e) => setOrderDate(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+              className="h-10"
             />
           </div>
 
           {/* Order discount */}
-          <div className="rounded-lg border border-gray-200 bg-white p-3">
-            <label className="text-sm font-medium text-gray-700">Discount (optional)</label>
-            <div className="mt-2 flex gap-2">
-              <div className="flex rounded-lg border border-gray-300">
-                <button
-                  type="button"
-                  onClick={() => setDiscountType('percentage')}
-                  className={`px-3 py-1.5 text-sm ${
-                    discountType === 'percentage' ? 'bg-green-700 text-white' : 'text-gray-600'
-                  } rounded-l-lg`}
-                >
-                  %
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDiscountType('fixed')}
-                  className={`px-3 py-1.5 text-sm ${
-                    discountType === 'fixed' ? 'bg-green-700 text-white' : 'text-gray-600'
-                  } rounded-r-lg`}
-                >
-                  GHS
-                </button>
+          <Card>
+            <CardContent>
+              <Label>Discount (optional)</Label>
+              <div className="mt-2 flex gap-2">
+                <div className="flex rounded-lg border border-input">
+                  <button
+                    type="button"
+                    onClick={() => setDiscountType('percentage')}
+                    className={cn(
+                      'px-3 py-1.5 text-sm rounded-l-lg',
+                      discountType === 'percentage'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    %
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDiscountType('fixed')}
+                    className={cn(
+                      'px-3 py-1.5 text-sm rounded-r-lg',
+                      discountType === 'fixed'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    GHS
+                  </button>
+                </div>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.01"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  placeholder="0"
+                  className="h-8 flex-1"
+                />
               </div>
-              <input
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                value={discountValue}
-                onChange={(e) => setDiscountValue(e.target.value)}
-                placeholder="0"
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* VAT toggle */}
-          <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Apply VAT</p>
-              <p className="text-xs text-gray-400">Ghana GRA taxes</p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={applyVat}
-              onClick={() => setApplyVat(!applyVat)}
-              className={`relative h-6 w-11 rounded-full transition-colors ${
-                applyVat ? 'bg-green-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  applyVat ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
+          <Card>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Apply VAT</p>
+                  <p className="text-xs text-muted-foreground">Ghana GRA taxes</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={applyVat}
+                  onClick={() => setApplyVat(!applyVat)}
+                  className={cn(
+                    'relative h-6 w-11 rounded-full transition-colors',
+                    applyVat ? 'bg-primary' : 'bg-muted-foreground/30',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform',
+                      applyVat ? 'translate-x-5' : 'translate-x-0',
+                    )}
+                  />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Notes */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Notes (optional)</label>
+          <div className="space-y-1.5">
+            <Label>Notes (optional)</Label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+              className="w-full rounded-lg border border-input bg-transparent px-3 py-2.5 text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               placeholder="Any notes about this sale"
             />
           </div>
 
           {/* Totals summary */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Subtotal</span>
-              <span>GHS {formatGHS(subtotal)}</span>
-            </div>
-            {orderDiscountAmount > 0 && (
-              <div className="mt-1 flex justify-between text-sm text-gray-600">
-                <span>Discount</span>
-                <span className="text-red-600">-GHS {formatGHS(orderDiscountAmount)}</span>
+          <Card>
+            <CardContent>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatGhs(subtotal)}</span>
               </div>
-            )}
-            {taxPreview && taxPreview.totalTaxAmount > 0 && (
-              <>
-                {taxPreview.breakdown.map((b) => (
-                  <div
-                    key={b.componentCode}
-                    className="mt-1 flex justify-between text-xs text-gray-500"
-                  >
-                    <span>
-                      {b.componentName} ({(b.rate * 100).toFixed(1)}%)
-                    </span>
-                    <span>GHS {formatGHS(b.taxAmount)}</span>
-                  </div>
-                ))}
-                <div className="mt-1 flex justify-between text-sm text-gray-600">
-                  <span>Tax</span>
-                  <span>GHS {formatGHS(taxAmount)}</span>
+              {orderDiscountAmount > 0 && (
+                <div className="mt-1 flex justify-between text-sm">
+                  <span className="text-muted-foreground">Discount</span>
+                  <span className="text-destructive">-{formatGhs(orderDiscountAmount)}</span>
                 </div>
-              </>
-            )}
-            <div className="mt-2 flex justify-between border-t border-gray-200 pt-2">
-              <span className="text-lg font-bold text-gray-900">TOTAL</span>
-              <span className="text-lg font-bold text-gray-900">GHS {formatGHS(total)}</span>
-            </div>
-          </div>
+              )}
+              {taxPreview && taxPreview.totalTaxAmount > 0 && (
+                <>
+                  {taxPreview.breakdown.map((b) => (
+                    <div
+                      key={b.componentCode}
+                      className="mt-1 flex justify-between text-xs text-muted-foreground"
+                    >
+                      <span>
+                        {b.componentName} ({(b.rate * 100).toFixed(1)}%)
+                      </span>
+                      <span>{formatGhs(b.taxAmount)}</span>
+                    </div>
+                  ))}
+                  <div className="mt-1 flex justify-between text-sm">
+                    <span className="text-muted-foreground">Tax</span>
+                    <span>{formatGhs(taxAmount)}</span>
+                  </div>
+                </>
+              )}
+              <Separator className="my-2" />
+              <div className="flex justify-between">
+                <span className="text-lg font-bold">TOTAL</span>
+                <span className="text-lg font-bold">{formatGhs(total)}</span>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
               onClick={() => setCurrentStep(0)}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
             >
               Back
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              size="lg"
+              className="flex-1"
               onClick={() => setCurrentStep(2)}
               disabled={!canProceedFromStep1}
-              className="flex-1 rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white hover:bg-green-800 active:bg-green-900 disabled:opacity-60"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -716,29 +717,29 @@ export default function NewOrderForm({
       {currentStep === 2 && (
         <div className="space-y-4">
           {/* Order summary */}
-          <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
+          <div className="rounded-lg bg-muted px-3 py-2 text-sm">
             <p>
               {selectedCustomer ? selectedCustomer.name : 'Walk-in'} &middot; {lines.length} item
               {lines.length > 1 ? 's' : ''}
             </p>
-            <p className="text-lg font-bold text-gray-900">GHS {formatGHS(total)}</p>
+            <p className="text-lg font-bold">{formatGhs(total)}</p>
           </div>
 
           {/* Credit warning (owner/manager override) */}
           {creditWarning && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              {creditWarning}
-            </div>
+            <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+              <AlertDescription>{creditWarning}</AlertDescription>
+            </Alert>
           )}
 
           {/* Payment mode selector */}
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Payment Arrangement</p>
+            <Label className="mb-2">Payment Arrangement</Label>
             <div className="grid grid-cols-3 gap-2">
               {(
                 [
                   { value: 'paid', label: 'Paid in Full' },
-                  { value: 'unpaid', label: 'Credit — Invoice Later' },
+                  { value: 'unpaid', label: 'Credit \u2014 Invoice Later' },
                   { value: 'partial', label: 'Partial Payment' },
                 ] as { value: 'paid' | 'unpaid' | 'partial'; label: string }[]
               ).map((opt) => (
@@ -746,11 +747,12 @@ export default function NewOrderForm({
                   key={opt.value}
                   type="button"
                   onClick={() => setPaymentMode(opt.value)}
-                  className={`rounded-xl border p-2.5 text-center text-xs font-medium transition-colors ${
+                  className={cn(
+                    'rounded-xl border p-2.5 text-center text-xs font-medium transition-colors',
                     paymentMode === opt.value
-                      ? 'border-green-600 bg-green-50 ring-2 ring-green-100 text-green-800'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20 text-primary'
+                      : 'border-border bg-card hover:border-border/80',
+                  )}
                 >
                   {opt.label}
                 </button>
@@ -760,65 +762,58 @@ export default function NewOrderForm({
 
           {/* Credit mode: customer required warning */}
           {paymentMode === 'unpaid' && needsCustomerForCredit && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-              Credit sales require a named customer. Go back to Step 1 to select a customer.
-            </div>
+            <Alert variant="destructive">
+              <AlertDescription>
+                Credit sales require a named customer. Go back to Step 1 to select a customer.
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Credit mode: customer info */}
           {paymentMode === 'unpaid' && !needsCustomerForCredit && selectedCustomer && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-              Invoice will be recorded to <strong>{selectedCustomer.name}</strong>. Payment expected
-              later.
-            </div>
+            <Alert className="border-blue-200 bg-blue-50 text-blue-800">
+              <AlertDescription>
+                Invoice will be recorded to <strong>{selectedCustomer.name}</strong>. Payment
+                expected later.
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Partial: amount paid now */}
           {paymentMode === 'partial' && (
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Amount paid now (GHS) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                inputMode="decimal"
-                min="0.01"
-                step="0.01"
-                value={amountPaidNow}
-                onChange={(e) => setAmountPaidNow(e.target.value)}
-                placeholder="0.00"
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              />
-              {amountPaidNowNum > 0 && total > 0 && (
-                <p className="mt-1 text-xs text-gray-500">
-                  GHS {formatGHS(Math.max(0, total - amountPaidNowNum))} remaining after this
-                  payment
-                </p>
-              )}
-              {fieldErrors.amountPaid && (
-                <p className="mt-1 text-xs text-red-600">{fieldErrors.amountPaid}</p>
-              )}
-            </div>
+            <MoneyInput
+              label="Amount paid now"
+              value={amountPaidNow}
+              onChange={setAmountPaidNow}
+              error={fieldErrors.amountPaid}
+              placeholder="0.00"
+            />
+          )}
+          {paymentMode === 'partial' && amountPaidNowNum > 0 && total > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {formatGhs(Math.max(0, total - amountPaidNowNum))} remaining after this payment
+            </p>
           )}
 
           {/* Payment method cards (shown for 'paid' and 'partial') */}
           {paymentMode !== 'unpaid' && (
             <div>
-              <p className="mb-2 text-sm font-medium text-gray-700">Payment Method</p>
+              <Label className="mb-2">Payment Method</Label>
               <div className="grid grid-cols-2 gap-2">
                 {PAYMENT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => setPaymentMethod(opt.value)}
-                    className={`rounded-xl border p-3 text-center transition-colors ${
+                    className={cn(
+                      'rounded-xl border p-3 text-center transition-colors',
                       paymentMethod === opt.value
-                        ? 'border-green-600 bg-green-50 ring-2 ring-green-100'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                    }`}
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                        : 'border-border bg-card hover:border-border/80',
+                    )}
                   >
                     <span className="text-xl">{opt.icon}</span>
-                    <p className="mt-1 text-sm font-medium text-gray-900">{opt.label}</p>
+                    <p className="mt-1 text-sm font-medium">{opt.label}</p>
                   </button>
                 ))}
               </div>
@@ -827,67 +822,61 @@ export default function NewOrderForm({
 
           {/* MoMo reference */}
           {paymentMode !== 'unpaid' && paymentMethod.startsWith('momo_') && (
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                MoMo Reference <span className="text-red-500">*</span>
-              </label>
-              <input
+            <div className="space-y-1.5">
+              <Label>
+                MoMo Reference <span className="text-destructive">*</span>
+              </Label>
+              <Input
                 type="text"
                 value={momoReference}
                 onChange={(e) => setMomoReference(e.target.value)}
                 placeholder="Transaction reference"
-                className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                  fieldErrors.momoReference
-                    ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                    : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-                }`}
+                className="h-10"
+                aria-invalid={!!fieldErrors.momoReference}
               />
               {fieldErrors.momoReference && (
-                <p className="mt-1 text-xs text-red-600">{fieldErrors.momoReference}</p>
+                <p className="text-xs text-destructive">{fieldErrors.momoReference}</p>
               )}
             </div>
           )}
 
           {/* Bank reference */}
           {paymentMode !== 'unpaid' && paymentMethod === 'bank' && (
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Bank Reference <span className="text-red-500">*</span>
-              </label>
-              <input
+            <div className="space-y-1.5">
+              <Label>
+                Bank Reference <span className="text-destructive">*</span>
+              </Label>
+              <Input
                 type="text"
                 value={bankReference}
                 onChange={(e) => setBankReference(e.target.value)}
                 placeholder="Transfer reference"
-                className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                  fieldErrors.bankReference
-                    ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                    : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-                }`}
+                className="h-10"
+                aria-invalid={!!fieldErrors.bankReference}
               />
               {fieldErrors.bankReference && (
-                <p className="mt-1 text-xs text-red-600">{fieldErrors.bankReference}</p>
+                <p className="text-xs text-destructive">{fieldErrors.bankReference}</p>
               )}
             </div>
           )}
 
           <div className="flex gap-3">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
               onClick={() => setCurrentStep(1)}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
             >
               Back
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              size="lg"
+              className="flex-1"
               onClick={handleSubmit}
               disabled={isPending || !canSubmit}
-              className="flex-1 rounded-lg bg-green-700 px-4 py-[13px] text-base font-semibold text-white hover:bg-green-800 active:bg-green-900 disabled:opacity-60"
-              style={{ minHeight: 52 }}
             >
               {isPending ? 'Recording sale...' : 'Record Sale'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

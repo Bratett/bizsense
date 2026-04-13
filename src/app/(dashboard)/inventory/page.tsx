@@ -17,7 +17,7 @@ export default async function InventoryPage() {
         <main className="min-h-screen bg-gray-50 p-4 md:p-8">
           <Suspense
             fallback={
-              <div className="mx-auto max-w-3xl animate-pulse">
+              <div className="mx-auto max-w-4xl animate-pulse">
                 <div className="h-8 w-32 rounded bg-gray-200" />
               </div>
             }

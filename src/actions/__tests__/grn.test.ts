@@ -9,6 +9,7 @@ vi.mock('@/lib/auth/requireRole', () => ({
 vi.mock('@/db', () => ({
   db: {
     select: vi.fn(),
+    selectDistinct: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
     transaction: vi.fn(),
@@ -673,6 +674,7 @@ describe('reconciliation — confirmed GRN orphan check', () => {
     // Check 2: approved expenses → []
     // Check 3: confirmed GRNs with null journalEntryId → 1 orphan
     // Check 4: imbalanced journal entries → []
+    // Check 5: COGS account lookup → [] (no COGS account — skip check)
     // Deduplication check: existing integrity log → [] (not already logged)
     vi.mocked(db.select)
       .mockReturnValueOnce(makeChain([]) as never) // orphan orders
@@ -681,6 +683,7 @@ describe('reconciliation — confirmed GRN orphan check', () => {
         makeChain([{ id: GRN_ID }]) as never, // orphan confirmed GRN
       )
       .mockReturnValueOnce(makeChain([]) as never) // imbalanced entries
+      .mockReturnValueOnce(makeChain([]) as never) // COGS account → not found
       .mockReturnValueOnce(makeChain([]) as never) // dedup check for grn
 
     vi.mocked(db.insert).mockReturnValue({

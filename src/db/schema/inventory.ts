@@ -208,6 +208,32 @@ export const stocktakeLines = pgTable('stocktake_lines', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+// ─── Supplier Invoices ───────────────────────────────────────────────────────
+
+export const supplierInvoices = pgTable('supplier_invoices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
+  supplierId: uuid('supplier_id')
+    .notNull()
+    .references(() => suppliers.id),
+  grnId: uuid('grn_id').references(() => goodsReceivedNotes.id),
+  invoiceNumber: text('invoice_number').notNull(),
+  invoiceDate: date('invoice_date').notNull(),
+  dueDate: date('due_date').notNull(),
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull(),
+  taxAmount: numeric('tax_amount', { precision: 15, scale: 2 }).default('0').notNull(),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+  status: text('status').notNull(),
+  // draft | approved | paid | cancelled
+  journalEntryId: uuid('journal_entry_id').references(() => journalEntries.id),
+  notes: text('notes'),
+  createdBy: uuid('created_by').references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 // ─── Supplier Payments ────────────────────────────────────────────────────────
 
 export const supplierPayments = pgTable('supplier_payments', {
@@ -220,6 +246,8 @@ export const supplierPayments = pgTable('supplier_payments', {
     .references(() => suppliers.id),
   grnId: uuid('grn_id').references(() => goodsReceivedNotes.id),
   // optional — links payment to a specific GRN; null = unallocated (FIFO on aging)
+  supplierInvoiceId: uuid('supplier_invoice_id').references(() => supplierInvoices.id),
+  // optional — links payment to a supplier invoice; mutually exclusive with grnId
   amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
   paymentMethod: text('payment_method').notNull(),
   // cash | momo_mtn | momo_telecel | momo_airtel | bank

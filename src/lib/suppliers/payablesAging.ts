@@ -154,6 +154,9 @@ function addToBuckets(totals: AgingBucketTotals, amount: number, bucket: AgingBu
 }
 
 // ─── computePayablesAging ─────────────────────────────────────────────────────
+// NOTE: This report currently ages AP by GRN receivedDate + creditTermsDays.
+// When supplier_invoices workflow is complete, aging should switch to
+// invoice dueDate for invoiced GRNs, falling back to GRN-based aging otherwise.
 
 export async function computePayablesAging(businessId: string): Promise<PayablesAgingReport> {
   const today = new Date().toISOString().split('T')[0]

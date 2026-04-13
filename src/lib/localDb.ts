@@ -25,6 +25,7 @@ class BizSenseDb extends Dexie {
   fxRates!: Dexie.Table
   pendingAiActions!: Dexie.Table
   supplierPayments!: Dexie.Table
+  supplierInvoices!: Dexie.Table
   stocktakes!: Dexie.Table
   stocktakeLines!: Dexie.Table
   syncQueue!: Dexie.Table
@@ -71,6 +72,10 @@ class BizSenseDb extends Dexie {
     this.version(4).stores({
       stocktakes: 'id, business_id, status, created_at',
       stocktakeLines: 'id, stocktake_id, product_id',
+    })
+    this.version(5).stores({
+      supplierInvoices: 'id, business_id, supplier_id, grn_id, invoice_date, status',
+      supplierPayments: 'id, business_id, supplier_id, grn_id, supplier_invoice_id, payment_date',
     })
   }
 }

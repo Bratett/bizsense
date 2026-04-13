@@ -37,7 +37,7 @@ export default async function SalesReportPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-6xl px-4 py-6 md:px-8">
+      <div className="mx-auto max-w-6xl p-4 md:p-8">
         {/* Header */}
         <div className="mb-1">
           <Link href="/reports" className="text-xs text-green-700 hover:underline">

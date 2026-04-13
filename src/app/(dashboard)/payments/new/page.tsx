@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function NewPaymentPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-3xl py-16 text-center">
+      <div className="mx-auto max-w-4xl py-16 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
           <svg
             width="32"
