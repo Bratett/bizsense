@@ -43,6 +43,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/customers') ||
     pathname.startsWith('/inventory') ||
     pathname.startsWith('/suppliers') ||
+    pathname.startsWith('/purchase-orders') ||
+    pathname.startsWith('/grn') ||
     pathname.startsWith('/reports') ||
     pathname.startsWith('/payroll') ||
     pathname.startsWith('/payments') ||

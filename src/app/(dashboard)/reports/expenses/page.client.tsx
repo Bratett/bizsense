@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { ExpenseReport, ExpenseReportLine } from '@/lib/reports/expenses'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -133,114 +136,97 @@ export default function ExpenseReportTable({ data }: { data: ExpenseReport }) {
     <div className="space-y-4">
       {/* Actions */}
       <div className="flex justify-end gap-2">
-        <button
-          onClick={handleCsv}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <Button variant="outline" onClick={handleCsv}>
           Download CSV
-        </button>
-        <button
-          onClick={handlePdf}
-          disabled={pdfLoading}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
+        </Button>
+        <Button variant="outline" onClick={handlePdf} disabled={pdfLoading}>
           {pdfLoading ? 'Generating…' : 'Download PDF'}
-        </button>
+        </Button>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <Card>
+        <CardContent className="p-0">
         {data.lines.length === 0 ? (
-          <p className="py-16 text-center text-sm text-gray-400">
+          <p className="py-16 text-center text-sm text-muted-foreground/60">
             No expenses recorded in this period.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Category
-                  </th>
-                  <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Code
-                  </th>
-                  <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Count
-                  </th>
-                  <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {hasPrior ? 'This Period' : 'Amount (GHS)'}
-                  </th>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="py-3 pl-4">Category</TableHead>
+                <TableHead className="py-3">Code</TableHead>
+                <TableHead className="py-3 pr-4 text-right">Count</TableHead>
+                <TableHead className="py-3 pr-4 text-right">
+                  {hasPrior ? 'This Period' : 'Amount (GHS)'}
+                </TableHead>
+                {hasPrior && (
+                  <TableHead className="py-3 pr-4 text-right text-amber-600">
+                    Prior Period
+                  </TableHead>
+                )}
+                {hasPrior && (
+                  <TableHead className="py-3 pr-4 text-right">Change</TableHead>
+                )}
+                <TableHead className="py-3 pr-4 text-right">Receipts</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.lines.map((line) => (
+                <TableRow key={line.accountId} className="hover:bg-muted/30">
+                  <TableCell className="py-2.5 pl-4 text-sm font-medium text-foreground/80">
+                    {line.category}
+                  </TableCell>
+                  <TableCell className="py-2.5 text-sm font-mono text-muted-foreground/60">{line.accountCode}</TableCell>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-muted-foreground">
+                    {line.transactionCount}
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-foreground">
+                    {formatGhs(line.totalAmount)}
+                  </TableCell>
                   {hasPrior && (
-                    <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-amber-600">
-                      Prior Period
-                    </th>
+                    <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-amber-600">
+                      {line.priorAmount !== undefined ? formatGhs(line.priorAmount) : '—'}
+                    </TableCell>
                   )}
                   {hasPrior && (
-                    <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Change
-                    </th>
+                    <TableCell className="py-2.5 pr-4 text-right text-sm">
+                      <ChangeBadge pct={line.changePercent} />
+                    </TableCell>
                   )}
-                  <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Receipts
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {data.lines.map((line) => (
-                  <tr key={line.accountId} className="hover:bg-gray-50">
-                    <td className="py-2.5 pl-4 text-sm font-medium text-gray-700">
-                      {line.category}
-                    </td>
-                    <td className="py-2.5 text-sm font-mono text-gray-400">{line.accountCode}</td>
-                    <td className="py-2.5 pr-4 text-right text-sm tabular-nums text-gray-500">
-                      {line.transactionCount}
-                    </td>
-                    <td className="py-2.5 pr-4 text-right text-sm tabular-nums text-gray-900">
-                      {formatGhs(line.totalAmount)}
-                    </td>
-                    {hasPrior && (
-                      <td className="py-2.5 pr-4 text-right text-sm tabular-nums text-amber-600">
-                        {line.priorAmount !== undefined ? formatGhs(line.priorAmount) : '—'}
-                      </td>
-                    )}
-                    {hasPrior && (
-                      <td className="py-2.5 pr-4 text-right text-sm">
-                        <ChangeBadge pct={line.changePercent} />
-                      </td>
-                    )}
-                    <td className="py-2.5 pr-4 text-right text-sm">
-                      <Link
-                        href={`/expenses?category=${encodeURIComponent(line.accountCode)}`}
-                        className="text-green-700 hover:underline"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-gray-200 bg-gray-50 font-semibold">
-                  <td className="py-3 pl-4 text-sm text-gray-900" colSpan={3}>
-                    Grand Total
-                  </td>
-                  <td className="py-3 pr-4 text-right text-sm tabular-nums text-gray-900">
-                    {formatGhs(data.grandTotal)}
-                  </td>
-                  {hasPrior && (
-                    <td className="py-3 pr-4 text-right text-sm tabular-nums text-amber-600">
-                      {data.priorTotal !== undefined ? formatGhs(data.priorTotal) : '—'}
-                    </td>
-                  )}
-                  {hasPrior && <td></td>}
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+                  <TableCell className="py-2.5 pr-4 text-right text-sm">
+                    <Link
+                      href={`/expenses?category=${encodeURIComponent(line.accountCode)}`}
+                      className="text-green-700 hover:underline"
+                    >
+                      View
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <tfoot>
+              <TableRow className="border-t-2 bg-muted/50 font-semibold">
+                <TableCell className="py-3 pl-4 text-sm text-foreground" colSpan={3}>
+                  Grand Total
+                </TableCell>
+                <TableCell className="py-3 pr-4 text-right text-sm tabular-nums text-foreground">
+                  {formatGhs(data.grandTotal)}
+                </TableCell>
+                {hasPrior && (
+                  <TableCell className="py-3 pr-4 text-right text-sm tabular-nums text-amber-600">
+                    {data.priorTotal !== undefined ? formatGhs(data.priorTotal) : '—'}
+                  </TableCell>
+                )}
+                {hasPrior && <TableCell></TableCell>}
+                <TableCell></TableCell>
+              </TableRow>
+            </tfoot>
+          </Table>
         )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

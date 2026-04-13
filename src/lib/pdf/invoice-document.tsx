@@ -2,14 +2,7 @@ import React from 'react'
 import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer'
 import type { InvoiceData } from './types'
 
-// ─── Formatting helpers ─────────────────────────────────────────────────────
-
-export function formatGHS(n: number): string {
-  const formatted = Math.abs(n)
-    .toFixed(2)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return n < 0 ? `GHS -${formatted}` : `GHS ${formatted}`
-}
+import { formatGhs } from '@/lib/format'
 
 function formatRate(rate: number): string {
   const pct = rate * 100
@@ -304,9 +297,9 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
                 {line.unitPrice.toFixed(2)}
               </Text>
               <Text style={[styles.tableCell, styles.colDiscount]}>
-                {line.discountAmount > 0 ? formatGHS(line.discountAmount) : '-'}
+                {line.discountAmount > 0 ? formatGhs(line.discountAmount) : '-'}
               </Text>
-              <Text style={[styles.tableCell, styles.colTotal]}>{formatGHS(line.lineTotal)}</Text>
+              <Text style={[styles.tableCell, styles.colTotal]}>{formatGhs(line.lineTotal)}</Text>
             </View>
           ))}
           {/* FX note */}
@@ -320,7 +313,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
           <View style={styles.totalsBlock}>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>Subtotal</Text>
-              <Text style={styles.totalsValue}>{formatGHS(data.subtotal)}</Text>
+              <Text style={styles.totalsValue}>{formatGhs(data.subtotal)}</Text>
             </View>
 
             {data.discountAmount > 0 && (
@@ -328,7 +321,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
                 <Text style={styles.totalsLabel}>
                   Discount{data.discountLabel ? ` (${data.discountLabel})` : ''}
                 </Text>
-                <Text style={styles.totalsValue}>-{formatGHS(data.discountAmount)}</Text>
+                <Text style={styles.totalsValue}>-{formatGhs(data.discountAmount)}</Text>
               </View>
             )}
 
@@ -337,14 +330,14 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
                 <View style={styles.totalsDivider} />
                 <View style={styles.totalsRow}>
                   <Text style={styles.totalsLabel}>Taxable Amount</Text>
-                  <Text style={styles.totalsValue}>{formatGHS(data.taxableAmount)}</Text>
+                  <Text style={styles.totalsValue}>{formatGhs(data.taxableAmount)}</Text>
                 </View>
                 {data.taxBreakdown.map((tax) => (
                   <View key={tax.componentCode} style={styles.totalsRow}>
                     <Text style={styles.totalsLabel}>
                       {tax.componentName} ({formatRate(tax.rate)})
                     </Text>
-                    <Text style={styles.totalsValue}>{formatGHS(tax.taxAmount)}</Text>
+                    <Text style={styles.totalsValue}>{formatGhs(tax.taxAmount)}</Text>
                   </View>
                 ))}
               </>
@@ -353,7 +346,7 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
             <View style={styles.totalsDivider} />
             <View style={styles.totalsRow}>
               <Text style={styles.grandTotalLabel}>TOTAL</Text>
-              <Text style={styles.grandTotalValue}>{formatGHS(data.totalAmount)}</Text>
+              <Text style={styles.grandTotalValue}>{formatGhs(data.totalAmount)}</Text>
             </View>
           </View>
         </View>
@@ -380,11 +373,11 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
             )}
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>Amount Paid</Text>
-              <Text style={styles.paymentValue}>{formatGHS(data.payment.amountPaid)}</Text>
+              <Text style={styles.paymentValue}>{formatGhs(data.payment.amountPaid)}</Text>
             </View>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>Balance Due</Text>
-              <Text style={styles.paymentValue}>{formatGHS(data.balanceDue)}</Text>
+              <Text style={styles.paymentValue}>{formatGhs(data.balanceDue)}</Text>
             </View>
           </View>
         )}

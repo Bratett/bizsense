@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+  --font-heading: var(--font-inter);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,76 +46,105 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* BizSense custom color tokens */
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   Design Token Audit — Sprint 9
+   All OKLch values verified against DESIGN.md hex specs via roundtrip
+   conversion (hex → OKLch → hex = exact match for all brand tokens).
+   - Hardcoded hex in Recharts chart components is intentional (library limitation)
+   - Aging chart colors use Tailwind standard palette (data-viz semantics)
+   - --secondary is a shadcn neutral default, not from DESIGN.md
+   ════════════════════════════════════════════════════════════════════════ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* ================================================================
+     BizSense Ghana — DESIGN.md Color Tokens
+     Primary: Deep Forest Green #00704A
+     ================================================================ */
+
+  /* Core brand — Deep Forest Green */
+  --primary: oklch(0.4815 0.1069 161.21);       /* #00704A */
+  --primary-foreground: oklch(1 0 0);           /* White */
+  --primary-dark: oklch(0.3973 0.0873 161.88);  /* #005538 */
+  --primary-light: oklch(0.9588 0.0158 166.73); /* #E8F5EF */
+
+  /* Accent — Gold */
+  --accent: oklch(0.7837 0.1587 72.99);         /* #F5A623 */
+  --accent-foreground: oklch(0.205 0 0);        /* Dark text */
+
+  /* Destructive — Danger Red */
+  --destructive: oklch(0.5785 0.2063 29.01);    /* #D93025 */
+
+  /* Warning — Orange */
+  --warning: oklch(0.756 0.165 68.85);          /* #F29900 */
+  --warning-foreground: oklch(0.205 0 0);       /* Dark text */
+
+  /* Secondary — light neutral for secondary buttons (shadcn neutral base, intentional) */
+  --secondary: oklch(0.97 0 0);                 /* ~#F7F7F7 — not from DESIGN.md, inherited from shadcn neutral */
+  --secondary-foreground: oklch(0.205 0 0);     /* Dark text */
+
+  /* Neutral scale */
+  --background: oklch(1 0 0);                   /* #FFFFFF */
+  --foreground: oklch(0.2101 0.0318 264.66);    /* #111827 */
+  --card: oklch(1 0 0);                         /* #FFFFFF */
+  --card-foreground: oklch(0.2101 0.0318 264.66); /* #111827 */
+  --popover: oklch(1 0 0);                      /* #FFFFFF */
+  --popover-foreground: oklch(0.2101 0.0318 264.66); /* #111827 */
+  --muted: oklch(0.967 0.0029 264.54);          /* #F3F4F6 */
+  --muted-foreground: oklch(0.3729 0.0306 259.73); /* #374151 */
+  --border: oklch(0.8717 0.0093 258.34);        /* #D1D5DB */
+  --input: oklch(0.8717 0.0093 258.34);         /* #D1D5DB */
+  --ring: oklch(0.4815 0.1069 161.21);          /* #00704A — focus ring matches primary */
+  --radius: 0.5rem;                             /* 8px — DESIGN.md spec */
+
+  /* Chart colors — BizSense green palette */
+  --chart-1: oklch(0.4815 0.1069 161.21);       /* Primary green #00704A */
+  --chart-2: oklch(0.5785 0.2063 29.01);        /* Red (expenses) #D93025 */
+  --chart-3: oklch(0.7837 0.1587 72.99);        /* Gold (pending) #F5A623 */
+  --chart-4: oklch(0.3973 0.0873 161.88);       /* Dark green #005538 */
+  --chart-5: oklch(0.556 0 0);                  /* Neutral */
+
+  /* Sidebar — matches primary brand */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.2101 0.0318 264.66);
+  --sidebar-primary: oklch(0.4815 0.1069 161.21);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.9588 0.0158 166.73); /* Primary light #E8F5EF */
+  --sidebar-accent-foreground: oklch(0.2101 0.0318 264.66);
+  --sidebar-border: oklch(0.8717 0.0093 258.34);
+  --sidebar-ring: oklch(0.4815 0.1069 161.21);
+
+  /* ================================================================
+     BizSense Status Badge Tokens (used by StatusBadge component)
+     ================================================================ */
+  --badge-paid-bg: #E8F5EF;
+  --badge-paid-text: #00704A;
+  --badge-pending-bg: #FEF3C7;
+  --badge-pending-text: #B45309;
+  --badge-overdue-bg: #FEE2E2;
+  --badge-overdue-text: #DC2626;
+  --badge-draft-bg: #F3F4F6;
+  --badge-draft-text: #6B7280;
+  --badge-ai-bg: #EEF2FF;
+  --badge-ai-text: #4338CA;
+  --badge-reversal-bg: #FEF3C7;
+  --badge-reversal-text: #B45309;
+
+  /* Shadows — DESIGN.md spec */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 4px 24px rgba(0, 0, 0, 0.15);
+
+  /* WhatsApp brand */
+  --whatsapp: #25D366;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
+/* No dark mode — BizSense is light-only */
 
 @layer base {
   * {
@@ -127,4 +156,10 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Tabular nums utility for monetary amounts */
+.money {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }

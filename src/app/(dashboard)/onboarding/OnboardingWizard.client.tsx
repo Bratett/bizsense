@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Progress } from '@/components/ui/progress'
 import Step1BusinessProfile from './steps/Step1BusinessProfile'
 import Step2CashBalances from './steps/Step2CashBalances'
 import Step3Inventory from './steps/Step3Inventory'
@@ -27,27 +28,18 @@ export default function OnboardingWizard() {
         <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-green-700">
           <span className="text-lg font-bold text-white">B</span>
         </div>
-        <h1 className="mt-2 text-xl font-bold text-gray-900">Set up your business</h1>
+        <h1 className="mt-2 text-xl font-semibold text-foreground">Set up your business</h1>
       </div>
 
       {/* Progress indicator */}
       <div className="mb-8">
-        <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
+        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>
             Step {step} of {STEPS.length}
           </span>
-          <span className="font-medium text-gray-700">{STEPS[step - 1].title}</span>
+          <span className="font-medium text-foreground">{STEPS[step - 1].title}</span>
         </div>
-        <div className="flex gap-1">
-          {STEPS.map((s) => (
-            <div
-              key={s.number}
-              className={`h-1.5 flex-1 rounded-full transition-colors ${
-                s.number <= step ? 'bg-green-600' : 'bg-gray-200'
-              }`}
-            />
-          ))}
-        </div>
+        <Progress value={(step / STEPS.length) * 100} className="h-1.5" />
         {/* Step titles row */}
         <div className="mt-2 hidden gap-1 sm:flex">
           {STEPS.map((s) => (
@@ -57,8 +49,8 @@ export default function OnboardingWizard() {
                 s.number === step
                   ? 'font-medium text-green-700'
                   : s.number < step
-                    ? 'text-gray-500'
-                    : 'text-gray-300'
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground/40'
               }`}
             >
               {s.title}

@@ -15,19 +15,15 @@ import FirstTimeOverlay from './FirstTimeOverlay.client'
 import DashboardChart from './DashboardChart.client'
 import ActivityFeed from './ActivityFeed.client'
 import SyncIndicator from '@/components/SyncIndicator.client'
+import { formatGhs } from '@/lib/format'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 function getGreeting(): string {
   const hour = new Date().getUTCHours() // Ghana is UTC+0
   if (hour < 12) return 'Good morning'
   if (hour < 17) return 'Good afternoon'
   return 'Good evening'
-}
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
 }
 
 function formatDate(): string {
@@ -127,26 +123,28 @@ const QUICK_ACTIONS = [
 
 function LockedCard({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-medium text-gray-500">{label}</p>
-      <div className="mt-2 flex items-center gap-1.5 text-gray-400">
-        <svg
-          width="16"
-          height="16"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-          />
-        </svg>
-        <span className="text-xs">Ask your manager for access</span>
-      </div>
-    </div>
+    <Card size="sm">
+      <CardContent>
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+        <div className="mt-2 flex items-center gap-1.5 text-gray-400">
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+            />
+          </svg>
+          <span className="text-xs">Ask your manager for access</span>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -213,97 +211,113 @@ export default async function DashboardPage() {
             {/* ─── Metric Cards (2x2 grid) ──────────────────────── */}
             <div className="grid grid-cols-2 gap-3">
               {/* Today's Sales — visible to all roles */}
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium text-gray-500">Today&apos;s Sales</p>
-                <p
-                  className={`mt-1 text-2xl font-semibold tabular-nums ${
-                    todaySales.total > 0 ? 'text-green-700' : 'text-gray-900'
-                  }`}
-                >
-                  GHS {formatGHS(todaySales.total)}
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  {todaySales.count} {todaySales.count === 1 ? 'sale' : 'sales'} today
-                </p>
-              </div>
+              <Card size="sm">
+                <CardContent>
+                  <p className="text-xs font-medium text-gray-500">Today&apos;s Sales</p>
+                  <p
+                    className={cn(
+                      'mt-1 text-2xl font-semibold tabular-nums',
+                      todaySales.total > 0 ? 'text-green-700' : 'text-gray-900',
+                    )}
+                  >
+                    {formatGhs(todaySales.total)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    {todaySales.count} {todaySales.count === 1 ? 'sale' : 'sales'} today
+                  </p>
+                </CardContent>
+              </Card>
 
               {/* Cash Balance */}
               {showFinancials && cashBalance ? (
-                <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-medium text-gray-500">Cash Balance</p>
-                  <p
-                    className={`mt-1 text-2xl font-semibold tabular-nums ${
-                      cashBalance.totalBalance < 0 ? 'text-red-600' : 'text-gray-900'
-                    }`}
-                  >
-                    GHS {formatGHS(cashBalance.totalBalance)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-gray-500">Cash + MoMo + Bank</p>
-                </div>
+                <Card size="sm">
+                  <CardContent>
+                    <p className="text-xs font-medium text-gray-500">Cash Balance</p>
+                    <p
+                      className={cn(
+                        'mt-1 text-2xl font-semibold tabular-nums',
+                        cashBalance.totalBalance < 0 ? 'text-red-600' : 'text-gray-900',
+                      )}
+                    >
+                      {formatGhs(cashBalance.totalBalance)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-gray-500">Cash + MoMo + Bank</p>
+                  </CardContent>
+                </Card>
               ) : (
                 <LockedCard label="Cash Balance" />
               )}
 
               {/* Outstanding Receivables */}
               {showFinancials && receivables ? (
-                <Link
-                  href="/reports/receivables"
-                  className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
-                >
-                  <p className="text-xs font-medium text-gray-500">Receivables</p>
-                  <p
-                    className={`mt-1 text-2xl font-semibold tabular-nums ${
-                      receivables.total > 0 ? 'text-yellow-600' : 'text-green-700'
-                    }`}
-                  >
-                    GHS {formatGHS(receivables.total)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    {receivables.count} unpaid {receivables.count === 1 ? 'invoice' : 'invoices'}
-                  </p>
+                <Link href="/reports/receivables" className="block">
+                  <Card size="sm" className="transition-colors hover:bg-muted/50">
+                    <CardContent>
+                      <p className="text-xs font-medium text-gray-500">Receivables</p>
+                      <p
+                        className={cn(
+                          'mt-1 text-2xl font-semibold tabular-nums',
+                          receivables.total > 0 ? 'text-yellow-600' : 'text-green-700',
+                        )}
+                      >
+                        {formatGhs(receivables.total)}
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {receivables.count} unpaid{' '}
+                        {receivables.count === 1 ? 'invoice' : 'invoices'}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </Link>
               ) : (
                 <LockedCard label="Receivables" />
               )}
 
               {/* Low Stock — visible to all roles */}
-              <Link
-                href="/inventory?filter=low_stock"
-                className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100"
-              >
-                <p className="text-xs font-medium text-gray-500">Low Stock</p>
-                {lowStock.count > 0 ? (
-                  <>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums text-amber-600">
-                      {lowStock.count} {lowStock.count === 1 ? 'product' : 'products'}
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">Below reorder level</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="mt-1 text-2xl font-semibold text-green-700">All stocked</p>
-                    <p className="mt-0.5 text-xs text-gray-500">No items below reorder level</p>
-                  </>
-                )}
+              <Link href="/inventory?filter=low_stock" className="block">
+                <Card size="sm" className="transition-colors hover:bg-muted/50 active:bg-muted">
+                  <CardContent>
+                    <p className="text-xs font-medium text-gray-500">Low Stock</p>
+                    {lowStock.count > 0 ? (
+                      <>
+                        <p className="mt-1 text-2xl font-semibold tabular-nums text-amber-600">
+                          {lowStock.count} {lowStock.count === 1 ? 'product' : 'products'}
+                        </p>
+                        <p className="mt-0.5 text-xs text-gray-500">Below reorder level</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mt-1 text-2xl font-semibold text-green-700">All stocked</p>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                          No items below reorder level
+                        </p>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
               </Link>
             </div>
 
             {/* ─── Quick Actions ──────────────────────────────────── */}
             <div className="grid grid-cols-4 gap-2">
               {QUICK_ACTIONS.map((action) => (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className={`flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 bg-white p-3 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100`}
-                >
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg ${action.color}`}
+                <Link key={action.href} href={action.href} className="block">
+                  <Card
+                    size="sm"
+                    className="flex h-full flex-col items-center gap-1.5 p-3 transition-colors hover:bg-muted/50 active:bg-muted"
                   >
-                    {action.icon}
-                  </span>
-                  <span className="text-[11px] font-medium text-gray-700 text-center leading-tight">
-                    {action.label}
-                  </span>
+                    <span
+                      className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-lg',
+                        action.color,
+                      )}
+                    >
+                      {action.icon}
+                    </span>
+                    <span className="text-[11px] font-medium text-gray-700 text-center leading-tight">
+                      {action.label}
+                    </span>
+                  </Card>
                 </Link>
               ))}
             </div>
@@ -312,11 +326,34 @@ export default async function DashboardPage() {
             <div className="space-y-2">
               {/* Overdue invoices alert */}
               {showFinancials && receivables && receivables.count > 0 && (
-                <Link
-                  href="/reports/receivables"
-                  className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                <Link href="/reports/receivables" className="block">
+                  <Card
+                    size="sm"
+                    className="flex-row items-center gap-3 ring-red-200 bg-red-50 px-4 py-3 transition-colors hover:bg-red-100"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-800">
+                        {receivables.count} unpaid{' '}
+                        {receivables.count === 1 ? 'invoice' : 'invoices'} &middot;{' '}
+                        {formatGhs(receivables.total)}
+                      </p>
+                    </div>
                     <svg
                       width="16"
                       height="16"
@@ -324,45 +361,47 @@ export default async function DashboardPage() {
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       strokeWidth={2}
+                      className="shrink-0 text-red-500"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
                       />
                     </svg>
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800">
-                      {receivables.count} unpaid {receivables.count === 1 ? 'invoice' : 'invoices'}{' '}
-                      &middot; GHS {formatGHS(receivables.total)}
-                    </p>
-                  </div>
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    className="text-red-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
+                  </Card>
                 </Link>
               )}
 
               {/* Low stock alert */}
               {lowStock.count > 0 && (
-                <Link
-                  href="/inventory?filter=low_stock"
-                  className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 transition-colors hover:bg-amber-100"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                <Link href="/inventory?filter=low_stock" className="block">
+                  <Card
+                    size="sm"
+                    className="flex-row items-center gap-3 ring-amber-200 bg-amber-50 px-4 py-3 transition-colors hover:bg-amber-100"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"
+                        />
+                      </svg>
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-amber-800">
+                        {lowStock.count} {lowStock.count === 1 ? 'item' : 'items'} below reorder
+                        level
+                      </p>
+                    </div>
                     <svg
                       width="16"
                       height="16"
@@ -370,44 +409,47 @@ export default async function DashboardPage() {
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       strokeWidth={2}
+                      className="shrink-0 text-amber-500"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
                       />
                     </svg>
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-800">
-                      {lowStock.count} {lowStock.count === 1 ? 'item' : 'items'} below reorder level
-                    </p>
-                  </div>
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    className="text-amber-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
+                  </Card>
                 </Link>
               )}
 
               {/* Pending approvals alert */}
               {showApprovals && pendingApprovals && pendingApprovals.count > 0 && (
-                <Link
-                  href="/expenses?filter=pending_approval"
-                  className="flex items-center gap-3 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 transition-colors hover:bg-yellow-100"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-100 text-yellow-700">
+                <Link href="/expenses?filter=pending_approval" className="block">
+                  <Card
+                    size="sm"
+                    className="flex-row items-center gap-3 ring-yellow-200 bg-yellow-50 px-4 py-3 transition-colors hover:bg-yellow-100"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-yellow-100 text-yellow-700">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                        />
+                      </svg>
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-yellow-800">
+                        {pendingApprovals.count}{' '}
+                        {pendingApprovals.count === 1 ? 'expense' : 'expenses'} awaiting approval
+                      </p>
+                    </div>
                     <svg
                       width="16"
                       height="16"
@@ -415,35 +457,15 @@ export default async function DashboardPage() {
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       strokeWidth={2}
+                      className="shrink-0 text-yellow-600"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
                       />
                     </svg>
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-yellow-800">
-                      {pendingApprovals.count}{' '}
-                      {pendingApprovals.count === 1 ? 'expense' : 'expenses'} awaiting approval
-                    </p>
-                  </div>
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    className="text-yellow-600"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
+                  </Card>
                 </Link>
               )}
             </div>

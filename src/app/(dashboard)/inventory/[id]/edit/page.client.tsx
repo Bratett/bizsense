@@ -4,6 +4,15 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { updateProduct, type ProductDetail, type UpdateProductInput } from '@/actions/products'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import { MoneyInput } from '@/components/ui/money-input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { PageHeader } from '@/components/ui/page-header'
 
 const UNIT_PRESETS = ['pcs', 'kg', 'bags', 'litres', 'boxes', 'crates', 'cartons', 'bottles']
 
@@ -19,7 +28,7 @@ export default function EditProductForm({
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  // Form state — pre-populated from product
+  // Form state -- pre-populated from product
   const [name, setName] = useState(product.name)
   const [category, setCategory] = useState(product.category ?? '')
   const [unit, setUnit] = useState(product.unit ?? '')
@@ -61,67 +70,63 @@ export default function EditProductForm({
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Link href={`/inventory/${product.id}`} className="text-gray-600 hover:text-gray-900">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">Edit Product</h1>
-      </div>
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/inventory" />}>Inventory</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href={`/inventory/${product.id}`} />}>{product.name}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Edit</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader title="Edit Product" backHref={`/inventory/${product.id}`} />
 
       {/* Error */}
       {error && (
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Product Name *
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Product Name *</Label>
+          <Input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             required
           />
-          {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
+          {fieldErrors.name && <p className="text-sm text-destructive">{fieldErrors.name}</p>}
         </div>
 
-        {/* SKU — read-only */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">SKU</label>
-          <p className="mt-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-600">
+        {/* SKU -- read-only */}
+        <div className="space-y-1.5">
+          <Label>SKU</Label>
+          <p className="rounded-lg border border-input bg-muted px-3 py-2.5 font-mono text-sm text-muted-foreground">
             {product.sku ?? 'None'}
           </p>
-          <p className="mt-1 text-xs text-gray-400">SKU cannot be changed after creation</p>
+          <p className="text-xs text-muted-foreground">SKU cannot be changed after creation</p>
         </div>
 
         {/* Category */}
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="category">Category</Label>
+          <Input
             id="category"
             type="text"
             list="category-suggestions"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             placeholder="e.g. Grains, Beverages, Electronics"
           />
           <datalist id="category-suggestions">
@@ -132,17 +137,14 @@ export default function EditProductForm({
         </div>
 
         {/* Unit */}
-        <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-gray-700">
-            Unit
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="unit">Unit</Label>
+          <Input
             id="unit"
             type="text"
             list="unit-presets"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             placeholder="e.g. pcs, kg, bags"
           />
           <datalist id="unit-presets">
@@ -154,126 +156,81 @@ export default function EditProductForm({
 
         {/* Cost Price + Selling Price */}
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="costPrice" className="block text-sm font-medium text-gray-700">
-              Cost Price (GHS) *
-            </label>
-            <input
-              id="costPrice"
-              type="text"
-              inputMode="decimal"
-              value={costPrice}
-              onChange={(e) => setCostPrice(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              required
-            />
-            {fieldErrors.costPrice && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.costPrice}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="sellingPrice" className="block text-sm font-medium text-gray-700">
-              Selling Price (GHS) *
-            </label>
-            <input
-              id="sellingPrice"
-              type="text"
-              inputMode="decimal"
-              value={sellingPrice}
-              onChange={(e) => setSellingPrice(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm tabular-nums text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-              required
-            />
-            {fieldErrors.sellingPrice && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.sellingPrice}</p>
-            )}
-          </div>
+          <MoneyInput
+            id="costPrice"
+            label="Cost Price (GHS) *"
+            value={String(costPrice)}
+            onChange={setCostPrice}
+            required
+            error={fieldErrors.costPrice}
+          />
+          <MoneyInput
+            id="sellingPrice"
+            label="Selling Price (GHS) *"
+            value={String(sellingPrice)}
+            onChange={setSellingPrice}
+            required
+            error={fieldErrors.sellingPrice}
+          />
         </div>
 
         {/* Selling Price USD */}
-        <div>
-          <label htmlFor="sellingPriceUsd" className="block text-sm font-medium text-gray-700">
-            Selling Price (USD)
-          </label>
-          <input
-            id="sellingPriceUsd"
-            type="text"
-            inputMode="decimal"
-            value={sellingPriceUsd}
-            onChange={(e) => setSellingPriceUsd(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm tabular-nums text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
-            placeholder="Optional"
-          />
-        </div>
+        <MoneyInput
+          id="sellingPriceUsd"
+          label="Selling Price (USD)"
+          currency="USD"
+          value={String(sellingPriceUsd)}
+          onChange={setSellingPriceUsd}
+          placeholder="Optional"
+        />
 
         {/* Track Inventory toggle */}
         <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
           <div>
-            <p className="text-sm font-medium text-gray-900">Track Inventory</p>
-            <p className="text-xs text-gray-500">Monitor stock levels for this product</p>
+            <p className="text-sm font-medium text-foreground">Track Inventory</p>
+            <p className="text-xs text-muted-foreground">Monitor stock levels for this product</p>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={trackInventory}
-            onClick={() => setTrackInventory(!trackInventory)}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-              trackInventory ? 'bg-green-600' : 'bg-gray-200'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                trackInventory ? 'translate-x-5' : 'translate-x-0'
-              }`}
-            />
-          </button>
+          <Switch
+            checked={trackInventory}
+            onCheckedChange={setTrackInventory}
+          />
         </div>
 
         {/* Reorder Level */}
         {trackInventory && (
-          <div>
-            <label htmlFor="reorderLevel" className="block text-sm font-medium text-gray-700">
-              Reorder Level
-            </label>
-            <p className="text-xs text-gray-500">Alert me when stock falls below this quantity</p>
-            <input
+          <div className="space-y-1.5">
+            <Label htmlFor="reorderLevel">Reorder Level</Label>
+            <p className="text-xs text-muted-foreground">Alert me when stock falls below this quantity</p>
+            <Input
               id="reorderLevel"
               type="text"
               inputMode="numeric"
               value={reorderLevel}
               onChange={(e) => setReorderLevel(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
               placeholder="0"
             />
             {fieldErrors.reorderLevel && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.reorderLevel}</p>
+              <p className="text-sm text-destructive">{fieldErrors.reorderLevel}</p>
             )}
           </div>
         )}
 
         {/* Description */}
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
+        <div className="space-y-1.5">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             placeholder="Optional product description"
           />
         </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full rounded-lg bg-green-700 py-3 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending} className="w-full">
           {isPending ? 'Saving...' : 'Save Changes'}
-        </button>
+        </Button>
       </form>
     </div>
   )

@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { TrialBalanceReport, TrialBalanceLine } from '@/lib/reports/trialBalance'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -134,81 +137,74 @@ export default function TrialBalanceTable({ data }: { data: TrialBalanceReport }
 
       {/* Actions */}
       <div className="flex justify-end gap-2">
-        <button
-          onClick={handleCsv}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <Button variant="outline" onClick={handleCsv}>
           Download CSV
-        </button>
-        <button
-          onClick={handlePdf}
-          disabled={pdfLoading}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
+        </Button>
+        <Button variant="outline" onClick={handlePdf} disabled={pdfLoading}>
           {pdfLoading ? 'Generating…' : 'Download PDF'}
-        </button>
+        </Button>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-20">
-                  Code
-                </th>
-                <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Account Name
-                </th>
-                <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Type
-                </th>
-                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Debits (GHS)
-                </th>
-                <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Credits (GHS)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {data.lines.map((line) => (
-                <tr key={line.accountId} className="hover:bg-gray-50">
-                  <td className="py-2 pl-4 text-sm font-mono text-gray-500">{line.accountCode}</td>
-                  <td className="py-2 text-sm text-gray-700">{line.accountName}</td>
-                  <td className="py-2 text-xs capitalize text-gray-400">{line.accountType}</td>
-                  <td className="py-2 pr-4 text-right text-sm tabular-nums text-gray-700">
-                    {line.cumulativeDebits > 0 ? line.cumulativeDebits.toFixed(2) : ''}
-                  </td>
-                  <td className="py-2 pr-4 text-right text-sm tabular-nums text-gray-700">
-                    {line.cumulativeCredits > 0 ? line.cumulativeCredits.toFixed(2) : ''}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr
-                className={`border-t-2 font-bold ${isBalanced ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}
+      <Card>
+        <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="py-3 pl-4 w-20">
+                Code
+              </TableHead>
+              <TableHead className="py-3">
+                Account Name
+              </TableHead>
+              <TableHead className="py-3">
+                Type
+              </TableHead>
+              <TableHead className="py-3 pr-4 text-right">
+                Debits (GHS)
+              </TableHead>
+              <TableHead className="py-3 pr-4 text-right">
+                Credits (GHS)
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.lines.map((line) => (
+              <TableRow key={line.accountId} className="hover:bg-muted/30">
+                <TableCell className="py-2 pl-4 text-sm font-mono text-muted-foreground">{line.accountCode}</TableCell>
+                <TableCell className="py-2 text-sm text-foreground/80">{line.accountName}</TableCell>
+                <TableCell className="py-2 text-xs capitalize text-muted-foreground/60">{line.accountType}</TableCell>
+                <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground/80">
+                  {line.cumulativeDebits > 0 ? line.cumulativeDebits.toFixed(2) : ''}
+                </TableCell>
+                <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground/80">
+                  {line.cumulativeCredits > 0 ? line.cumulativeCredits.toFixed(2) : ''}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+          <tfoot>
+            <TableRow
+              className={`border-t-2 font-bold ${isBalanced ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}
+            >
+              <TableCell className="py-3 pl-4 text-sm"></TableCell>
+              <TableCell className="py-3 text-sm text-foreground">TOTAL</TableCell>
+              <TableCell></TableCell>
+              <TableCell
+                className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
               >
-                <td className="py-3 pl-4 text-sm"></td>
-                <td className="py-3 text-sm text-gray-900">TOTAL</td>
-                <td></td>
-                <td
-                  className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
-                >
-                  {data.totalDebits.toFixed(2)}
-                </td>
-                <td
-                  className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
-                >
-                  {data.totalCredits.toFixed(2)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
+                {data.totalDebits.toFixed(2)}
+              </TableCell>
+              <TableCell
+                className={`py-3 pr-4 text-right text-sm tabular-nums ${isBalanced ? 'text-green-700' : 'text-red-600'}`}
+              >
+                {data.totalCredits.toFixed(2)}
+              </TableCell>
+            </TableRow>
+          </tfoot>
+        </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }

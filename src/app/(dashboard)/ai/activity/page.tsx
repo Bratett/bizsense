@@ -30,7 +30,7 @@ export default async function AiActivityPage({ searchParams }: PageProps) {
   const { actions, flaggedLogs } = await getAiActivityLog({ status, dateFrom, dateTo })
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto max-w-4xl p-4 md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">AI Activity Log</h1>
         <a href="/ai" className="text-sm text-green-700 hover:underline">

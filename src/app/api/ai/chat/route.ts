@@ -9,6 +9,9 @@ import { db } from '@/db'
 import { aiConversationLogs } from '@/db/schema/ai'
 
 // Tools that stage through pending_ai_actions — all others are read-only
+/** Max output tokens for AI responses — shared across initial call and agentic loop. */
+const AI_MAX_TOKENS = 4096
+
 const WRITE_TOOLS = new Set([
   'record_sale',
   'record_expense',
@@ -37,14 +40,14 @@ export async function POST(req: Request) {
   const userRole = session.user.role
 
   // ── 2. Parse request ──────────────────────────────────────────────────────
-  let body: { messages?: Anthropic.MessageParam[] }
+  let body: { messages?: Anthropic.MessageParam[]; sessionId?: string }
   try {
     body = await req.json()
   } catch {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { messages } = body
+  const { messages, sessionId } = body
 
   if (!messages?.length) {
     return Response.json({ error: 'No messages provided' }, { status: 400 })
@@ -79,7 +82,7 @@ export async function POST(req: Request) {
   try {
     let currentResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      max_tokens: AI_MAX_TOKENS,
       system: systemPrompt,
       tools: AI_TOOLS,
       messages,
@@ -136,7 +139,7 @@ export async function POST(req: Request) {
 
       currentResponse = await anthropic.messages.create({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
+        max_tokens: AI_MAX_TOKENS,
         system: systemPrompt,
         tools: AI_TOOLS,
         messages: accumulatedMessages,
@@ -156,7 +159,7 @@ export async function POST(req: Request) {
   await db.insert(aiConversationLogs).values({
     businessId,
     userId,
-    sessionId: undefined,
+    sessionId: sessionId ?? null,
     userMessage: latestText,
     aiResponse: finalTextResponse,
     toolCalls: toolCallsMade,

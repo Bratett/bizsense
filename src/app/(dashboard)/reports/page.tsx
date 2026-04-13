@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getServerSession } from '@/lib/session'
+import { PageHeader } from '@/components/ui/page-header'
+import { Card } from '@/components/ui/card'
 
 export const metadata = { title: 'Reports | BizSense' }
 
@@ -215,29 +217,29 @@ export default async function ReportsPage() {
   if (session.user.role === 'cashier') redirect('/access-denied')
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-4xl px-4 py-6 md:px-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Reports</h1>
-        <p className="mt-1 mb-6 text-sm text-gray-500">Financial reports and business analytics</p>
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-4xl p-4 md:p-8">
+        <PageHeader
+          title="Reports"
+          subtitle="Financial reports and business analytics"
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {REPORTS.map((report) => (
-            <Link
-              key={report.title}
-              href={report.href}
-              className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-green-200 hover:shadow-md"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-green-50">
-                  {report.icon}
+            <Link key={report.title} href={report.href}>
+              <Card className="group p-5 transition-all hover:ring-2 hover:ring-primary/20 hover:shadow-md">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-primary/10">
+                    {report.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground group-hover:text-primary">
+                      {report.title}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{report.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-green-700">
-                    {report.title}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">{report.description}</p>
-                </div>
-              </div>
+              </Card>
             </Link>
           ))}
         </div>

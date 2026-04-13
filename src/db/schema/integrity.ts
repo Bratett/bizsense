@@ -9,7 +9,7 @@ export const ledgerIntegrityLog = pgTable('ledger_integrity_log', {
   sourceTable: text('source_table').notNull(),
   sourceId: uuid('source_id').notNull(),
   issue: text('issue').notNull(),
-  // missing_journal_entry | debit_credit_mismatch
+  // missing_journal_entry | debit_credit_mismatch | missing_cogs_entry
   detectedAt: timestamp('detected_at').defaultNow().notNull(),
   resolvedAt: timestamp('resolved_at'),
   resolvedBy: uuid('resolved_by').references(() => users.id),

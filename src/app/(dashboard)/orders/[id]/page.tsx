@@ -10,5 +10,9 @@ export default async function OrderDetailPage({ params }: PageProps) {
   await getServerSession()
   const { id } = await params
   const order = await getOrderById(id)
-  return <OrderDetailView order={order} />
+  return (
+    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <OrderDetailView order={order} />
+    </main>
+  )
 }

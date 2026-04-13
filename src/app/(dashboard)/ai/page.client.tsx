@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ConfirmationCard, type PendingActionProps } from '@/components/ai/ConfirmationCard'
 import { confirmAiAction, rejectAiAction } from '@/actions/aiPromotions'
 import { getOrCreateAiSessionId } from '@/lib/ai/session'
+import { Button } from '@/components/ui/button'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -322,12 +323,13 @@ export function AiChatClient({ businessName }: { businessName: string }) {
         {lastError && !isSubmitting && (
           <div className="mx-auto mt-2 flex max-w-sm items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
             <p className="flex-1 text-sm text-red-700">Something went wrong.</p>
-            <button
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={handleRetry}
-              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
             >
               Retry
-            </button>
+            </Button>
           </div>
         )}
 
@@ -366,11 +368,13 @@ export function AiChatClient({ businessName }: { businessName: string }) {
           </div>
 
           {/* Mic placeholder */}
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             title="Voice input coming soon."
             disabled
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+            className="h-12 w-12 flex-shrink-0 rounded-full"
             aria-label="Voice input (coming soon)"
           >
             <svg
@@ -389,14 +393,15 @@ export function AiChatClient({ businessName }: { businessName: string }) {
               <line x1="12" y1="19" x2="12" y2="23" />
               <line x1="8" y1="23" x2="16" y2="23" />
             </svg>
-          </button>
+          </Button>
 
           {/* Send button */}
-          <button
+          <Button
             type="button"
+            size="icon"
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isSubmitting}
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-700 text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-12 w-12 flex-shrink-0 rounded-full bg-green-700 text-white hover:bg-green-800"
             aria-label="Send message"
           >
             {isSubmitting ? (
@@ -417,7 +422,7 @@ export function AiChatClient({ businessName }: { businessName: string }) {
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
             )}
-          </button>
+          </Button>
         </div>
       </footer>
     </div>

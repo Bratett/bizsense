@@ -1,11 +1,9 @@
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-gray-200 ${className ?? ''}`} />
-}
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function DashboardLoading() {
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-3xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6">
         {/* Greeting */}
         <div>
           <Skeleton className="h-6 w-56" />

@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { completeOnboardingStep5 } from '@/actions/onboarding'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 type PayableRow = {
   supplierName: string
@@ -86,54 +88,46 @@ export default function Step5Payables({ onComplete, onBack }: Props) {
 
   if (!showForm) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Do you owe money to any suppliers?</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Add what your business owes. Skip if no outstanding payables.
-        </p>
-        <div className="mt-6 flex flex-col gap-3">
-          <button
+      <Card>
+        <CardHeader>
+          <CardTitle>Do you owe money to any suppliers?</CardTitle>
+          <CardDescription>
+            Add what your business owes. Skip if no outstanding payables.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+        <div className="flex flex-col gap-3">
+          <Button
             type="button"
             onClick={() => setShowForm(true)}
-            className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white
-                       transition-colors hover:bg-green-800 active:bg-green-900"
+            className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+            size="lg"
           >
             Yes, add suppliers
-          </button>
+          </Button>
           <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={onBack}
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
+            <Button type="button" variant="ghost" onClick={onBack} className="text-sm text-muted-foreground">
               Back
-            </button>
-            <button
-              type="button"
-              onClick={onComplete}
-              className="text-sm text-gray-400 hover:text-gray-600"
-            >
+            </Button>
+            <Button type="button" variant="ghost" onClick={onComplete} className="text-sm text-muted-foreground/60">
               Skip this step
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Outstanding Payables</h2>
-        <button
-          type="button"
-          onClick={onComplete}
-          disabled={isPending}
-          className="text-sm text-gray-400 hover:text-gray-600"
-        >
+    <Card>
+      <CardHeader className="flex-row items-center justify-between">
+        <CardTitle>Outstanding Payables</CardTitle>
+        <Button type="button" variant="ghost" onClick={onComplete} disabled={isPending} className="text-sm text-muted-foreground/60">
           Skip this step
-        </button>
-      </div>
+        </Button>
+      </CardHeader>
+      <CardContent>
       <p className="mt-1 text-sm text-gray-500">Add suppliers you owe money to.</p>
 
       {error && (
@@ -212,19 +206,20 @@ export default function Step5Payables({ onComplete, onBack }: Props) {
           </div>
         ))}
 
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={addRow}
           disabled={isPending}
-          className="text-sm font-medium text-green-700 hover:text-green-800"
+          className="justify-start p-0 text-sm font-medium text-green-700 hover:text-green-800"
         >
           + Add another supplier
-        </button>
+        </Button>
 
         {/* Total */}
-        <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
-          <span className="text-sm font-medium text-gray-700">Total Payables</span>
-          <span className="text-base font-semibold text-gray-900">
+        <div className="flex items-center justify-between rounded-lg bg-muted px-4 py-3">
+          <span className="text-sm font-medium text-foreground/80">Total Payables</span>
+          <span className="text-base font-semibold text-foreground">
             GHS{' '}
             {total.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
@@ -232,26 +227,21 @@ export default function Step5Payables({ onComplete, onBack }: Props) {
 
         {/* Actions */}
         <div className="mt-2 flex flex-col gap-2">
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={isPending}
-            className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white
-                       transition-colors hover:bg-green-800 active:bg-green-900
-                       disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+            size="lg"
           >
             {isPending ? 'Saving\u2026' : 'Continue'}
-          </button>
-          <button
-            type="button"
-            onClick={onBack}
-            disabled={isPending}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
+          </Button>
+          <Button type="button" variant="ghost" onClick={onBack} disabled={isPending} className="text-sm text-muted-foreground">
             Back
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

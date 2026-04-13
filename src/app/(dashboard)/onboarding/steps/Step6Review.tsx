@@ -6,10 +6,9 @@ import {
   completeOnboarding,
   type OpeningPositionSummary,
 } from '@/actions/onboarding'
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 type Props = {
   onBack: () => void
@@ -56,9 +55,12 @@ export default function Step6Review({ onBack }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">Here&apos;s your opening position</h2>
-      <p className="mt-1 text-sm text-gray-500">Review before we finalise your books.</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Here&apos;s your opening position</CardTitle>
+        <CardDescription>Review before we finalise your books.</CardDescription>
+      </CardHeader>
+      <CardContent>
 
       {error && (
         <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
@@ -100,26 +102,26 @@ export default function Step6Review({ onBack }: Props) {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">Cash & Mobile Money</span>
                   <span className="text-sm font-medium text-gray-900">
-                    GHS {formatGHS(summary.cashTotal)}
+                    {formatGhs(summary.cashTotal)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">Inventory Value</span>
                   <span className="text-sm font-medium text-gray-900">
-                    GHS {formatGHS(summary.inventoryTotal)}
+                    {formatGhs(summary.inventoryTotal)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">Receivables</span>
                   <span className="text-sm font-medium text-gray-900">
-                    GHS {formatGHS(summary.receivablesTotal)}
+                    {formatGhs(summary.receivablesTotal)}
                   </span>
                 </div>
                 <div className="my-1 border-t border-gray-300" />
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-gray-900">Total Assets</span>
                   <span className="text-sm font-bold text-gray-900">
-                    GHS {formatGHS(summary.totalAssets)}
+                    {formatGhs(summary.totalAssets)}
                   </span>
                 </div>
               </div>
@@ -134,14 +136,14 @@ export default function Step6Review({ onBack }: Props) {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-700">Payables</span>
                   <span className="text-sm font-medium text-gray-900">
-                    GHS {formatGHS(summary.payablesTotal)}
+                    {formatGhs(summary.payablesTotal)}
                   </span>
                 </div>
                 <div className="my-1 border-t border-gray-300" />
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-gray-900">Total Liabilities</span>
                   <span className="text-sm font-bold text-gray-900">
-                    GHS {formatGHS(summary.payablesTotal)}
+                    {formatGhs(summary.payablesTotal)}
                   </span>
                 </div>
               </div>
@@ -152,7 +154,7 @@ export default function Step6Review({ onBack }: Props) {
               <div className="flex items-center justify-between">
                 <span className="text-base font-semibold text-gray-900">Net Opening Equity</span>
                 <span className="text-base font-bold text-green-700">
-                  GHS {formatGHS(summary.netEquity)}
+                  {formatGhs(summary.netEquity)}
                 </span>
               </div>
             </div>
@@ -167,34 +169,29 @@ export default function Step6Review({ onBack }: Props) {
             ) : (
               <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
                 Your opening entries don&apos;t balance. Difference: GHS{' '}
-                {formatGHS(Math.abs(summary.difference))}. Please go back and check your entries.
+                {formatGhs(Math.abs(summary.difference))}. Please go back and check your entries.
               </div>
             )}
           </div>
 
           {/* Actions */}
           <div className="mt-6 flex flex-col gap-2">
-            <button
+            <Button
               type="button"
               onClick={handleFinish}
               disabled={isPending || !summary.balanced}
-              className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white
-                         transition-colors hover:bg-green-800 active:bg-green-900
-                         disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+              size="lg"
             >
               {isPending ? 'Finishing setup\u2026' : 'Finish Setup'}
-            </button>
-            <button
-              type="button"
-              onClick={onBack}
-              disabled={isPending}
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
+            </Button>
+            <Button type="button" variant="ghost" onClick={onBack} disabled={isPending} className="text-sm text-muted-foreground">
               Back
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+      </CardContent>
+    </Card>
   )
 }

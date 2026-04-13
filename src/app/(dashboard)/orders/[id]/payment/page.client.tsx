@@ -5,6 +5,16 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { recordPaymentReceived } from '@/actions/payments'
 import type { OrderDetail } from '@/actions/orders'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import { PageHeader } from '@/components/ui/page-header'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -17,15 +27,6 @@ const PAYMENT_OPTIONS = [
 ] as const
 
 type PaymentMethod = (typeof PAYMENT_OPTIONS)[number]['value']
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 function todayISO(): string {
   return new Date().toISOString().split('T')[0]
@@ -52,7 +53,6 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
   const [notes, setNotes] = useState('')
 
   const amountNum = Math.max(0, parseFloat(amount) || 0)
-  const selectedOption = PAYMENT_OPTIONS.find((o) => o.value === paymentMethod)
   const hasRef = paymentMethod.startsWith('momo_')
     ? momoReference.trim().length > 0
     : paymentMethod === 'bank'
@@ -92,89 +92,98 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <Link
-          href={`/orders/${order.id}`}
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Back to order"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Record Payment</h1>
-          <p className="text-sm text-gray-500">{order.orderNumber}</p>
-        </div>
-      </div>
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/orders" />}>Sales</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href={`/orders/${order.id}`} />}>{order.orderNumber}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Record Payment</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader
+        title="Record Payment"
+        subtitle={order.orderNumber}
+        backHref={`/orders/${order.id}`}
+      />
 
       {/* Success banner */}
       {success && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-          Payment recorded. Redirecting...
-        </div>
+        <Alert className="mb-4 border-green-200 bg-green-50">
+          <AlertDescription className="text-green-800">
+            Payment recorded. Redirecting...
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Error banner */}
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Invoice summary */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <p className="text-xs font-medium text-gray-500">Invoice Summary</p>
-        {order.customer && <p className="mt-1 font-medium text-gray-900">{order.customer.name}</p>}
-        <div className="mt-2 space-y-1 text-sm">
-          <div className="flex justify-between text-gray-600">
-            <span>Invoice total</span>
-            <span>GHS {formatGHS(totalAmount)}</span>
-          </div>
-          {alreadyPaid > 0 && (
-            <div className="flex justify-between text-gray-600">
-              <span>Previously paid</span>
-              <span>GHS {formatGHS(alreadyPaid)}</span>
-            </div>
+      <Card>
+        <CardContent>
+          <p className="text-xs font-medium text-muted-foreground">Invoice Summary</p>
+          {order.customer && (
+            <p className="mt-1 font-medium text-foreground">{order.customer.name}</p>
           )}
-          <div className="flex justify-between border-t border-gray-100 pt-1">
-            <span className="font-medium text-amber-700">Outstanding</span>
-            <span className="text-lg font-bold text-amber-700">GHS {formatGHS(remaining)}</span>
+          <div className="mt-2 space-y-1 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Invoice total</span>
+              <span>{formatGhs(totalAmount)}</span>
+            </div>
+            {alreadyPaid > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Previously paid</span>
+                <span>{formatGhs(alreadyPaid)}</span>
+              </div>
+            )}
+            <Separator />
+            <div className="flex justify-between pt-1">
+              <span className="font-medium text-amber-700">Outstanding</span>
+              <span className="text-lg font-bold text-amber-700">{formatGhs(remaining)}</span>
+            </div>
           </div>
-        </div>
 
-        {/* FX info */}
-        {order.fxRate && Number(order.fxRate) > 1 && (
-          <div className="mt-2 rounded-lg bg-yellow-50 px-3 py-2 text-xs text-yellow-700">
-            Original rate: 1 USD = GHS {Number(order.fxRate).toFixed(4)} &middot; Invoice: GHS{' '}
-            {formatGHS(totalAmount)} (USD {(totalAmount / Number(order.fxRate)).toFixed(2)})
-          </div>
-        )}
-      </div>
+          {/* FX info */}
+          {order.fxRate && Number(order.fxRate) > 1 && (
+            <Alert className="mt-2 border-yellow-200 bg-yellow-50">
+              <AlertDescription className="text-xs text-yellow-700">
+                Original rate: 1 USD = GHS {Number(order.fxRate).toFixed(4)} &middot; Invoice: GHS{' '}
+                {formatGhs(totalAmount)} (USD {(totalAmount / Number(order.fxRate)).toFixed(2)})
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="mt-4 space-y-4">
         {/* Amount field */}
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">
-              GHS received <span className="text-red-500">*</span>
-            </label>
-            <button
-              type="button"
+            <Label>
+              GHS received <span className="text-destructive">*</span>
+            </Label>
+            <Button
+              variant="link"
+              size="sm"
+              className="px-0"
               onClick={() => setAmount(remaining.toFixed(2))}
-              className="text-xs font-medium text-green-700 hover:underline"
             >
-              Pay in full (GHS {formatGHS(remaining)})
-            </button>
+              Pay in full ({formatGhs(remaining)})
+            </Button>
           </div>
-          <input
+          <Input
             type="number"
             inputMode="decimal"
             min="0.01"
@@ -182,18 +191,18 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
             max={remaining}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="mt-1"
           />
           {amountNum > 0 && amountNum < remaining - 0.001 && (
-            <p className="mt-1 text-xs text-gray-500">
-              GHS {formatGHS(remaining - amountNum)} still outstanding after this payment
+            <p className="mt-1 text-xs text-muted-foreground">
+              {formatGhs(remaining - amountNum)} still outstanding after this payment
             </p>
           )}
         </div>
 
         {/* Payment method */}
         <div>
-          <p className="mb-2 text-sm font-medium text-gray-700">Payment Method</p>
+          <Label className="mb-2 block">Payment Method</Label>
           <div className="grid grid-cols-2 gap-2">
             {PAYMENT_OPTIONS.map((opt) => (
               <button
@@ -202,12 +211,12 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
                 onClick={() => setPaymentMethod(opt.value)}
                 className={`rounded-xl border p-3 text-center transition-colors ${
                   paymentMethod === opt.value
-                    ? 'border-green-600 bg-green-50 ring-2 ring-green-100'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border bg-background hover:border-muted-foreground/30'
                 }`}
               >
                 <span className="text-xl">{opt.icon}</span>
-                <p className="mt-1 text-sm font-medium text-gray-900">{opt.label}</p>
+                <p className="mt-1 text-sm font-medium text-foreground">{opt.label}</p>
               </button>
             ))}
           </div>
@@ -216,22 +225,18 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
         {/* MoMo reference */}
         {paymentMethod.startsWith('momo_') && (
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              MoMo Reference <span className="text-red-500">*</span>
-            </label>
-            <input
+            <Label>
+              MoMo Reference <span className="text-destructive">*</span>
+            </Label>
+            <Input
               type="text"
               value={momoReference}
               onChange={(e) => setMomoReference(e.target.value)}
               placeholder="Transaction reference"
-              className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                fieldErrors.momoReference
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                  : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-              }`}
+              className={`mt-1 ${fieldErrors.momoReference ? 'border-destructive' : ''}`}
             />
             {fieldErrors.momoReference && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.momoReference}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors.momoReference}</p>
             )}
           </div>
         )}
@@ -239,57 +244,48 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
         {/* Bank reference */}
         {paymentMethod === 'bank' && (
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Bank Reference <span className="text-red-500">*</span>
-            </label>
-            <input
+            <Label>
+              Bank Reference <span className="text-destructive">*</span>
+            </Label>
+            <Input
               type="text"
               value={bankReference}
               onChange={(e) => setBankReference(e.target.value)}
               placeholder="Transfer reference"
-              className={`mt-1 w-full rounded-lg border px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-                fieldErrors.bankReference
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                  : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-              }`}
+              className={`mt-1 ${fieldErrors.bankReference ? 'border-destructive' : ''}`}
             />
             {fieldErrors.bankReference && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.bankReference}</p>
+              <p className="mt-1 text-xs text-destructive">{fieldErrors.bankReference}</p>
             )}
           </div>
         )}
 
         {/* Date */}
         <div>
-          <label className="text-sm font-medium text-gray-700">Payment Date</label>
-          <input
+          <Label>Payment Date</Label>
+          <Input
             type="date"
             value={paymentDate}
             onChange={(e) => setPaymentDate(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="mt-1"
           />
         </div>
 
         {/* Notes */}
         <div>
-          <label className="text-sm font-medium text-gray-700">Notes (optional)</label>
-          <textarea
+          <Label>Notes (optional)</Label>
+          <Textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="mt-1"
             placeholder="Payment notes"
           />
         </div>
 
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white hover:bg-green-800 active:bg-green-900 disabled:opacity-60"
-        >
+        <Button className="w-full py-3" onClick={handleSubmit} disabled={!canSubmit}>
           {isPending ? 'Recording...' : 'Record Payment'}
-        </button>
+        </Button>
       </div>
     </>
   )

@@ -4,8 +4,26 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createGrn, confirmGrn } from '@/actions/grn'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { generateGrnNumber } from '@/lib/grnNumber'
 import type { PoWithLinesAndGrns } from '@/actions/purchaseOrders'
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { PageHeader } from '@/components/ui/page-header'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -36,13 +54,6 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 function parseNum(s: string): number {
   const n = parseFloat(s)
   return isNaN(n) ? 0 : n
-}
-
-function formatGHS(amount: number): string {
-  return `GHS ${amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
 }
 
 function todayISO(): string {
@@ -142,169 +153,168 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
 
   if (po.lines.every((l) => Number(l.quantityOutstanding) <= 0.001)) {
     return (
-      <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-        <div className="mx-auto max-w-2xl">
-          <Link
-            href={`/purchase-orders/${po.id}`}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            ← {po.poNumber}
-          </Link>
-          <div className="mt-8 rounded-xl bg-white p-8 text-center shadow-sm">
-            <p className="text-lg font-medium text-gray-700">All lines fully received</p>
-            <p className="mt-1 text-sm text-gray-400">
+      <div className="mx-auto max-w-2xl">
+        <PageHeader title={po.poNumber} backHref={`/purchase-orders/${po.id}`} />
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-lg font-medium text-foreground">All lines fully received</p>
+            <p className="mt-1 text-sm text-muted-foreground">
               There are no outstanding quantities on this purchase order.
             </p>
-          </div>
-        </div>
-      </main>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <Link
-          href={`/purchase-orders/${po.id}`}
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          ← {po.poNumber}
-        </Link>
-        <h1 className="mt-4 text-xl font-semibold text-gray-900">Receive Goods — {po.poNumber}</h1>
-        <p className="mt-1 text-sm text-gray-500">{po.supplierName}</p>
+    <div className="mx-auto max-w-4xl">
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/purchase-orders" />}>Purchase Orders</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href={`/purchase-orders/${po.id}`} />}>{po.poNumber}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Receive</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <div className="mt-6 space-y-4">
-          {/* Date */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <label className="block text-sm font-medium text-gray-700">Date Received</label>
-            <input
+      <PageHeader
+        title={`Receive Goods -- ${po.poNumber}`}
+        subtitle={po.supplierName}
+        backHref={`/purchase-orders/${po.id}`}
+      />
+
+      <div className="space-y-4">
+        {/* Date */}
+        <Card>
+          <CardContent>
+            <Label>Date Received</Label>
+            <Input
               type="date"
               value={receivedDate}
               max={todayISO()}
               onChange={(e) => setReceivedDate(e.target.value)}
-              className="mt-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-auto"
             />
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Line items table */}
-          <div className="overflow-hidden rounded-xl bg-white shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b border-gray-100 bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Product</th>
-                    <th className="px-3 py-3 text-right font-medium text-gray-500">Ordered</th>
-                    <th className="px-3 py-3 text-right font-medium text-gray-500">Received</th>
-                    <th className="px-3 py-3 text-right font-medium text-gray-500">Outstanding</th>
-                    <th className="px-3 py-3 text-right font-medium text-gray-500">
-                      Receiving Now
-                    </th>
-                    <th className="px-3 py-3 text-right font-medium text-gray-500">Unit Cost</th>
-                    <th className="px-3 py-3 text-right font-medium text-gray-500">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {lines.map((line) => {
-                    const lineTotal = parseNum(line.quantityReceiving) * parseNum(line.unitCost)
-                    const receivingNum = parseNum(line.quantityReceiving)
-                    const exceedsOutstanding = receivingNum > line.quantityOutstanding + 0.001
+        {/* Line items table */}
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Product</TableHead>
+                <TableHead className="px-3 text-right">Ordered</TableHead>
+                <TableHead className="px-3 text-right">Received</TableHead>
+                <TableHead className="px-3 text-right">Outstanding</TableHead>
+                <TableHead className="px-3 text-right">Receiving Now</TableHead>
+                <TableHead className="px-3 text-right">Unit Cost</TableHead>
+                <TableHead className="px-3 text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lines.map((line) => {
+                const lineTotal = parseNum(line.quantityReceiving) * parseNum(line.unitCost)
+                const receivingNum = parseNum(line.quantityReceiving)
+                const exceedsOutstanding = receivingNum > line.quantityOutstanding + 0.001
 
-                    return (
-                      <tr key={line.poLineId}>
-                        <td className="px-4 py-3 text-gray-900">
-                          {line.productDescription ?? '—'}
-                        </td>
-                        <td className="px-3 py-3 text-right text-gray-500">
-                          {line.quantityOrdered.toFixed(2)}
-                        </td>
-                        <td className="px-3 py-3 text-right text-gray-500">
-                          {line.quantityPreviouslyReceived.toFixed(2)}
-                        </td>
-                        <td className="px-3 py-3 text-right text-gray-500">
-                          {line.quantityOutstanding.toFixed(2)}
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <input
-                            type="number"
-                            min="0"
-                            max={line.quantityOutstanding}
-                            step="0.01"
-                            value={line.quantityReceiving}
-                            onChange={(e) =>
-                              updateLine(line.poLineId, 'quantityReceiving', e.target.value)
-                            }
-                            className={`w-20 rounded-lg border px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                              exceedsOutstanding ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                            }`}
-                          />
-                          {exceedsOutstanding && (
-                            <p className="mt-0.5 text-xs text-red-600">Exceeds outstanding</p>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={line.unitCost}
-                            onChange={(e) => updateLine(line.poLineId, 'unitCost', e.target.value)}
-                            className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="px-3 py-3 text-right font-medium text-gray-900">
-                          {formatGHS(lineTotal)}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-                <tfoot className="border-t border-gray-200 bg-gray-50">
-                  <tr>
-                    <td colSpan={6} className="px-4 py-3 text-right font-semibold text-gray-700">
-                      Total
-                    </td>
-                    <td className="px-3 py-3 text-right font-bold text-gray-900">
-                      {formatGHS(totalCost)}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
+                return (
+                  <TableRow key={line.poLineId}>
+                    <TableCell className="px-4 text-foreground">
+                      {line.productDescription ?? '--'}
+                    </TableCell>
+                    <TableCell className="px-3 text-right text-muted-foreground">
+                      {line.quantityOrdered.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="px-3 text-right text-muted-foreground">
+                      {line.quantityPreviouslyReceived.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="px-3 text-right text-muted-foreground">
+                      {line.quantityOutstanding.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="px-3 text-right">
+                      <Input
+                        type="number"
+                        min="0"
+                        max={line.quantityOutstanding}
+                        step="0.01"
+                        value={line.quantityReceiving}
+                        onChange={(e) =>
+                          updateLine(line.poLineId, 'quantityReceiving', e.target.value)
+                        }
+                        className={`w-20 text-right ${
+                          exceedsOutstanding ? 'border-destructive bg-destructive/5' : ''
+                        }`}
+                      />
+                      {exceedsOutstanding && (
+                        <p className="mt-0.5 text-xs text-destructive">Exceeds outstanding</p>
+                      )}
+                    </TableCell>
+                    <TableCell className="px-3 text-right">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={line.unitCost}
+                        onChange={(e) => updateLine(line.poLineId, 'unitCost', e.target.value)}
+                        className="w-24 text-right"
+                      />
+                    </TableCell>
+                    <TableCell className="px-3 text-right font-medium text-foreground">
+                      {formatGhs(lineTotal)}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={6} className="px-4 text-right font-semibold">
+                  Total
+                </TableCell>
+                <TableCell className="px-3 text-right font-bold text-foreground">
+                  {formatGhs(totalCost)}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </Card>
 
-          {/* Payment type */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-medium text-gray-700">Payment</h2>
-            <div className="mt-2 flex gap-3">
-              <button
-                type="button"
+        {/* Payment type */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <Button
+                variant={paymentType === 'credit' ? 'default' : 'outline'}
+                className="flex-1"
                 onClick={() => setPaymentType('credit')}
-                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                  paymentType === 'credit'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
               >
-                On Credit — create payable
-              </button>
-              <button
-                type="button"
+                On Credit -- create payable
+              </Button>
+              <Button
+                variant={paymentType === 'cash' ? 'default' : 'outline'}
+                className="flex-1"
                 onClick={() => setPaymentType('cash')}
-                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                  paymentType === 'cash'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
               >
                 Paid now
-              </button>
+              </Button>
             </div>
             {paymentType === 'cash' && (
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                className="mt-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-3 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 {Object.entries(PAYMENT_METHOD_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>
@@ -313,28 +323,34 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                 ))}
               </select>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Notes */}
-          <div className="rounded-xl bg-white p-4 shadow-sm">
-            <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
-            <textarea
+        {/* Notes */}
+        <Card>
+          <CardContent>
+            <Label>Notes (optional)</Label>
+            <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1"
             />
-          </div>
+          </CardContent>
+        </Card>
 
-          {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
-          )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          {/* Confirm dialog */}
-          {confirmMode && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-medium text-amber-800">Confirm Receipt</p>
-              <p className="mt-1 text-sm text-amber-700">
+        {/* Confirm dialog */}
+        {confirmMode && (
+          <Alert>
+            <AlertDescription>
+              <p className="font-medium">Confirm Receipt</p>
+              <p className="mt-1 text-sm">
                 Confirming will add{' '}
                 {lines
                   .filter((l) => parseNum(l.quantityReceiving) > 0)
@@ -342,53 +358,43 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                   .toFixed(2)}{' '}
                 units to inventory and{' '}
                 {paymentType === 'credit'
-                  ? `create a payable of ${formatGHS(totalCost)} to ${po.supplierName}`
-                  : `record a payment of ${formatGHS(totalCost)}`}
+                  ? `create a payable of ${formatGhs(totalCost)} to ${po.supplierName}`
+                  : `record a payment of ${formatGhs(totalCost)}`}
                 .
               </p>
               <div className="mt-3 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setConfirmMode(false)}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
-                >
+                <Button variant="outline" onClick={() => setConfirmMode(false)}>
                   Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => handleSubmit(true)}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {isPending ? 'Confirming…' : 'Yes, Confirm Receipt'}
-                </button>
+                </Button>
+                <Button disabled={isPending} onClick={() => handleSubmit(true)}>
+                  {isPending ? 'Confirming...' : 'Yes, Confirm Receipt'}
+                </Button>
               </div>
-            </div>
-          )}
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Actions */}
-          {!confirmMode && (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                disabled={!canSubmit || isPending}
-                onClick={() => handleSubmit(false)}
-                className="flex-1 rounded-lg border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              >
-                {isPending ? 'Saving…' : 'Save as Draft'}
-              </button>
-              <button
-                type="button"
-                disabled={!canSubmit || isPending}
-                onClick={() => setConfirmMode(true)}
-                className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                Confirm Receipt
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Actions */}
+        {!confirmMode && (
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1 py-3"
+              disabled={!canSubmit || isPending}
+              onClick={() => handleSubmit(false)}
+            >
+              {isPending ? 'Saving...' : 'Save as Draft'}
+            </Button>
+            <Button
+              className="flex-1 py-3"
+              disabled={!canSubmit || isPending}
+              onClick={() => setConfirmMode(true)}
+            >
+              Confirm Receipt
+            </Button>
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   )
 }

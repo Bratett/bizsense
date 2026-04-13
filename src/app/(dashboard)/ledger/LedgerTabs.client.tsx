@@ -6,6 +6,26 @@ import { createOpeningBalance, triggerReconciliation } from '@/actions/ledger'
 import { seedBusiness } from '@/actions/onboarding'
 import type { JournalEntriesResult, JournalEntryRow, TrialBalanceResult } from './queries'
 
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { EmptyState } from '@/components/ui/empty-state'
+import { PageHeader } from '@/components/ui/page-header'
+import { Card, CardContent } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableFooter,
+} from '@/components/ui/table'
+import { FileText, BarChart3 } from 'lucide-react'
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtGHS(value: string | number): string {
@@ -114,12 +134,6 @@ export default function LedgerTabs({
     startTransition(() => router.push(buildUrl(overrides)))
   }
 
-  // ── Tab switcher ─────────────────────────────────────────────────────────────
-
-  const tabBase = 'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors'
-  const tabActive = `${tabBase} border-green-700 text-green-700`
-  const tabInactive = `${tabBase} border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300`
-
   // ── Period presets for Trial Balance ─────────────────────────────────────────
 
   const [tbPeriod, setTbPeriod] = useState<string>(() => {
@@ -156,80 +170,70 @@ export default function LedgerTabs({
     <main className="min-h-screen bg-gray-50">
       {/* Page header */}
       <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <div className="max-w-7xl mx-auto flex items-start justify-between gap-3 flex-wrap">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">General Ledger</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Double-entry ledger — source of truth for all reports
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto">
+          <PageHeader
+            title="General Ledger"
+            subtitle="Double-entry ledger — source of truth for all reports"
+            className="mb-0"
+            actions={
+              isDev ? (
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Badge variant="outline" className="font-mono text-[10px] border-yellow-300 bg-yellow-100 text-yellow-700">
+                    DEV MODE
+                  </Badge>
 
-          {/* Dev toolbar — non-production only */}
-          {isDev && (
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 border border-yellow-300 font-semibold">
-                DEV MODE
-              </span>
+                  {/* Seed button */}
+                  <form
+                    action={async () => {
+                      const result = await seedBusiness()
+                      setSeedStatus(
+                        result.accounts === 0 && result.taxComponents === 0
+                          ? 'Already seeded'
+                          : `Seeded ${result.accounts} accounts + ${result.taxComponents} tax components`,
+                      )
+                      router.refresh()
+                    }}
+                  >
+                    <Button type="submit" variant="outline" size="sm" className="font-mono border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100">
+                      Seed CoA + Tax
+                    </Button>
+                  </form>
 
-              {/* Seed button */}
-              <form
-                action={async () => {
-                  const result = await seedBusiness()
-                  setSeedStatus(
-                    result.accounts === 0 && result.taxComponents === 0
-                      ? 'Already seeded'
-                      : `Seeded ${result.accounts} accounts + ${result.taxComponents} tax components`,
-                  )
-                  router.refresh()
-                }}
-              >
-                <button
-                  type="submit"
-                  className="text-xs px-3 py-1.5 rounded border border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100 font-mono"
-                >
-                  Seed CoA + Tax
-                </button>
-              </form>
+                  {/* Opening balance button */}
+                  <form
+                    action={async () => {
+                      await createOpeningBalance()
+                      router.refresh()
+                    }}
+                  >
+                    <Button type="submit" variant="outline" size="sm" className="font-mono">
+                      + Opening Balance
+                    </Button>
+                  </form>
 
-              {/* Opening balance button */}
-              <form
-                action={async () => {
-                  await createOpeningBalance()
-                  router.refresh()
-                }}
-              >
-                <button
-                  type="submit"
-                  className="text-xs px-3 py-1.5 rounded border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 font-mono"
-                >
-                  + Opening Balance
-                </button>
-              </form>
-
-              {seedStatus && <span className="text-xs text-gray-500 font-mono">{seedStatus}</span>}
-            </div>
-          )}
+                  {seedStatus && <span className="text-xs text-gray-500 font-mono">{seedStatus}</span>}
+                </div>
+              ) : undefined
+            }
+          />
         </div>
 
         {/* Tab bar */}
-        <div className="max-w-7xl mx-auto mt-3 flex gap-0 border-b border-gray-200 -mb-px">
-          <button
-            className={tab === 'journal' ? tabActive : tabInactive}
-            onClick={() => navigate({ tab: 'journal' })}
+        <div className="max-w-7xl mx-auto mt-3">
+          <Tabs
+            value={tab}
+            onValueChange={(val) => navigate({ tab: val as string })}
           >
-            Journal Entries
-          </button>
-          <button
-            className={tab === 'trial-balance' ? tabActive : tabInactive}
-            onClick={() => navigate({ tab: 'trial-balance' })}
-          >
-            Trial Balance
-          </button>
+            <TabsList variant="line">
+              <TabsTrigger value="journal">Journal Entries</TabsTrigger>
+              <TabsTrigger value="trial-balance">Trial Balance</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {isPending && <div className="text-xs text-gray-400 mb-2">Loading…</div>}
+        {isPending && <div className="text-xs text-gray-400 mb-2">Loading...</div>}
 
         {tab === 'journal' && (
           <JournalEntriesTab
@@ -280,156 +284,136 @@ function JournalEntriesTab({
   return (
     <div>
       {/* Filters */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4 flex flex-wrap gap-3 items-end">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500 font-medium">From</label>
-          <input
-            type="date"
-            value={filters.dateFrom}
-            onChange={(e) => navigate({ dateFrom: e.target.value, page: undefined })}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-2 w-36 focus:border-green-600 focus:ring-2 focus:ring-green-100 focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500 font-medium">To</label>
-          <input
-            type="date"
-            value={filters.dateTo}
-            onChange={(e) => navigate({ dateTo: e.target.value, page: undefined })}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-2 w-36 focus:border-green-600 focus:ring-2 focus:ring-green-100 focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500 font-medium">Source</label>
-          <select
-            value={filters.sourceType ?? ''}
-            onChange={(e) => navigate({ sourceType: e.target.value || undefined, page: undefined })}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:border-green-600 focus:ring-2 focus:ring-green-100 focus:outline-none"
-          >
-            <option value="">All sources</option>
-            <option value="order">Order</option>
-            <option value="expense">Expense</option>
-            <option value="payment">Payment</option>
-            <option value="payroll">Payroll</option>
-            <option value="manual">Manual</option>
-            <option value="ai_recorded">AI Recorded</option>
-            <option value="reversal">Reversal</option>
-            <option value="opening_balance">Opening Balance</option>
-          </select>
-        </div>
-        <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={!!filters.aiGenerated}
-            onChange={(e) =>
-              navigate({ ai: e.target.checked ? 'true' : undefined, page: undefined })
-            }
-            className="rounded"
-          />
-          AI only
-        </label>
-        <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={!!filters.unbalancedOnly}
-            onChange={(e) =>
-              navigate({ unbalanced: e.target.checked ? 'true' : undefined, page: undefined })
-            }
-            className="rounded"
-          />
-          Unbalanced only
-        </label>
-      </div>
+      <Card className="mb-4">
+        <CardContent className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs text-muted-foreground">From</Label>
+            <Input
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) => navigate({ dateFrom: e.target.value, page: undefined })}
+              className="w-36"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs text-muted-foreground">To</Label>
+            <Input
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) => navigate({ dateTo: e.target.value, page: undefined })}
+              className="w-36"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs text-muted-foreground">Source</Label>
+            <select
+              value={filters.sourceType ?? ''}
+              onChange={(e) => navigate({ sourceType: e.target.value || undefined, page: undefined })}
+              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none"
+            >
+              <option value="">All sources</option>
+              <option value="order">Order</option>
+              <option value="expense">Expense</option>
+              <option value="payment">Payment</option>
+              <option value="payroll">Payroll</option>
+              <option value="manual">Manual</option>
+              <option value="ai_recorded">AI Recorded</option>
+              <option value="reversal">Reversal</option>
+              <option value="opening_balance">Opening Balance</option>
+            </select>
+          </div>
+          <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!!filters.aiGenerated}
+              onChange={(e) =>
+                navigate({ ai: e.target.checked ? 'true' : undefined, page: undefined })
+              }
+              className="rounded"
+            />
+            AI only
+          </label>
+          <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!!filters.unbalancedOnly}
+              onChange={(e) =>
+                navigate({ unbalanced: e.target.checked ? 'true' : undefined, page: undefined })
+              }
+              className="rounded"
+            />
+            Unbalanced only
+          </label>
+        </CardContent>
+      </Card>
 
       {/* Table */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                {isDev && (
-                  <th className="text-left px-3 py-2.5 font-medium text-yellow-700 text-xs font-mono bg-yellow-50">
-                    Entry ID
-                  </th>
-                )}
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">Date</th>
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">Ref</th>
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">
-                  Description
-                </th>
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">Source</th>
-                <th className="text-right px-3 py-2.5 font-medium text-gray-600 text-xs font-mono tabular-nums">
-                  Dr Total
-                </th>
-                <th className="text-right px-3 py-2.5 font-medium text-gray-600 text-xs font-mono tabular-nums">
-                  Cr Total
-                </th>
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {entries.length === 0 && (
-                <tr>
-                  <td colSpan={isDev ? 8 : 7} className="px-3 py-12 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <svg
-                        width="40"
-                        height="40"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#9CA3AF"
-                        strokeWidth={1}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                        />
-                      </svg>
-                      <p className="text-sm font-semibold text-gray-700">
-                        No journal entries found
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Try adjusting your filters or date range.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
+      <Card className="overflow-hidden">
+        <Table className="min-w-[600px]">
+          <TableHeader>
+            <TableRow>
+              {isDev && (
+                <TableHead className="text-yellow-700 text-xs font-mono bg-yellow-50">
+                  Entry ID
+                </TableHead>
               )}
-              {entries.map((entry) => (
-                <JournalEntryRows
-                  key={entry.id}
-                  entry={entry}
-                  isExpanded={expandedId === entry.id}
-                  onToggle={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
-                  isDev={isDev}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+              <TableHead className="text-xs">Date</TableHead>
+              <TableHead className="text-xs">Ref</TableHead>
+              <TableHead className="text-xs">Description</TableHead>
+              <TableHead className="text-xs">Source</TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">Dr Total</TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">Cr Total</TableHead>
+              <TableHead className="text-xs">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {entries.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={isDev ? 8 : 7} className="px-3 py-12 text-center">
+                  <EmptyState
+                    icon={<FileText className="h-10 w-10" />}
+                    title="No journal entries found"
+                    subtitle="Try adjusting your filters or date range."
+                    className="py-0"
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+            {entries.map((entry) => (
+              <JournalEntryRows
+                key={entry.id}
+                entry={entry}
+                isExpanded={expandedId === entry.id}
+                onToggle={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                isDev={isDev}
+              />
+            ))}
+          </TableBody>
+        </Table>
 
         {/* Pagination */}
         {(page > 1 || hasMore) && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               disabled={page <= 1}
               onClick={() => navigate({ page: String(page - 1) })}
-              className="text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white disabled:opacity-50 hover:bg-gray-50"
             >
               &larr; Prev
-            </button>
-            <span className="text-sm text-gray-500">Page {page}</span>
-            <button
+            </Button>
+            <span className="text-sm text-muted-foreground">Page {page}</span>
+            <Button
+              variant="outline"
+              size="sm"
               disabled={!hasMore}
               onClick={() => navigate({ page: String(page + 1) })}
-              className="text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white disabled:opacity-50 hover:bg-gray-50"
             >
               Next &rarr;
-            </button>
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }
@@ -450,7 +434,7 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
     ? 'bg-red-50 border-l-4 border-l-red-500'
     : entry.sourceType === 'reversal'
       ? 'bg-amber-50'
-      : 'hover:bg-gray-50'
+      : ''
 
   const linesDrTotal = entry.lines.reduce((s, l) => s + Number(l.debitAmount), 0)
   const linesCrTotal = entry.lines.reduce((s, l) => s + Number(l.creditAmount), 0)
@@ -459,49 +443,45 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
   return (
     <>
       {/* Main row */}
-      <tr className={`cursor-pointer transition-colors ${rowBg}`} onClick={onToggle}>
+      <TableRow className={`cursor-pointer ${rowBg}`} onClick={onToggle}>
         {isDev && (
-          <td className="px-3 py-2.5 bg-yellow-50">
+          <TableCell className="bg-yellow-50">
             <span className="text-[10px] font-mono text-yellow-700 break-all">{entry.id}</span>
-          </td>
+          </TableCell>
         )}
-        <td className="px-3 py-2.5 text-xs text-gray-700 whitespace-nowrap">
+        <TableCell className="text-xs text-muted-foreground">
           {formatDate(entry.entryDate)}
-        </td>
-        <td className="px-3 py-2.5 text-xs text-gray-500 font-mono">{entry.reference ?? '–'}</td>
-        <td className="px-3 py-2.5 text-xs text-gray-800 max-w-[200px] truncate">
+        </TableCell>
+        <TableCell className="text-xs text-muted-foreground font-mono">{entry.reference ?? '–'}</TableCell>
+        <TableCell className="text-xs max-w-[200px] truncate">
           {entry.description ?? '–'}
-        </td>
-        <td className="px-3 py-2.5">
+        </TableCell>
+        <TableCell>
           <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-xs text-gray-600">{sourceLabel(entry.sourceType)}</span>
+            <span className="text-xs text-muted-foreground">{sourceLabel(entry.sourceType)}</span>
             {entry.aiGenerated && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-medium">
-                AI
-              </span>
+              <StatusBadge variant="ai">AI</StatusBadge>
             )}
             {entry.sourceType === 'reversal' && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
-                REVERSAL
-              </span>
+              <StatusBadge variant="reversal">REVERSAL</StatusBadge>
             )}
           </div>
-        </td>
-        <td className="px-3 py-2.5 text-xs font-mono tabular-nums text-right text-gray-800">
+        </TableCell>
+        <TableCell className="text-xs font-mono tabular-nums text-right">
           {fmtGHS(entry.drTotal)}
-        </td>
-        <td className="px-3 py-2.5 text-xs font-mono tabular-nums text-right text-gray-800">
+        </TableCell>
+        <TableCell className="text-xs font-mono tabular-nums text-right">
           {fmtGHS(entry.crTotal)}
-        </td>
-        <td className="px-3 py-2.5 text-xs">
+        </TableCell>
+        <TableCell className="text-xs">
           {entry.isImbalanced ? (
-            <span className="text-red-600 font-semibold">✗ IMBALANCED</span>
+            <StatusBadge variant="overdue">IMBALANCED</StatusBadge>
           ) : (
-            <span className="text-green-700">✓</span>
+            <span className="text-green-700">&#10003;</span>
           )}
-          <span className="ml-1 text-gray-400">{isExpanded ? '▲' : '▼'}</span>
-        </td>
-      </tr>
+          <span className="ml-1 text-gray-400">{isExpanded ? '\u25B2' : '\u25BC'}</span>
+        </TableCell>
+      </TableRow>
 
       {/* Expanded lines */}
       {isExpanded && (
@@ -548,15 +528,15 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
                         Account ID
                       </th>
                     )}
-                    <th className="text-left px-3 py-2 font-medium text-gray-500">Code</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-500">Account Name</th>
-                    <th className="text-right px-3 py-2 font-medium text-gray-500 font-mono tabular-nums">
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground">Code</th>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground">Account Name</th>
+                    <th className="text-right px-3 py-2 font-medium text-muted-foreground font-mono tabular-nums">
                       Debit (GHS)
                     </th>
-                    <th className="text-right px-3 py-2 font-medium text-gray-500 font-mono tabular-nums">
+                    <th className="text-right px-3 py-2 font-medium text-muted-foreground font-mono tabular-nums">
                       Credit (GHS)
                     </th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-500">Memo</th>
+                    <th className="text-left px-3 py-2 font-medium text-muted-foreground">Memo</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -569,33 +549,33 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
                           </span>
                         </td>
                       )}
-                      <td className="px-3 py-1.5 font-mono text-gray-600">{line.accountCode}</td>
-                      <td className="px-3 py-1.5 text-gray-800">{line.accountName}</td>
-                      <td className="px-3 py-1.5 font-mono tabular-nums text-right text-gray-800">
+                      <td className="px-3 py-1.5 font-mono text-muted-foreground">{line.accountCode}</td>
+                      <td className="px-3 py-1.5">{line.accountName}</td>
+                      <td className="px-3 py-1.5 font-mono tabular-nums text-right">
                         {fmtGHS(line.debitAmount)}
                       </td>
-                      <td className="px-3 py-1.5 font-mono tabular-nums text-right text-gray-800">
+                      <td className="px-3 py-1.5 font-mono tabular-nums text-right">
                         {fmtGHS(line.creditAmount)}
                       </td>
-                      <td className="px-3 py-1.5 text-gray-500">{line.memo ?? '–'}</td>
+                      <td className="px-3 py-1.5 text-muted-foreground">{line.memo ?? '–'}</td>
                     </tr>
                   ))}
                   {/* Footer */}
                   <tr className="border-t border-gray-300 bg-gray-50 font-semibold">
-                    <td colSpan={isDev ? 3 : 2} className="px-3 py-1.5 text-gray-700">
+                    <td colSpan={isDev ? 3 : 2} className="px-3 py-1.5">
                       TOTAL
                     </td>
-                    <td className="px-3 py-1.5 font-mono tabular-nums text-right text-gray-800">
+                    <td className="px-3 py-1.5 font-mono tabular-nums text-right">
                       {fmtGHS(linesDrTotal)}
                     </td>
-                    <td className="px-3 py-1.5 font-mono tabular-nums text-right text-gray-800">
+                    <td className="px-3 py-1.5 font-mono tabular-nums text-right">
                       {fmtGHS(linesCrTotal)}
                     </td>
                     <td className="px-3 py-1.5">
                       {linesBalanced ? (
-                        <span className="text-green-700 font-medium">✓ Balanced</span>
+                        <span className="text-green-700 font-medium">&#10003; Balanced</span>
                       ) : (
-                        <span className="text-red-600 font-semibold">✗ IMBALANCED</span>
+                        <StatusBadge variant="overdue">IMBALANCED</StatusBadge>
                       )}
                     </td>
                   </tr>
@@ -606,15 +586,17 @@ function JournalEntryRows({ entry, isExpanded, onToggle, isDev }: JournalEntryRo
             {/* Dev: JSON view toggle */}
             {isDev && (
               <div className="mt-2">
-                <button
+                <Button
+                  variant="link"
+                  size="xs"
                   onClick={(e) => {
                     e.stopPropagation()
                     setShowJson((v) => !v)
                   }}
-                  className="text-[10px] font-mono text-yellow-700 underline"
+                  className="text-[10px] font-mono text-yellow-700 p-0 h-auto"
                 >
                   {showJson ? 'Hide JSON' : 'Show JSON'}
-                </button>
+                </Button>
                 {showJson && (
                   <pre className="mt-1 text-[10px] font-mono bg-gray-900 text-green-400 rounded p-3 overflow-x-auto whitespace-pre-wrap break-all">
                     {JSON.stringify(
@@ -670,60 +652,62 @@ function TrialBalanceTab({
   return (
     <div>
       {/* Period selector */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm mb-4 flex flex-wrap gap-3 items-end">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500 font-medium">Period</label>
-          <select
-            value={tbPeriod}
-            onChange={(e) => applyPeriod(e.target.value)}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:border-green-600 focus:ring-2 focus:ring-green-100 focus:outline-none"
-          >
-            <option value="current_month">Current month</option>
-            <option value="last_month">Last month</option>
-            <option value="ytd">Year to date</option>
-            <option value="custom">Custom range</option>
-          </select>
-        </div>
-        {tbPeriod === 'custom' && (
-          <>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">From</label>
-              <input
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) => navigate({ dateFrom: e.target.value })}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-2 w-36 focus:border-green-600 focus:ring-2 focus:ring-green-100 focus:outline-none"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">To</label>
-              <input
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) => navigate({ dateTo: e.target.value })}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-2 w-36 focus:border-green-600 focus:ring-2 focus:ring-green-100 focus:outline-none"
-              />
-            </div>
-          </>
-        )}
-        {tbPeriod !== 'custom' && (
-          <span className="text-xs text-gray-400">
-            {filters.dateFrom} → {filters.dateTo}
-          </span>
-        )}
-      </div>
+      <Card className="mb-4">
+        <CardContent className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs text-muted-foreground">Period</Label>
+            <select
+              value={tbPeriod}
+              onChange={(e) => applyPeriod(e.target.value)}
+              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none"
+            >
+              <option value="current_month">Current month</option>
+              <option value="last_month">Last month</option>
+              <option value="ytd">Year to date</option>
+              <option value="custom">Custom range</option>
+            </select>
+          </div>
+          {tbPeriod === 'custom' && (
+            <>
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs text-muted-foreground">From</Label>
+                <Input
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => navigate({ dateFrom: e.target.value })}
+                  className="w-36"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs text-muted-foreground">To</Label>
+                <Input
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => navigate({ dateTo: e.target.value })}
+                  className="w-36"
+                />
+              </div>
+            </>
+          )}
+          {tbPeriod !== 'custom' && (
+            <span className="text-xs text-muted-foreground">
+              {filters.dateFrom} &rarr; {filters.dateTo}
+            </span>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Balance banner */}
       {isBalanced ? (
         <div className="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800 font-medium">
-          <span className="text-green-700 text-base">✓</span>
+          <span className="text-green-700 text-base">&#10003;</span>
           Trial Balance is balanced
         </div>
       ) : (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="text-sm text-red-800 font-medium">
-              <span className="text-red-600">✗</span> Trial Balance does not balance — difference:{' '}
+              <span className="text-red-600">&#10007;</span> Trial Balance does not balance — difference:{' '}
               <span className="font-mono">GHS {fmtGHS(diff)}</span>
             </div>
             <form
@@ -731,128 +715,110 @@ function TrialBalanceTab({
                 await triggerReconciliation()
               }}
             >
-              <button
-                type="submit"
-                className="text-xs px-3 py-1.5 bg-red-600 text-white rounded hover:bg-red-700 font-medium whitespace-nowrap"
-              >
+              <Button type="submit" variant="destructive" size="sm">
                 Run reconciliation
-              </button>
+              </Button>
             </form>
           </div>
         </div>
       )}
 
       {/* Table */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[520px]">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs font-mono">
-                  Code
-                </th>
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">
-                  Account Name
-                </th>
-                <th className="text-left px-3 py-2.5 font-medium text-gray-600 text-xs">Type</th>
-                <th className="text-right px-3 py-2.5 font-medium text-gray-600 text-xs font-mono tabular-nums">
-                  Total Debits
-                </th>
-                <th className="text-right px-3 py-2.5 font-medium text-gray-600 text-xs font-mono tabular-nums">
-                  Total Credits
-                </th>
-                <th className="text-right px-3 py-2.5 font-medium text-gray-600 text-xs font-mono tabular-nums">
-                  Balance
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {TYPE_ORDER.map((type) => {
-                const typeRows = grouped[type]
-                if (typeRows.length === 0) return null
-                return (
-                  <>
-                    <tr key={`hdr-${type}`} className="bg-gray-100 border-y border-gray-200">
-                      <td
-                        colSpan={6}
-                        className="px-3 py-1.5 text-xs font-semibold text-gray-700 uppercase tracking-wide"
-                      >
-                        {TYPE_LABEL[type]}
-                      </td>
-                    </tr>
-                    {typeRows.map((row) => (
-                      <tr key={row.code} className="border-b border-gray-50 hover:bg-gray-50">
-                        <td className="px-3 py-2 font-mono text-xs text-gray-600">{row.code}</td>
-                        <td className="px-3 py-2 text-xs text-gray-800">{row.name}</td>
-                        <td className="px-3 py-2 text-xs text-gray-500 capitalize">{row.type}</td>
-                        <td className="px-3 py-2 font-mono tabular-nums text-xs text-right text-gray-800">
-                          {fmtGHS(row.totalDebits)}
-                        </td>
-                        <td className="px-3 py-2 font-mono tabular-nums text-xs text-right text-gray-800">
-                          {fmtGHS(row.totalCredits)}
-                        </td>
-                        <td className="px-3 py-2 font-mono tabular-nums text-xs text-right text-gray-800">
-                          {fmtGHS(row.balance)}
-                        </td>
-                      </tr>
-                    ))}
-                  </>
-                )
-              })}
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-3 py-12 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <svg
-                        width="40"
-                        height="40"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#9CA3AF"
-                        strokeWidth={1}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-                        />
-                      </svg>
-                      <p className="text-sm font-semibold text-gray-700">
-                        No transactions in this period
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Select a different date range to view the trial balance.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-            {rows.length > 0 && (
-              <tfoot>
-                <tr className="border-t-2 border-gray-300 bg-gray-50 font-semibold">
-                  <td colSpan={3} className="px-3 py-2.5 text-xs text-gray-700">
-                    Grand Total
-                  </td>
-                  <td className="px-3 py-2.5 font-mono tabular-nums text-xs text-right text-gray-900">
-                    {fmtGHS(grandTotalDebits)}
-                  </td>
-                  <td className="px-3 py-2.5 font-mono tabular-nums text-xs text-right text-gray-900">
-                    {fmtGHS(grandTotalCredits)}
-                  </td>
-                  <td className="px-3 py-2.5 font-mono tabular-nums text-xs text-right">
-                    {isBalanced ? (
-                      <span className="text-green-700">–</span>
-                    ) : (
-                      <span className="text-red-600">{fmtGHS(diff)}</span>
-                    )}
-                  </td>
-                </tr>
-              </tfoot>
+      <Card className="overflow-hidden">
+        <Table className="min-w-[520px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs font-mono">Code</TableHead>
+              <TableHead className="text-xs">Account Name</TableHead>
+              <TableHead className="text-xs">Type</TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">Total Debits</TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">Total Credits</TableHead>
+              <TableHead className="text-right text-xs font-mono tabular-nums">Balance</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {TYPE_ORDER.map((type) => {
+              const typeRows = grouped[type]
+              if (typeRows.length === 0) return null
+              return (
+                <TrialBalanceTypeGroup key={type} type={type} typeRows={typeRows} />
+              )
+            })}
+            {rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="px-3 py-12 text-center">
+                  <EmptyState
+                    icon={<BarChart3 className="h-10 w-10" />}
+                    title="No transactions in this period"
+                    subtitle="Select a different date range to view the trial balance."
+                    className="py-0"
+                  />
+                </TableCell>
+              </TableRow>
             )}
-          </table>
-        </div>
-      </div>
+          </TableBody>
+          {rows.length > 0 && (
+            <TableFooter>
+              <TableRow className="font-semibold">
+                <TableCell colSpan={3} className="text-xs">
+                  Grand Total
+                </TableCell>
+                <TableCell className="font-mono tabular-nums text-xs text-right">
+                  {fmtGHS(grandTotalDebits)}
+                </TableCell>
+                <TableCell className="font-mono tabular-nums text-xs text-right">
+                  {fmtGHS(grandTotalCredits)}
+                </TableCell>
+                <TableCell className="font-mono tabular-nums text-xs text-right">
+                  {isBalanced ? (
+                    <span className="text-green-700">&ndash;</span>
+                  ) : (
+                    <span className="text-red-600">{fmtGHS(diff)}</span>
+                  )}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
+      </Card>
     </div>
+  )
+}
+
+// Extracted to avoid the Fragment-key issue in the original code
+function TrialBalanceTypeGroup({
+  type,
+  typeRows,
+}: {
+  type: string
+  typeRows: TrialBalanceResult['rows']
+}) {
+  return (
+    <>
+      <TableRow className="bg-muted border-y">
+        <TableCell
+          colSpan={6}
+          className="text-xs font-semibold uppercase tracking-wide"
+        >
+          {TYPE_LABEL[type]}
+        </TableCell>
+      </TableRow>
+      {typeRows.map((row) => (
+        <TableRow key={row.code}>
+          <TableCell className="font-mono text-xs text-muted-foreground">{row.code}</TableCell>
+          <TableCell className="text-xs">{row.name}</TableCell>
+          <TableCell className="text-xs text-muted-foreground capitalize">{row.type}</TableCell>
+          <TableCell className="font-mono tabular-nums text-xs text-right">
+            {fmtGHS(row.totalDebits)}
+          </TableCell>
+          <TableCell className="font-mono tabular-nums text-xs text-right">
+            {fmtGHS(row.totalCredits)}
+          </TableCell>
+          <TableCell className="font-mono tabular-nums text-xs text-right">
+            {fmtGHS(row.balance)}
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
   )
 }

@@ -3,6 +3,7 @@ import Sidebar from './Sidebar.client'
 import BottomNav from './BottomNav.client'
 import ConnectivityBanner from '@/components/ConnectivityBanner.client'
 import AiChatBubble from '@/components/AiChatBubble.client'
+import { Toaster } from '@/components/ui/sonner'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Session is already validated by middleware — this provides role context
@@ -15,6 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex-1 pb-[76px] md:pb-0 md:ml-60">{children}</div>
       <BottomNav />
       <AiChatBubble />
+      <Toaster position="bottom-center" richColors />
     </div>
   )
 }

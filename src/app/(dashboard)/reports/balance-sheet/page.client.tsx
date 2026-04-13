@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { BalanceSheet } from '@/lib/reports/balanceSheet'
 import type { AccountBalance } from '@/lib/reports/engine'
 
@@ -169,26 +172,26 @@ function BSDocument({ data }: { data: BalanceSheet }) {
 function AccountRow({ account }: { account: AccountBalance }) {
   if (account.netBalance === 0) return null
   return (
-    <tr>
-      <td className="py-1.5 pl-4 text-sm text-gray-500 w-16">{account.accountCode}</td>
-      <td className="py-1.5 text-sm text-gray-700">{account.accountName}</td>
-      <td className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-gray-900">
+    <TableRow>
+      <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground w-16">{account.accountCode}</TableCell>
+      <TableCell className="py-1.5 text-sm text-foreground/80">{account.accountName}</TableCell>
+      <TableCell className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-foreground">
         {formatGhs(account.netBalance)}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   )
 }
 
 function SectionHeader({ label }: { label: string }) {
   return (
-    <tr className="bg-gray-50">
-      <td
+    <TableRow className="bg-muted/50">
+      <TableCell
         colSpan={3}
-        className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500"
+        className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
       >
         {label}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -202,29 +205,29 @@ function SubtotalRow({
   bold?: boolean
 }) {
   return (
-    <tr className={`border-t border-gray-200 ${bold ? 'font-bold bg-gray-50' : 'font-semibold'}`}>
-      <td className="py-2 pl-4 text-sm text-gray-500"></td>
-      <td className="py-2 text-sm text-gray-800">{label}</td>
-      <td
-        className={`py-2 pr-4 text-right text-sm tabular-nums ${amount < 0 ? 'text-red-600' : 'text-gray-900'}`}
+    <TableRow className={`border-t ${bold ? 'font-bold bg-muted/50' : 'font-semibold'}`}>
+      <TableCell className="py-2 pl-4 text-sm text-muted-foreground"></TableCell>
+      <TableCell className="py-2 text-sm text-foreground/90">{label}</TableCell>
+      <TableCell
+        className={`py-2 pr-4 text-right text-sm tabular-nums ${amount < 0 ? 'text-red-600' : 'text-foreground'}`}
       >
         {formatGhs(amount)}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   )
 }
 
 function GrandTotalRow({ label, amount }: { label: string; amount: number }) {
   return (
-    <tr className="border-t-2 border-gray-800 bg-gray-100">
-      <td className="py-3 pl-4 text-sm"></td>
-      <td className="py-3 text-sm font-bold text-gray-900">{label}</td>
-      <td
-        className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${amount < 0 ? 'text-red-600' : 'text-gray-900'}`}
+    <TableRow className="border-t-2 border-foreground/80 bg-muted">
+      <TableCell className="py-3 pl-4 text-sm"></TableCell>
+      <TableCell className="py-3 text-sm font-bold text-foreground">{label}</TableCell>
+      <TableCell
+        className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${amount < 0 ? 'text-red-600' : 'text-foreground'}`}
       >
         {formatGhs(amount)}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -329,47 +332,41 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
 
       {/* Export controls */}
       <div className="flex justify-end gap-2">
-        <button
-          onClick={handleCsv}
-          className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <Button variant="outline" onClick={handleCsv}>
           Download CSV
-        </button>
-        <button
-          onClick={handlePdf}
-          disabled={pdfLoading}
-          className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
+        </Button>
+        <Button variant="outline" onClick={handlePdf} disabled={pdfLoading}>
           {pdfLoading ? 'Generating…' : 'Download PDF'}
-        </button>
+        </Button>
       </div>
 
       {/* Report table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 w-16">
+      <Card>
+        <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="py-3 pl-4 w-16">
                 Code
-              </th>
-              <th className="py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="py-3">
                 Account
-              </th>
-              <th className="py-3 pr-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+              </TableHead>
+              <TableHead className="py-3 pr-4 text-right">
                 Amount (GHS)
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {/* ── ASSETS ─────────────────────────────────────────────────── */}
-            <tr className="bg-green-50">
-              <td
+            <TableRow className="bg-green-50">
+              <TableCell
                 colSpan={3}
                 className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-green-900"
               >
                 Assets
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
 
             {/* Current Assets */}
             <SectionHeader label="Current Assets" />
@@ -380,45 +377,45 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
 
             {/* Fixed Assets */}
             <SectionHeader label="Fixed Assets" />
-            <tr>
-              <td className="py-1.5 pl-4 text-sm text-gray-500">1500</td>
-              <td className="py-1.5 text-sm text-gray-700">Fixed Assets — Cost</td>
-              <td className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-gray-900">
+            <TableRow>
+              <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground">1500</TableCell>
+              <TableCell className="py-1.5 text-sm text-foreground/80">Fixed Assets — Cost</TableCell>
+              <TableCell className="py-1.5 pr-4 text-right text-sm font-medium tabular-nums text-foreground">
                 {formatGhs(assets.fixedAssets.cost)}
-              </td>
-            </tr>
-            <tr>
-              <td className="py-1.5 pl-4 text-sm text-gray-500">1510</td>
-              <td className="py-1.5 text-sm text-gray-500 italic">
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground">1510</TableCell>
+              <TableCell className="py-1.5 text-sm text-muted-foreground italic">
                 Less: Accumulated Depreciation
-              </td>
-              <td className="py-1.5 pr-4 text-right text-sm tabular-nums text-gray-500">
+              </TableCell>
+              <TableCell className="py-1.5 pr-4 text-right text-sm tabular-nums text-muted-foreground">
                 ({formatGhs(assets.fixedAssets.accumulatedDepreciation)})
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
             <SubtotalRow label="Net Book Value" amount={assets.fixedAssets.netBookValue} />
             {assets.fixedAssets.accumulatedDepreciation === 0 && (
-              <tr>
-                <td></td>
-                <td colSpan={2} className="py-1 text-xs text-gray-400 italic">
+              <TableRow>
+                <TableCell></TableCell>
+                <TableCell colSpan={2} className="py-1 text-xs text-muted-foreground/60 italic">
                   Accumulated depreciation tracking will be available after monthly depreciation is
                   processed.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
 
             {/* Total Assets */}
             <GrandTotalRow label="TOTAL ASSETS" amount={assets.totalAssets} />
 
             {/* ── LIABILITIES ────────────────────────────────────────────── */}
-            <tr className="bg-amber-50">
-              <td
+            <TableRow className="bg-amber-50">
+              <TableCell
                 colSpan={3}
                 className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-amber-900"
               >
                 Liabilities
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
 
             {/* Current Liabilities */}
             <SectionHeader label="Current Liabilities" />
@@ -427,11 +424,11 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
                 <AccountRow key={a.accountId} account={a} />
               ))
             ) : (
-              <tr>
-                <td colSpan={3} className="py-2 pl-4 text-sm text-gray-400 italic">
+              <TableRow>
+                <TableCell colSpan={3} className="py-2 pl-4 text-sm text-muted-foreground/60 italic">
                   None
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
             <SubtotalRow label="Total Current Liabilities" amount={totalCurrentL} />
 
@@ -442,11 +439,11 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
                 <AccountRow key={a.accountId} account={a} />
               ))
             ) : (
-              <tr>
-                <td colSpan={3} className="py-2 pl-4 text-sm text-gray-400 italic">
+              <TableRow>
+                <TableCell colSpan={3} className="py-2 pl-4 text-sm text-muted-foreground/60 italic">
                   None
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
             <SubtotalRow label="Total Long-term Liabilities" amount={totalLongTermL} />
 
@@ -454,51 +451,52 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
             <GrandTotalRow label="TOTAL LIABILITIES" amount={liabilities.totalLiabilities} />
 
             {/* ── EQUITY ─────────────────────────────────────────────────── */}
-            <tr className="bg-blue-50">
-              <td
+            <TableRow className="bg-blue-50">
+              <TableCell
                 colSpan={3}
                 className="py-2.5 pl-4 text-sm font-bold uppercase tracking-wider text-blue-900"
               >
                 Equity
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
 
             <SectionHeader label="Owner's Equity" />
             {equity.lines.map((a) => (
               <AccountRow key={a.accountId} account={a} />
             ))}
-            <tr>
-              <td className="py-1.5 pl-4 text-sm text-gray-500"></td>
-              <td className="py-1.5 text-sm text-gray-700">Financial Year to Date Profit/(Loss)</td>
-              <td
+            <TableRow>
+              <TableCell className="py-1.5 pl-4 text-sm text-muted-foreground"></TableCell>
+              <TableCell className="py-1.5 text-sm text-foreground/80">Financial Year to Date Profit/(Loss)</TableCell>
+              <TableCell
                 className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
-                  equity.currentPeriodProfit < 0 ? 'text-red-600' : 'text-gray-900'
+                  equity.currentPeriodProfit < 0 ? 'text-red-600' : 'text-foreground'
                 }`}
               >
                 {equity.currentPeriodProfit < 0
                   ? `(${formatGhs(Math.abs(equity.currentPeriodProfit))})`
                   : formatGhs(equity.currentPeriodProfit)}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
             <GrandTotalRow label="TOTAL EQUITY" amount={equity.totalEquity} />
 
             {/* ── TOTAL L + E ─────────────────────────────────────────────── */}
-            <tr className="border-t-4 border-gray-900 bg-gray-100">
-              <td className="py-4 pl-4 text-sm"></td>
-              <td className="py-4 text-sm font-bold text-gray-900 uppercase tracking-wide">
+            <TableRow className="border-t-4 border-foreground bg-muted">
+              <TableCell className="py-4 pl-4 text-sm"></TableCell>
+              <TableCell className="py-4 text-sm font-bold text-foreground uppercase tracking-wide">
                 Total Liabilities + Equity
-              </td>
-              <td
+              </TableCell>
+              <TableCell
                 className={`py-4 pr-4 text-right text-sm font-bold tabular-nums ${
-                  data.totalLiabilitiesAndEquity < 0 ? 'text-red-600' : 'text-gray-900'
+                  data.totalLiabilitiesAndEquity < 0 ? 'text-red-600' : 'text-foreground'
                 }`}
               >
                 {formatGhs(data.totalLiabilitiesAndEquity)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }

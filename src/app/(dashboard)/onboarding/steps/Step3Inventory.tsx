@@ -5,6 +5,8 @@ import { completeOnboardingStep3, importProductsCsv } from '@/actions/onboarding
 import CsvImportModal from '@/components/CsvImportModal.client'
 import { validateProductsCsv } from '@/lib/csvImport/validateProducts'
 import { generateProductsTemplate } from '@/lib/csvImport/generateTemplate'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 const UNITS = ['piece', 'kg', 'litre', 'box', 'bag', 'carton', 'other']
 
@@ -106,46 +108,43 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
   if (!showForm) {
     return (
       <>
-        <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Do you have products or stock?</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Add what you have on hand. Skip if you sell services only.
-          </p>
-          <div className="mt-6 flex flex-col gap-3">
-            <button
+        <Card>
+          <CardHeader>
+            <CardTitle>Do you have products or stock?</CardTitle>
+            <CardDescription>
+              Add what you have on hand. Skip if you sell services only.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+          <div className="flex flex-col gap-3">
+            <Button
               type="button"
               onClick={() => setShowForm(true)}
-              className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white
-                         transition-colors hover:bg-green-800 active:bg-green-900"
+              className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+              size="lg"
             >
               Yes, add products
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setShowCsvModal(true)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-700
-                         transition-colors hover:bg-gray-50 active:bg-gray-100"
+              className="w-full"
+              size="lg"
             >
               Import from CSV
-            </button>
+            </Button>
             <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={onBack}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
+              <Button type="button" variant="ghost" onClick={onBack} className="text-sm text-muted-foreground">
                 Back
-              </button>
-              <button
-                type="button"
-                onClick={onComplete}
-                className="text-sm text-gray-400 hover:text-gray-600"
-              >
+              </Button>
+              <Button type="button" variant="ghost" onClick={onComplete} className="text-sm text-muted-foreground/60">
                 Skip this step
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
+          </CardContent>
+        </Card>
         <CsvImportModal
           isOpen={showCsvModal}
           onClose={() => setShowCsvModal(false)}
@@ -172,18 +171,14 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Opening Stock</h2>
-        <button
-          type="button"
-          onClick={onComplete}
-          disabled={isPending}
-          className="text-sm text-gray-400 hover:text-gray-600"
-        >
+    <Card>
+      <CardHeader className="flex-row items-center justify-between">
+        <CardTitle>Opening Stock</CardTitle>
+        <Button type="button" variant="ghost" onClick={onComplete} disabled={isPending} className="text-sm text-muted-foreground/60">
           Skip this step
-        </button>
-      </div>
+        </Button>
+      </CardHeader>
+      <CardContent>
       <p className="mt-1 text-sm text-gray-500">
         Add your current products. You can add more after setup.
       </p>
@@ -320,26 +315,21 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
 
         {/* Actions */}
         <div className="mt-2 flex flex-col gap-2">
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={isPending}
-            className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white
-                       transition-colors hover:bg-green-800 active:bg-green-900
-                       disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full bg-green-700 hover:bg-green-800 active:bg-green-900"
+            size="lg"
           >
             {isPending ? 'Saving\u2026' : 'Continue'}
-          </button>
-          <button
-            type="button"
-            onClick={onBack}
-            disabled={isPending}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
+          </Button>
+          <Button type="button" variant="ghost" onClick={onBack} disabled={isPending} className="text-sm text-muted-foreground">
             Back
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

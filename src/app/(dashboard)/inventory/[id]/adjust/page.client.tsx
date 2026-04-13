@@ -4,7 +4,16 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { adjustStock, type AdjustStockInput } from '@/actions/inventory'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import type { ProductDetail } from '@/actions/products'
+import { formatGhs } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { PageHeader } from '@/components/ui/page-header'
 
 const REASON_OPTIONS = [
   'Stock received without PO',
@@ -14,13 +23,6 @@ const REASON_OPTIONS = [
   'Donation / give-away',
   'Other',
 ]
-
-function formatGHS(amount: number): string {
-  return amount.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 export default function AdjustStockForm({ product }: { product: ProductDetail }) {
   const router = useRouter()
@@ -62,47 +64,51 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Link href={`/inventory/${product.id}`} className="text-gray-600 hover:text-gray-900">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">Adjust Stock</h1>
-      </div>
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/inventory" />}>Inventory</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href={`/inventory/${product.id}`} />}>{product.name}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Adjust Stock</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <p className="mt-2 text-sm text-gray-600">
-        Adjust stock for <span className="font-medium text-gray-900">{product.name}</span>
-      </p>
+      <PageHeader
+        title="Adjust Stock"
+        subtitle={`Adjust stock for ${product.name}`}
+        backHref={`/inventory/${product.id}`}
+      />
 
       {/* Current Stock Card */}
-      <div className="mt-3 rounded-lg border border-gray-200 bg-white p-3">
-        <p className="text-xs text-gray-500">Current Stock</p>
-        <p className="mt-0.5 text-lg font-semibold tabular-nums text-gray-900">
-          {product.currentStock} {product.unit ?? 'units'}
-        </p>
-      </div>
+      <Card className="mb-4" size="sm">
+        <CardContent>
+          <p className="text-xs text-muted-foreground">Current Stock</p>
+          <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
+            {product.currentStock} {product.unit ?? 'units'}
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Error */}
       {error && (
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Adjustment Type Toggle */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Adjustment Type</label>
-          <div className="mt-1 flex rounded-lg border border-gray-300 bg-gray-50 p-0.5">
+        <div className="space-y-1.5">
+          <Label>Adjustment Type</Label>
+          <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-0.5">
             <button
               type="button"
               onClick={() => setAdjustmentType('add')}
@@ -129,11 +135,11 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
         </div>
 
         {/* Quantity */}
-        <div>
-          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
-            Quantity <span className="text-red-500">*</span>
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="quantity">
+            Quantity <span className="text-destructive">*</span>
+          </Label>
+          <Input
             id="quantity"
             type="number"
             inputMode="decimal"
@@ -142,20 +148,19 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             placeholder={`e.g. 10 ${product.unit ?? 'units'}`}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 tabular-nums placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
           />
           {fieldErrors.quantity && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.quantity}</p>
+            <p className="text-sm text-destructive">{fieldErrors.quantity}</p>
           )}
         </div>
 
-        {/* Unit Cost — only for Add */}
+        {/* Unit Cost -- only for Add */}
         {adjustmentType === 'add' && (
-          <div>
-            <label htmlFor="unitCost" className="block text-sm font-medium text-gray-700">
-              Cost per unit (GHS) <span className="text-red-500">*</span>
-            </label>
-            <input
+          <div className="space-y-1.5">
+            <Label htmlFor="unitCost">
+              Cost per unit (GHS) <span className="text-destructive">*</span>
+            </Label>
+            <Input
               id="unitCost"
               type="number"
               inputMode="decimal"
@@ -164,24 +169,23 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
               value={unitCost}
               onChange={(e) => setUnitCost(e.target.value)}
               placeholder="0.00"
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 tabular-nums placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
             />
             {fieldErrors.unitCost && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors.unitCost}</p>
+              <p className="text-sm text-destructive">{fieldErrors.unitCost}</p>
             )}
           </div>
         )}
 
         {/* Reason */}
-        <div>
-          <label htmlFor="reason" className="block text-sm font-medium text-gray-700">
-            Reason <span className="text-red-500">*</span>
-          </label>
+        <div className="space-y-1.5">
+          <Label htmlFor="reason">
+            Reason <span className="text-destructive">*</span>
+          </Label>
           <select
             id="reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="w-full rounded-lg border border-input bg-white px-3 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
           >
             <option value="">Select a reason</option>
             {REASON_OPTIONS.map((r) => (
@@ -190,62 +194,59 @@ export default function AdjustStockForm({ product }: { product: ProductDetail })
               </option>
             ))}
           </select>
-          {fieldErrors.reason && <p className="mt-1 text-xs text-red-600">{fieldErrors.reason}</p>}
+          {fieldErrors.reason && <p className="text-sm text-destructive">{fieldErrors.reason}</p>}
         </div>
 
         {/* Notes */}
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-            Notes
-          </label>
-          <textarea
+        <div className="space-y-1.5">
+          <Label htmlFor="notes">Notes</Label>
+          <Textarea
             id="notes"
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Optional additional details"
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
           />
         </div>
 
         {/* Summary */}
         {adjustmentType === 'add' && quantity && unitCost && (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <p className="text-xs text-gray-500">Total Value Added</p>
-            <p className="mt-0.5 text-lg font-semibold tabular-nums text-gray-900">
-              GHS {formatGHS((parseFloat(quantity) || 0) * (parseFloat(String(unitCost)) || 0))}
-            </p>
-          </div>
+          <Card size="sm">
+            <CardContent>
+              <p className="text-xs text-muted-foreground">Total Value Added</p>
+              <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
+                {formatGhs((parseFloat(quantity) || 0) * (parseFloat(String(unitCost)) || 0))}
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         {adjustmentType === 'remove' && quantity && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-            <p className="text-xs text-amber-700">
+          <Alert>
+            <AlertDescription>
               Removing {quantity} {product.unit ?? 'units'} from stock. The write-off value will be
               calculated using FIFO costing.
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         )}
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">
-          <button
+          <Button
             type="submit"
             disabled={isPending}
-            className={`flex-1 rounded-lg py-2.5 text-sm font-medium text-white disabled:opacity-50 ${
-              adjustmentType === 'add'
-                ? 'bg-green-700 hover:bg-green-800'
-                : 'bg-red-600 hover:bg-red-700'
-            }`}
+            variant={adjustmentType === 'remove' ? 'destructive' : 'default'}
+            className="flex-1"
           >
             {isPending ? 'Saving...' : adjustmentType === 'add' ? 'Add Stock' : 'Remove Stock'}
-          </button>
-          <Link
-            href={`/inventory/${product.id}`}
-            className="flex-1 rounded-lg border border-gray-300 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            render={<Link href={`/inventory/${product.id}`} />}
           >
             Cancel
-          </Link>
+          </Button>
         </div>
       </form>
     </div>

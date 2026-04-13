@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Banknote } from 'lucide-react'
 import {
   approveExpense,
   rejectExpense,
@@ -12,28 +13,21 @@ import {
 import { getCategoryLabel, EXPENSE_CATEGORIES } from '@/lib/expenses/categories'
 import type { UserRole } from '@/lib/session'
 import SwipeableRow from '@/components/SwipeableRow.client'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent } from '@/components/ui/card'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
+import { PageHeader } from '@/components/ui/page-header'
+import { SearchInput } from '@/components/ui/search-input'
 
-function formatGHS(amount: string | number): string {
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount
-  return num.toLocaleString('en-GH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
+import { formatGhs, formatDate } from '@/lib/format'
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-const STATUS_STYLES: Record<string, string> = {
-  approved: 'bg-green-100 text-green-700',
-  pending_approval: 'bg-amber-100 text-amber-700',
-  rejected: 'bg-red-100 text-red-700',
+const STATUS_BADGE_VARIANT: Record<string, 'approved' | 'pending' | 'rejected'> = {
+  approved: 'approved',
+  pending_approval: 'pending',
+  rejected: 'rejected',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -113,38 +107,35 @@ export default function ExpenseList({
     .reduce((sum, e) => sum + parseFloat(e.amount), 0)
 
   return (
-    <div className="mx-auto max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Expenses</h1>
-        <Link
-          href="/expenses/new"
-          className="rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
-        >
-          Record Expense
-        </Link>
-      </div>
+    <div className="mx-auto max-w-4xl">
+      <PageHeader
+        title="Expenses"
+        actions={
+          <Button render={<Link href="/expenses/new" />}>
+            Record Expense
+          </Button>
+        }
+      />
 
       {/* Error banner */}
       {actionError && (
-        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {actionError}
-        </div>
+        <Alert variant="destructive" className="mt-3">
+          <AlertDescription>{actionError}</AlertDescription>
+        </Alert>
       )}
 
       {/* Filters */}
       <div className="mt-4 flex gap-2">
-        <input
-          type="search"
+        <SearchInput
           placeholder="Search expenses..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+          onChange={setSearch}
+          className="flex-1"
         />
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+          className="rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <option value="">All Categories</option>
           {EXPENSE_CATEGORIES.map((c) => (
@@ -162,7 +153,7 @@ export default function ExpenseList({
             <p className="text-sm font-semibold text-amber-800">
               {pendingExpenses.length} expense{pendingExpenses.length > 1 ? 's' : ''} awaiting
               approval &mdash; GHS{' '}
-              {formatGHS(pendingExpenses.reduce((s, e) => s + parseFloat(e.amount), 0))}
+              {formatGhs(pendingExpenses.reduce((s, e) => s + parseFloat(e.amount), 0))}
             </p>
 
             <div className="mt-3 space-y-2">
@@ -182,24 +173,23 @@ export default function ExpenseList({
                   </div>
                   <div className="ml-3 flex items-center gap-2">
                     <span className="text-sm font-semibold text-gray-900 tabular-nums">
-                      GHS {formatGHS(expense.amount)}
+                      {formatGhs(expense.amount)}
                     </span>
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
                       onClick={() => handleApprove(expense.id)}
                       disabled={isPending}
-                      className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
                     >
                       Approve
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
                       onClick={() => handleReject(expense.id)}
                       disabled={isPending}
-                      className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
                     >
                       Reject
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -211,31 +201,12 @@ export default function ExpenseList({
       {/* Expense list */}
       <div className="mt-4 space-y-2">
         {otherExpenses.length === 0 && pendingExpenses.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-gray-200 px-6 py-12 text-center">
-            <svg
-              className="mx-auto h-10 w-10 text-gray-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-              />
-            </svg>
-            <p className="mt-3 text-sm font-medium text-gray-900">No expenses yet</p>
-            <p className="mt-1 text-sm text-gray-500">
-              Record your first expense to start tracking spending.
-            </p>
-            <Link
-              href="/expenses/new"
-              className="mt-4 inline-block rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
-            >
-              Record Expense
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Banknote className="h-10 w-10" />}
+            title="No expenses yet"
+            subtitle="Record your first expense to start tracking spending."
+            action={{ label: 'Record Expense', href: '/expenses/new' }}
+          />
         ) : (
           otherExpenses.map((expense) => (
             <SwipeableRow
@@ -259,16 +230,12 @@ export default function ExpenseList({
                         {expense.description}
                       </p>
                       {expense.approvalStatus === 'rejected' && (
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[expense.approvalStatus]}`}
-                        >
+                        <StatusBadge variant={STATUS_BADGE_VARIANT[expense.approvalStatus]}>
                           {STATUS_LABELS[expense.approvalStatus]}
-                        </span>
+                        </StatusBadge>
                       )}
                       {expense.isCapitalExpense && (
-                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                          Asset
-                        </span>
+                        <Badge variant="secondary">Asset</Badge>
                       )}
                     </div>
                     <p className="mt-0.5 text-xs text-gray-500">
@@ -280,7 +247,7 @@ export default function ExpenseList({
                     </p>
                   </div>
                   <p className="ml-3 text-sm font-semibold text-gray-900 tabular-nums">
-                    GHS {formatGHS(expense.amount)}
+                    {formatGhs(expense.amount)}
                   </p>
                 </div>
               </Link>
@@ -291,22 +258,24 @@ export default function ExpenseList({
 
       {/* Summary footer */}
       {(otherExpenses.length > 0 || pendingExpenses.length > 0) && (
-        <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Total (approved): <span className="font-semibold">GHS {formatGHS(total)}</span>
-            </p>
-            <p className="text-sm text-gray-500">
-              {filtered.length} expense{filtered.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          {summary.pendingApprovalCount > 0 && canApprove && (
-            <p className="mt-1 text-xs text-amber-600">
-              {summary.pendingApprovalCount} pending &middot; GHS{' '}
-              {formatGHS(summary.pendingApprovalTotal)}
-            </p>
-          )}
-        </div>
+        <Card className="mt-4">
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Total (approved): <span className="font-semibold text-foreground">{formatGhs(total)}</span>
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {filtered.length} expense{filtered.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            {summary.pendingApprovalCount > 0 && canApprove && (
+              <p className="mt-1 text-xs text-amber-600">
+                {summary.pendingApprovalCount} pending &middot; GHS{' '}
+                {formatGhs(summary.pendingApprovalTotal)}
+              </p>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   )

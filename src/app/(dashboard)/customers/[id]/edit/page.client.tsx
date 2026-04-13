@@ -8,6 +8,13 @@ import {
   type CustomerActionResult,
   type CustomerWithBalance,
 } from '@/actions/customers'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { PageHeader } from '@/components/ui/page-header'
+import { cn } from '@/lib/utils'
 
 const initialState: CustomerActionResult = { success: false, error: '' }
 
@@ -25,31 +32,29 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <Link
-          href={`/customers/${customer.id}`}
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Back to customer"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">Edit Customer</h1>
-      </div>
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/customers" />}>Customers</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href={`/customers/${customer.id}`} />}>{customer.name}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Edit</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader title="Edit Customer" backHref={`/customers/${customer.id}`} />
 
       {/* General error */}
       {!state.success && state.error && !state.fieldErrors && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          {state.error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       )}
 
       <form action={formAction} className="space-y-4">
@@ -57,99 +62,89 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
         <input type="hidden" name="id" value={customer.id} />
 
         {/* Name */}
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Name <span className="text-red-500">*</span>
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="name">
+            Name <span className="text-destructive">*</span>
+          </Label>
+          <Input
             id="name"
             name="name"
             type="text"
             required
             maxLength={255}
             defaultValue={customer.name}
-            className={`mt-1 w-full rounded-lg border px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-              fieldErrors?.name
-                ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-            }`}
+            className={cn(
+              'h-11 px-4 text-base',
+              fieldErrors?.name && 'border-destructive focus-visible:ring-destructive/20',
+            )}
           />
-          {fieldErrors?.name && <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>}
+          {fieldErrors?.name && <p className="text-sm text-destructive">{fieldErrors.name}</p>}
         </div>
 
         {/* Phone */}
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-            Phone <span className="text-red-500">*</span>
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="phone">
+            Phone <span className="text-destructive">*</span>
+          </Label>
+          <Input
             id="phone"
             name="phone"
             type="tel"
             inputMode="tel"
             required
             defaultValue={customer.phone ?? ''}
-            className={`mt-1 w-full rounded-lg border px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-              fieldErrors?.phone
-                ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-            }`}
+            className={cn(
+              'h-11 px-4 text-base',
+              fieldErrors?.phone && 'border-destructive focus-visible:ring-destructive/20',
+            )}
             placeholder="e.g. 0241234567"
           />
-          {fieldErrors?.phone && <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>}
+          {fieldErrors?.phone && <p className="text-sm text-destructive">{fieldErrors.phone}</p>}
         </div>
 
         {/* Email */}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             name="email"
             type="email"
             defaultValue={customer.email ?? ''}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="h-11 px-4 text-base"
           />
         </div>
 
         {/* Location */}
-        <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-            Location
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <Input
             id="location"
             name="location"
             type="text"
             defaultValue={customer.location ?? ''}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="h-11 px-4 text-base"
             placeholder="e.g. Madina Market, Tema Comm. 1"
           />
         </div>
 
         {/* MoMo Number */}
-        <div>
-          <label htmlFor="momoNumber" className="block text-sm font-medium text-gray-700">
-            Mobile Money Number
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="momoNumber">Mobile Money Number</Label>
+          <Input
             id="momoNumber"
             name="momoNumber"
             type="tel"
             inputMode="tel"
             defaultValue={customer.momoNumber ?? ''}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="h-11 px-4 text-base"
             placeholder="e.g. 0241234567"
           />
         </div>
 
         {/* Credit Limit */}
-        <div>
-          <label htmlFor="creditLimit" className="block text-sm font-medium text-gray-700">
-            Credit Limit (GHS)
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="creditLimit">Credit Limit (GHS)</Label>
+          <Input
             id="creditLimit"
             name="creditLimit"
             type="number"
@@ -157,40 +152,33 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
             min={0}
             step="0.01"
             defaultValue={customer.creditLimit}
-            className={`mt-1 w-full rounded-lg border px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
-              fieldErrors?.creditLimit
-                ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                : 'border-gray-300 focus:border-green-600 focus:ring-green-100'
-            }`}
+            className={cn(
+              'h-11 px-4 text-base',
+              fieldErrors?.creditLimit && 'border-destructive focus-visible:ring-destructive/20',
+            )}
           />
-          <p className="mt-1 text-xs text-gray-400">0 = cash only, no credit</p>
+          <p className="text-xs text-muted-foreground">0 = cash only, no credit</p>
           {fieldErrors?.creditLimit && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.creditLimit}</p>
+            <p className="text-sm text-destructive">{fieldErrors.creditLimit}</p>
           )}
         </div>
 
         {/* Notes */}
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-            Notes
-          </label>
+        <div className="space-y-2">
+          <Label htmlFor="notes">Notes</Label>
           <textarea
             id="notes"
             name="notes"
             rows={3}
             defaultValue={customer.notes ?? ''}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+            className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
           />
         </div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full rounded-lg bg-green-700 px-4 py-3 text-base font-semibold text-white hover:bg-green-800 active:bg-green-900 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={isPending} className="h-11 w-full text-base font-semibold">
           {isPending ? 'Saving...' : 'Save Changes'}
-        </button>
+        </Button>
       </form>
     </>
   )

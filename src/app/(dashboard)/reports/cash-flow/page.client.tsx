@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatGhs } from '@/lib/format'
 import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import type { CashFlowStatement, CashFlowSection } from '@/lib/reports/cashFlow'
 
 // ─── PDF document ─────────────────────────────────────────────────────────────
@@ -100,43 +103,43 @@ function CFDocument({ data }: { data: CashFlowStatement }) {
 function CashSection({ section }: { section: CashFlowSection }) {
   return (
     <>
-      <tr className="bg-gray-50">
-        <td
+      <TableRow className="bg-muted/50">
+        <TableCell
           colSpan={2}
-          className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-gray-500"
+          className="py-2 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
         >
           {section.label}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
       {section.lines.length === 0 && (
-        <tr>
-          <td className="py-2 pl-6 text-sm text-gray-400 italic" colSpan={2}>
+        <TableRow>
+          <TableCell className="py-2 pl-6 text-sm text-muted-foreground/60 italic" colSpan={2}>
             No activity in this period
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       )}
       {section.lines.map((line, i) => (
-        <tr key={i}>
-          <td className="py-1.5 pl-6 text-sm text-gray-700">{line.description}</td>
-          <td
+        <TableRow key={i}>
+          <TableCell className="py-1.5 pl-6 text-sm text-foreground/80">{line.description}</TableCell>
+          <TableCell
             className={`py-1.5 pr-4 text-right text-sm font-medium tabular-nums ${
               line.amount >= 0 ? 'text-green-700' : 'text-red-600'
             }`}
           >
             {formatGhs(line.amount)}
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       ))}
-      <tr className="border-t border-gray-200 font-semibold">
-        <td className="py-2 pl-4 text-sm text-gray-700">Net {section.label}</td>
-        <td
+      <TableRow className="border-t font-semibold">
+        <TableCell className="py-2 pl-4 text-sm text-foreground/80">Net {section.label}</TableCell>
+        <TableCell
           className={`py-2 pr-4 text-right text-sm tabular-nums ${
-            section.netAmount >= 0 ? 'text-gray-900' : 'text-red-600'
+            section.netAmount >= 0 ? 'text-foreground' : 'text-red-600'
           }`}
         >
           {formatGhs(section.netAmount)}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
     </>
   )
 }
@@ -226,59 +229,54 @@ export default function CashFlowReport({ data }: { data: CashFlowStatement }) {
 
       {/* Export controls */}
       <div className="flex justify-end gap-2">
-        <button
-          onClick={handleCsv}
-          className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <Button variant="outline" onClick={handleCsv}>
           Download CSV
-        </button>
-        <button
-          onClick={handlePdf}
-          disabled={pdfLoading}
-          className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
+        </Button>
+        <Button variant="outline" onClick={handlePdf} disabled={pdfLoading}>
           {pdfLoading ? 'Generating…' : 'Download PDF'}
-        </button>
+        </Button>
       </div>
 
       {/* Report table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full">
-          <tbody className="divide-y divide-gray-100">
+      <Card>
+        <CardContent className="p-0">
+        <Table>
+          <TableBody>
             <CashSection section={data.operating} />
             <CashSection section={data.investing} />
             <CashSection section={data.financing} />
 
             {/* Net change */}
-            <tr className="border-t-2 border-gray-300 bg-gray-50">
-              <td className="py-3 pl-4 text-sm font-bold text-gray-900">Net Change in Cash</td>
-              <td
+            <TableRow className="border-t-2 border-gray-300 bg-muted/50">
+              <TableCell className="py-3 pl-4 text-sm font-bold text-foreground">Net Change in Cash</TableCell>
+              <TableCell
                 className={`py-3 pr-4 text-right text-sm font-bold tabular-nums ${
                   data.netChange >= 0 ? 'text-green-700' : 'text-red-600'
                 }`}
               >
                 {formatGhs(data.netChange)}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
 
             {/* Opening balance */}
-            <tr>
-              <td className="py-2 pl-4 text-sm text-gray-700">Opening Cash Balance</td>
-              <td className="py-2 pr-4 text-right text-sm tabular-nums text-gray-900">
+            <TableRow>
+              <TableCell className="py-2 pl-4 text-sm text-foreground/80">Opening Cash Balance</TableCell>
+              <TableCell className="py-2 pr-4 text-right text-sm tabular-nums text-foreground">
                 {formatGhs(data.openingCashBalance)}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
 
             {/* Closing balance (arithmetic) */}
-            <tr className="font-semibold">
-              <td className="py-2.5 pl-4 text-sm text-gray-900">Closing Cash Balance</td>
-              <td className="py-2.5 pr-4 text-right text-sm tabular-nums text-gray-900">
+            <TableRow className="font-semibold">
+              <TableCell className="py-2.5 pl-4 text-sm text-foreground">Closing Cash Balance</TableCell>
+              <TableCell className="py-2.5 pr-4 text-right text-sm tabular-nums text-foreground">
                 {formatGhs(data.closingCashBalance)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        </CardContent>
+      </Card>
 
       {/* Reconciliation check */}
       <div
