@@ -25,7 +25,7 @@ import { uploadReceipt, getReceiptSignedUrl } from '../receipts'
 // ─── Test constants ─────────────────────────────────────────────────────────
 
 const BUSINESS_ID = 'biz-test-001'
-const OTHER_BUSINESS_ID = 'biz-other-999'
+const _OTHER_BUSINESS_ID = 'biz-other-999'
 const USER_ID = 'user-test-001'
 const EXPENSE_ID = 'exp-test-001'
 

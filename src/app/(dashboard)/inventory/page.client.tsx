@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { ProductListItem } from '@/actions/products'
 import type { UserRole } from '@/lib/session'
+import { useProductsWithStock } from '@/lib/offline/dexieHooks'
 import SwipeableRow from '@/components/SwipeableRow.client'
 import { formatGhs } from '@/lib/format'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,21 @@ const FILTER_TABS: { key: StockFilter; label: string }[] = [
   { key: 'out_of_stock', label: 'Out of Stock' },
 ]
 
-function stockStatus(product: ProductListItem) {
+// Generic product shape compatible with both ProductListItem and DexieProductWithStock
+interface DisplayProduct {
+  id: string
+  name: string
+  sku: string | null
+  category: string | null
+  unit: string | null
+  currentStock: number
+  stockValue: number
+  sellingPrice: number | string | null
+  reorderLevel: number
+  trackInventory: boolean
+}
+
+function stockStatus(product: DisplayProduct) {
   if (!product.trackInventory) return { color: 'gray' as const, label: 'Not tracked' }
   if (product.currentStock <= 0) return { color: 'red' as const, label: 'Out of stock' }
   if (product.reorderLevel > 0 && product.currentStock <= product.reorderLevel)
@@ -41,10 +56,12 @@ const STATUS_TEXT: Record<string, string> = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ProductList({
+  businessId,
   initialProducts,
   categories,
   userRole,
 }: {
+  businessId: string
   initialProducts: ProductListItem[]
   categories: string[]
   userRole: UserRole
@@ -59,7 +76,38 @@ export default function ProductList({
   )
   const [categoryFilter, setCategoryFilter] = useState('')
 
-  const filtered = initialProducts.filter((p) => {
+  // Live from Dexie — filters by name; SKU filter applied below client-side
+  const dexieProducts = useProductsWithStock(businessId)
+
+  // Build display list from Dexie (preferred) or SSR fallback
+  const allProducts: DisplayProduct[] =
+    dexieProducts !== undefined
+      ? dexieProducts.map((p) => ({
+          id: p.id,
+          name: p.name,
+          sku: p.sku,
+          category: p.category,
+          unit: p.unit,
+          currentStock: p.currentStock,
+          stockValue: p.stockValue,
+          sellingPrice: p.sellingPrice,
+          reorderLevel: p.reorderLevel,
+          trackInventory: p.trackInventory,
+        }))
+      : initialProducts.map((p) => ({
+          id: p.id,
+          name: p.name,
+          sku: p.sku,
+          category: p.category,
+          unit: p.unit ?? null,
+          currentStock: p.currentStock,
+          stockValue: p.stockValue,
+          sellingPrice: p.sellingPrice,
+          reorderLevel: p.reorderLevel,
+          trackInventory: p.trackInventory,
+        }))
+
+  const filtered = allProducts.filter((p) => {
     if (search) {
       const term = search.toLowerCase()
       const matchesName = p.name.toLowerCase().includes(term)
@@ -81,6 +129,7 @@ export default function ProductList({
     return true
   })
 
+  const totalCount = allProducts.length
   const canManage = ['owner', 'manager', 'accountant'].includes(userRole)
 
   return (
@@ -252,8 +301,8 @@ export default function ProductList({
       {/* Footer count */}
       {filtered.length > 0 && (
         <p className="mt-4 text-center text-xs text-gray-400">
-          Showing {filtered.length} of {initialProducts.length} product
-          {initialProducts.length !== 1 ? 's' : ''}
+          Showing {filtered.length} of {totalCount} product
+          {totalCount !== 1 ? 's' : ''}
         </p>
       )}
     </div>

@@ -147,7 +147,7 @@ function VatDocument({ data }: { data: VatReport }) {
 
 // ─── Line row ─────────────────────────────────────────────────────────────────
 
-function LineRow({ line, netLabel }: { line: VatReportLine; netLabel: string }) {
+function LineRow({ line, netLabel: _netLabel }: { line: VatReportLine; netLabel: string }) {
   return (
     <TableRow>
       <TableCell className="py-2 pl-4 text-sm tabular-nums text-muted-foreground">

@@ -6,7 +6,7 @@ import PullToRefresh from '@/components/PullToRefresh.client'
 
 export default async function ExpensesPage() {
   const session = await getServerSession()
-  const role = session.user.role
+  const { businessId, role } = session.user
 
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
@@ -22,7 +22,12 @@ export default async function ExpensesPage() {
     <>
       <PullToRefresh>
         <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-          <ExpenseList initialExpenses={expenses} summary={summary} userRole={role} />
+          <ExpenseList
+            businessId={businessId}
+            initialExpenses={expenses}
+            summary={summary}
+            userRole={role}
+          />
         </main>
       </PullToRefresh>
       <Fab href="/expenses/new" label="New Expense" />

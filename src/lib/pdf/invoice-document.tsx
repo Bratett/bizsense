@@ -224,7 +224,10 @@ export function InvoiceDocument({ data }: { data: InvoiceData }) {
         {/* ── Header ── */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            {data.business.logoUrl && <Image src={data.business.logoUrl} style={styles.logo} />}
+            {data.business.logoUrl && (
+              // eslint-disable-next-line jsx-a11y/alt-text
+              <Image src={data.business.logoUrl} style={styles.logo} />
+            )}
             <Text style={styles.businessName}>{data.business.name}</Text>
             {data.business.address && (
               <Text style={styles.businessDetail}>{data.business.address}</Text>

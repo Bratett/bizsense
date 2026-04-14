@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import { X } from 'lucide-react'
 import {
   createOrder,
@@ -17,6 +16,9 @@ import { generateOrderNumber } from '@/lib/orderNumber'
 import type { TaxCalculationResult } from '@/lib/tax'
 import { formatGhs } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { withOfflineFallback } from '@/lib/offline/withOfflineFallback'
+import { writeOrderOffline } from '@/lib/offline/offlineOrders'
+import { mirrorOrderToDexie } from '@/lib/offline/mirror'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,7 +59,6 @@ const PAYMENT_OPTIONS: PaymentOption[] = [
 ]
 
 const STEPS = ['Customer', 'Items', 'Payment'] as const
-type Step = (typeof STEPS)[number]
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -75,9 +76,13 @@ function todayISO(): string {
 export default function NewOrderForm({
   customers,
   vatRegistered,
+  businessId,
+  userId,
 }: {
   customers: CustomerListItem[]
   vatRegistered: boolean
+  businessId: string
+  userId: string
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -237,8 +242,6 @@ export default function NewOrderForm({
   const selectedCustomer = customers.find((c) => c.id === customerId)
 
   // ─── Step validation ───────────────────────────────────────────────────────
-  const canProceedFromStep0 = true // customer is optional
-
   const canProceedFromStep1 = lines.every(
     (l) => l.description.trim() && parseNum(l.quantity) > 0 && parseNum(l.unitPrice) >= 0,
   )
@@ -290,17 +293,58 @@ export default function NewOrderForm({
           notes: notes.trim() || undefined,
         }
 
-        const result = await createOrder(input)
+        const amountPaid =
+          paymentMode === 'partial' ? amountPaidNowNum : paymentMode === 'paid' ? total : 0
+
+        const result = await withOfflineFallback(
+          () => createOrder(input),
+          () =>
+            writeOrderOffline({
+              ...input,
+              businessId,
+              userId,
+              subtotal,
+              discountAmount: orderDiscountAmount,
+              taxAmount,
+              totalAmount: total,
+              amountPaid,
+            }).then((orderId) => ({
+              success: true as const,
+              orderId,
+              orderNumber: input.orderNumber,
+            })),
+        )
 
         if (result.success) {
+          if (!result.wasOffline) {
+            // Mirror the online-written record to Dexie for future offline reads
+            mirrorOrderToDexie(
+              { orderId: result.orderId, orderNumber: result.orderNumber },
+              input,
+              {
+                subtotal,
+                discountAmount: orderDiscountAmount,
+                taxAmount,
+                totalAmount: total,
+                amountPaid,
+              },
+            ).catch(() => {})
+          }
+
           if (hasUsdLine && fxRateNum > 0) {
             recordFxRate({ fromCurrency: 'USD', rate: fxRateNum, rateDate: orderDate }).catch(
               () => {},
             )
           }
-          if (result.creditWarning) {
+          if ('creditWarning' in result && result.creditWarning) {
             setCreditWarning(result.creditWarning)
           }
+
+          if (result.wasOffline) {
+            setError('Saved offline — will sync when reconnected.')
+            // Still navigate to let the user see the order from Dexie
+          }
+
           router.push(`/orders/${result.orderId}`)
         } else {
           setError(result.error)

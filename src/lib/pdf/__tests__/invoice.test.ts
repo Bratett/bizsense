@@ -30,7 +30,6 @@ import { getOrderById } from '@/actions/orders'
 import { calculateTax } from '@/lib/tax'
 import { getInvoiceData } from '@/actions/invoices'
 import { formatGhs as formatGHS } from '@/lib/format'
-import type { InvoiceData } from '../types'
 
 // ─── Test constants ─────────────────────────────────────────────────────────
 

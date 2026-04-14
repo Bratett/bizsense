@@ -43,9 +43,7 @@ import { db } from '@/db'
 import { createOrder } from '@/actions/orders'
 import { createExpense } from '@/actions/expenses'
 import { recordPaymentReceived } from '@/actions/payments'
-import { createCustomer, updateCustomer } from '@/actions/customers'
-import { createSupplier } from '@/actions/suppliers'
-import { adjustStock } from '@/actions/inventory'
+import { createCustomer } from '@/actions/customers'
 import { confirmAiAction, rejectAiAction } from '../aiPromotions'
 
 // ─── Test constants ──────────────────────────────────────────────────────────

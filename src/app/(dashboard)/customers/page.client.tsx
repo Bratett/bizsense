@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
 import type { CustomerListItem } from '@/actions/customers'
+import { useCustomers } from '@/lib/offline/dexieHooks'
 import SwipeableRow from '@/components/SwipeableRow.client'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -14,18 +15,39 @@ import { SearchInput } from '@/components/ui/search-input'
 import { avatarColor, initials } from '@/lib/format'
 
 export default function CustomerList({
+  businessId,
   initialCustomers,
 }: {
+  businessId: string
   initialCustomers: CustomerListItem[]
 }) {
   const router = useRouter()
   const [search, setSearch] = useState('')
 
-  const filtered = initialCustomers.filter((c) => {
+  // Live from Dexie — undefined while Dexie is loading (use SSR fallback).
+  // The hook handles search filtering so the list re-queries on each keystroke.
+  const dexieCustomers = useCustomers(businessId, search)
+
+  // Fallback: SSR data filtered client-side (shown before Dexie loads)
+  const ssrFiltered = initialCustomers.filter((c) => {
     if (!search) return true
     const term = search.toLowerCase()
     return c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term))
   })
+
+  // Use Dexie data once available; fall back to SSR while loading
+  const filtered =
+    dexieCustomers !== undefined
+      ? dexieCustomers.map((c) => ({
+          id: c.id,
+          name: c.name,
+          phone: c.phone || null,
+          location: c.location,
+          isActive: c.isActive,
+        }))
+      : ssrFiltered
+
+  const totalCount = dexieCustomers !== undefined ? dexieCustomers.length : initialCustomers.length
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -116,7 +138,7 @@ export default function CustomerList({
 
         {/* List */}
         <div className="mt-2 space-y-2">
-          {filtered.length === 0 && initialCustomers.length === 0 && (
+          {filtered.length === 0 && totalCount === 0 && (
             <EmptyState
               icon={<Users className="h-10 w-10" />}
               title="No customers yet"
@@ -125,7 +147,7 @@ export default function CustomerList({
             />
           )}
 
-          {filtered.length === 0 && initialCustomers.length > 0 && (
+          {filtered.length === 0 && totalCount > 0 && (
             <EmptyState
               icon={<Users className="h-10 w-10" />}
               title="No customers match your search"
@@ -223,8 +245,8 @@ export default function CustomerList({
         {/* Footer count */}
         {filtered.length > 0 && (
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            Showing {filtered.length} of {initialCustomers.length} customer
-            {initialCustomers.length !== 1 ? 's' : ''}
+            Showing {filtered.length} of {totalCount} customer
+            {totalCount !== 1 ? 's' : ''}
           </p>
         )}
       </div>

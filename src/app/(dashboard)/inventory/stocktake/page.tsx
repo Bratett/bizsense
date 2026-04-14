@@ -1,5 +1,5 @@
 import { getServerSession } from '@/lib/session'
-import { getActiveStocktake, getStocktakeHistory } from '@/actions/stocktakes'
+import { getActiveStocktake } from '@/actions/stocktakes'
 import StocktakeView from './page.client'
 
 export default async function StocktakePage() {

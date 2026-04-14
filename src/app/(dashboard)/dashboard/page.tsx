@@ -14,9 +14,10 @@ import {
 import FirstTimeOverlay from './FirstTimeOverlay.client'
 import DashboardChart from './DashboardChart.client'
 import ActivityFeed from './ActivityFeed.client'
+import { DashboardMetrics } from './DashboardMetrics.client'
 import SyncIndicator from '@/components/SyncIndicator.client'
 import { formatGhs } from '@/lib/format'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 function getGreeting(): string {
@@ -119,35 +120,6 @@ const QUICK_ACTIONS = [
   },
 ]
 
-// ─── Lock icon for restricted cards ───────────────────────────────────────────
-
-function LockedCard({ label }: { label: string }) {
-  return (
-    <Card size="sm">
-      <CardContent>
-        <p className="text-xs font-medium text-gray-500">{label}</p>
-        <div className="mt-2 flex items-center gap-1.5 text-gray-400">
-          <svg
-            width="16"
-            height="16"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-            />
-          </svg>
-          <span className="text-xs">Ask your manager for access</span>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
@@ -157,14 +129,17 @@ export default async function DashboardPage() {
   const showFinancials = ['owner', 'manager', 'accountant'].includes(role)
   const showApprovals = ['owner', 'manager'].includes(role)
 
-  // Fetch all dashboard data in parallel
-  // TODO Sprint 9: replace with Dexie-first read
+  // Fetch all dashboard data in parallel.
+  // The 4 metric cards (todaySales, cashBalance, receivables, lowStock) are
+  // passed as SSR fallback values to DashboardMetrics.client.tsx, which
+  // switches to live Dexie data after hydration — making the metrics update
+  // instantly when a sale is recorded offline without any network request.
   const [
     legacy,
     todaySales,
     cashBalance,
     receivables,
-    payables,
+    _payables,
     pendingApprovals,
     activity,
     chartData,
@@ -209,92 +184,17 @@ export default async function DashboardPage() {
           {/* Left column: metrics + quick actions + alerts */}
           <div className="flex-1 space-y-6">
             {/* ─── Metric Cards (2x2 grid) ──────────────────────── */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Today's Sales — visible to all roles */}
-              <Card size="sm">
-                <CardContent>
-                  <p className="text-xs font-medium text-gray-500">Today&apos;s Sales</p>
-                  <p
-                    className={cn(
-                      'mt-1 text-2xl font-semibold tabular-nums',
-                      todaySales.total > 0 ? 'text-green-700' : 'text-gray-900',
-                    )}
-                  >
-                    {formatGhs(todaySales.total)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    {todaySales.count} {todaySales.count === 1 ? 'sale' : 'sales'} today
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Cash Balance */}
-              {showFinancials && cashBalance ? (
-                <Card size="sm">
-                  <CardContent>
-                    <p className="text-xs font-medium text-gray-500">Cash Balance</p>
-                    <p
-                      className={cn(
-                        'mt-1 text-2xl font-semibold tabular-nums',
-                        cashBalance.totalBalance < 0 ? 'text-red-600' : 'text-gray-900',
-                      )}
-                    >
-                      {formatGhs(cashBalance.totalBalance)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">Cash + MoMo + Bank</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <LockedCard label="Cash Balance" />
-              )}
-
-              {/* Outstanding Receivables */}
-              {showFinancials && receivables ? (
-                <Link href="/reports/receivables" className="block">
-                  <Card size="sm" className="transition-colors hover:bg-muted/50">
-                    <CardContent>
-                      <p className="text-xs font-medium text-gray-500">Receivables</p>
-                      <p
-                        className={cn(
-                          'mt-1 text-2xl font-semibold tabular-nums',
-                          receivables.total > 0 ? 'text-yellow-600' : 'text-green-700',
-                        )}
-                      >
-                        {formatGhs(receivables.total)}
-                      </p>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        {receivables.count} unpaid{' '}
-                        {receivables.count === 1 ? 'invoice' : 'invoices'}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ) : (
-                <LockedCard label="Receivables" />
-              )}
-
-              {/* Low Stock — visible to all roles */}
-              <Link href="/inventory?filter=low_stock" className="block">
-                <Card size="sm" className="transition-colors hover:bg-muted/50 active:bg-muted">
-                  <CardContent>
-                    <p className="text-xs font-medium text-gray-500">Low Stock</p>
-                    {lowStock.count > 0 ? (
-                      <>
-                        <p className="mt-1 text-2xl font-semibold tabular-nums text-amber-600">
-                          {lowStock.count} {lowStock.count === 1 ? 'product' : 'products'}
-                        </p>
-                        <p className="mt-0.5 text-xs text-gray-500">Below reorder level</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="mt-1 text-2xl font-semibold text-green-700">All stocked</p>
-                        <p className="mt-0.5 text-xs text-gray-500">No items below reorder level</p>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
+            {/* Live from Dexie after hydration; SSR values shown on first paint */}
+            <DashboardMetrics
+              businessId={businessId}
+              showFinancials={showFinancials}
+              ssrTodaySales={todaySales.total}
+              ssrTodaySalesCount={todaySales.count}
+              ssrCashBalance={cashBalance?.totalBalance ?? null}
+              ssrReceivables={receivables?.total ?? null}
+              ssrReceivablesCount={receivables?.count ?? null}
+              ssrLowStockCount={lowStock.count}
+            />
 
             {/* ─── Quick Actions ──────────────────────────────────── */}
             <div className="grid grid-cols-4 gap-2">

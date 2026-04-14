@@ -17,7 +17,12 @@ export default async function NewOrderPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="mx-auto max-w-lg">
-        <NewOrderForm customers={customers} vatRegistered={biz?.vatRegistered ?? false} />
+        <NewOrderForm
+          customers={customers}
+          vatRegistered={biz?.vatRegistered ?? false}
+          businessId={session.user.businessId}
+          userId={session.user.id}
+        />
       </div>
     </main>
   )

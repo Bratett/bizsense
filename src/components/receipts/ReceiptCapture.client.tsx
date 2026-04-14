@@ -30,7 +30,6 @@ export default function ReceiptCapture({
   const [preview, setPreview] = useState<string | null>(null)
   const [uploaded, setUploaded] = useState(!!existingReceiptPath)
   const [error, setError] = useState<string | null>(null)
-  const [viewUrl, setViewUrl] = useState<string | null>(null)
   const [isLoadingUrl, setIsLoadingUrl] = useState(false)
   const [pendingBase64, setPendingBase64] = useState<string | null>(null)
 
@@ -112,7 +111,6 @@ export default function ReceiptCapture({
     const result = await getReceiptSignedUrl(expenseId)
     setIsLoadingUrl(false)
     if (result.success) {
-      setViewUrl(result.signedUrl)
       window.open(result.signedUrl, '_blank', 'noopener,noreferrer')
     } else {
       setError(result.error)
@@ -127,7 +125,6 @@ export default function ReceiptCapture({
         setUploaded(false)
         setPreview(null)
         setPendingBase64(null)
-        setViewUrl(null)
         onUploadComplete?.({ path: '', signedUrl: '' })
       } else {
         setError(result.error)

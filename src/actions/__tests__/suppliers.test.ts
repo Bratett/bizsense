@@ -18,7 +18,6 @@ import { requireRole } from '@/lib/auth/requireRole'
 import { db } from '@/db'
 import {
   createSupplier,
-  updateSupplier,
   deactivateSupplier,
   listSuppliers,
   getSupplierById,

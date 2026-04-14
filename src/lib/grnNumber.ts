@@ -1,4 +1,4 @@
-import { localDb } from './localDb'
+import { localDb } from '@/db/local/dexie'
 import { getDevicePrefix } from './device'
 
 const GRN_NUMBER_PATTERN = /^GRN-[A-Z2-9]{4}-\d{4,}$/

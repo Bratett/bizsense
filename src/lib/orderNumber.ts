@@ -1,4 +1,4 @@
-import { localDb } from './localDb'
+import { localDb } from '@/db/local/dexie'
 import { getDevicePrefix } from './device'
 
 const ORDER_NUMBER_PATTERN = /^ORD-[A-Z2-9]{4}-\d{4,}$/

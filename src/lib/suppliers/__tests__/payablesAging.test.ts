@@ -17,7 +17,7 @@ const BUSINESS_ID = 'biz-001'
 const SUP_A = 'sup-a'
 const GRN_1 = 'grn-001'
 const GRN_2 = 'grn-002'
-const GRN_3 = 'grn-003'
+const _GRN_3 = 'grn-003'
 
 function makeChain(result: unknown[]) {
   const chain: Record<string, unknown> = {

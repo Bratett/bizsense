@@ -281,6 +281,7 @@ export default function Step1BusinessProfile({ onComplete }: Props) {
             </Label>
             <div className="flex items-center gap-3">
               {logoPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={logoPreview}
                   alt="Logo preview"

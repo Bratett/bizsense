@@ -90,7 +90,7 @@ function mockAtomicWrite(orderId = 'order-001') {
     let insertCounter = 0
 
     const mockTx = {
-      insert: vi.fn((table: unknown) => ({
+      insert: vi.fn((_table: unknown) => ({
         values: vi.fn((data: unknown) => {
           const tableName =
             insertCounter === 0 ? 'orders' : insertCounter === 1 ? 'orderLines' : 'paymentsReceived'

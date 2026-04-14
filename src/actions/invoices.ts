@@ -1,8 +1,8 @@
 'use server'
 
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { businesses, customers, orders } from '@/db/schema'
+import { businesses, customers } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
 import { getOrderById } from '@/actions/orders'
 import { calculateTax } from '@/lib/tax'

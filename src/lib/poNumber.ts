@@ -1,4 +1,4 @@
-import { localDb } from './localDb'
+import { localDb } from '@/db/local/dexie'
 import { getDevicePrefix } from './device'
 
 const PO_NUMBER_PATTERN = /^PO-[A-Z2-9]{4}-\d{4,}$/

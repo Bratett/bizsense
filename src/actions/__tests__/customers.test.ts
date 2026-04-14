@@ -18,7 +18,6 @@ import { getServerSession } from '@/lib/session'
 import { db } from '@/db'
 import {
   createCustomer,
-  updateCustomer,
   deactivateCustomer,
   listCustomers,
   getCustomerById,

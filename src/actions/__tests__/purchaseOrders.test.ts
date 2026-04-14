@@ -427,7 +427,7 @@ describe('listPurchaseOrders', () => {
 
     // Verify the WHERE clause included businessId
     const chain = vi.mocked(db.select).mock.results[0].value
-    const whereCall = (chain['from'] as ReturnType<typeof vi.fn>).mock.results[0]?.value
+    const _whereCall = (chain['from'] as ReturnType<typeof vi.fn>).mock.results[0]?.value
     // The query was built with businessId filter via eq(purchaseOrders.businessId, businessId)
     // We verify requireRole was called, which enforces businessId from session
     expect(requireRole).toHaveBeenCalledWith(['owner', 'manager', 'accountant'])

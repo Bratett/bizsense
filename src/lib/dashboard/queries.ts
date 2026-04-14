@@ -10,7 +10,6 @@ import {
   inventoryTransactions,
   goodsReceivedNotes,
   supplierPayments,
-  suppliers,
 } from '@/db/schema'
 import { format, subDays } from 'date-fns'
 
