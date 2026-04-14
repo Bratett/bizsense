@@ -13,7 +13,7 @@ import {
   count as drizzleCount,
 } from 'drizzle-orm'
 import { db } from '@/db'
-import { orders, orderLines, paymentsReceived, customers, products } from '@/db/schema'
+import { orders, orderLines, customers, products } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -223,7 +223,6 @@ export async function listSales(filters?: SalesListFilters): Promise<SalesListRe
   const pageSize = filters?.pageSize ?? 20
   const offset = (page - 1) * pageSize
 
-  const today = new Date().toISOString().split('T')[0]
   const overdueDate = new Date(Date.now() - OVERDUE_DAYS * 86400000).toISOString().split('T')[0]
 
   // Build WHERE conditions

@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { createGrn, confirmGrn } from '@/actions/grn'
 import { generateGrnNumber } from '@/lib/grnNumber'
 import type { SupplierListItem } from '@/actions/suppliers'

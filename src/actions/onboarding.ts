@@ -491,34 +491,23 @@ export async function completeOnboardingStep5(input: Step5Input): Promise<Action
       const amount = Math.round(p.amountOwed * 100) / 100
 
       // Upsert supplier by phone number
-      let _supplierId: string
       if (p.phone?.trim()) {
         const [existing] = await tx
           .select({ id: suppliers.id })
           .from(suppliers)
           .where(and(eq(suppliers.businessId, businessId), eq(suppliers.phone, p.phone.trim())))
-        if (existing) {
-          _supplierId = existing.id
-        } else {
-          const [created] = await tx
-            .insert(suppliers)
-            .values({
-              businessId,
-              name: p.supplierName.trim(),
-              phone: p.phone.trim(),
-            })
-            .returning({ id: suppliers.id })
-          _supplierId = created.id
-        }
-      } else {
-        const [created] = await tx
-          .insert(suppliers)
-          .values({
+        if (!existing) {
+          await tx.insert(suppliers).values({
             businessId,
             name: p.supplierName.trim(),
+            phone: p.phone.trim(),
           })
-          .returning({ id: suppliers.id })
-        _supplierId = created.id
+        }
+      } else {
+        await tx.insert(suppliers).values({
+          businessId,
+          name: p.supplierName.trim(),
+        })
       }
 
       // Post journal entry per payable

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createCustomer, type CustomerActionResult } from '@/actions/customers'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -9,33 +9,96 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PageHeader } from '@/components/ui/page-header'
 import { cn } from '@/lib/utils'
+import { withOfflineFallback } from '@/lib/offline/withOfflineFallback'
+import { writeCustomerOffline } from '@/lib/offline/offlineCustomers'
+import { mirrorCustomerToDexie } from '@/lib/offline/mirror'
 
 const initialState: CustomerActionResult = { success: false, error: '' }
 
-export default function CustomerForm() {
-  const [state, formAction, isPending] = useActionState(createCustomer, initialState)
+export default function CustomerForm({ businessId }: { businessId: string }) {
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const router = useRouter()
 
-  useEffect(() => {
-    if (state.success) {
-      router.push('/customers')
-    }
-  }, [state.success, router])
+  // ─── Controlled form state ─────────────────────────────────────────────────
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [location, setLocation] = useState('')
+  const [momoNumber, setMomoNumber] = useState('')
+  const [creditLimit, setCreditLimit] = useState('0')
+  const [notes, setNotes] = useState('')
 
-  const fieldErrors = !state.success ? state.fieldErrors : undefined
+  // ─── Submit ────────────────────────────────────────────────────────────────
+  const handleSubmit = () => {
+    setError(null)
+    setFieldErrors({})
+
+    startTransition(async () => {
+      try {
+        const fd = new FormData()
+        fd.set('name', name)
+        fd.set('phone', phone)
+        fd.set('email', email)
+        fd.set('location', location)
+        fd.set('momoNumber', momoNumber)
+        fd.set('creditLimit', creditLimit)
+        fd.set('notes', notes)
+
+        const result = await withOfflineFallback(
+          () => createCustomer(initialState, fd),
+          () =>
+            writeCustomerOffline({
+              businessId,
+              name,
+              phone,
+              email: email || null,
+              location: location || null,
+              momoNumber: momoNumber || null,
+              creditLimit: Number(creditLimit) || 0,
+              notes: notes || null,
+            }).then((customerId) => ({ success: true as const, customerId })),
+        )
+
+        if (result.success) {
+          if (!result.wasOffline) {
+            mirrorCustomerToDexie(
+              { customerId: result.customerId ?? '' },
+              {
+                name,
+                phone,
+                email: email || null,
+                location: location || null,
+                momoNumber: momoNumber || null,
+                creditLimit: Number(creditLimit) || 0,
+                notes: notes || null,
+              },
+            ).catch(() => {})
+          }
+          router.push('/customers')
+        } else {
+          setError(result.error ?? null)
+          if (result.fieldErrors) setFieldErrors(result.fieldErrors)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+      }
+    })
+  }
 
   return (
     <>
       <PageHeader title="Add Customer" backHref="/customers" />
 
       {/* General error */}
-      {!state.success && state.error && !state.fieldErrors && (
+      {error && !Object.keys(fieldErrors).length && (
         <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{state.error}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      <form action={formAction} className="space-y-4">
+      <div className="space-y-4">
         {/* Name */}
         <div className="space-y-2">
           <Label htmlFor="name">
@@ -43,17 +106,18 @@ export default function CustomerForm() {
           </Label>
           <Input
             id="name"
-            name="name"
             type="text"
             required
             maxLength={255}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className={cn(
               'h-11 px-4 text-base',
-              fieldErrors?.name && 'border-destructive focus-visible:ring-destructive/20',
+              fieldErrors.name && 'border-destructive focus-visible:ring-destructive/20',
             )}
             placeholder="e.g. Ama Serwaa"
           />
-          {fieldErrors?.name && <p className="text-sm text-destructive">{fieldErrors.name}</p>}
+          {fieldErrors.name && <p className="text-sm text-destructive">{fieldErrors.name}</p>}
         </div>
 
         {/* Phone */}
@@ -63,17 +127,18 @@ export default function CustomerForm() {
           </Label>
           <Input
             id="phone"
-            name="phone"
             type="tel"
             inputMode="tel"
             required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             className={cn(
               'h-11 px-4 text-base',
-              fieldErrors?.phone && 'border-destructive focus-visible:ring-destructive/20',
+              fieldErrors.phone && 'border-destructive focus-visible:ring-destructive/20',
             )}
             placeholder="e.g. 0241234567"
           />
-          {fieldErrors?.phone && <p className="text-sm text-destructive">{fieldErrors.phone}</p>}
+          {fieldErrors.phone && <p className="text-sm text-destructive">{fieldErrors.phone}</p>}
         </div>
 
         {/* Email */}
@@ -81,8 +146,9 @@ export default function CustomerForm() {
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
-            name="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="h-11 px-4 text-base"
             placeholder="e.g. ama@example.com"
           />
@@ -93,8 +159,9 @@ export default function CustomerForm() {
           <Label htmlFor="location">Location</Label>
           <Input
             id="location"
-            name="location"
             type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             className="h-11 px-4 text-base"
             placeholder="e.g. Madina Market, Tema Comm. 1"
           />
@@ -105,9 +172,10 @@ export default function CustomerForm() {
           <Label htmlFor="momoNumber">Mobile Money Number</Label>
           <Input
             id="momoNumber"
-            name="momoNumber"
             type="tel"
             inputMode="tel"
+            value={momoNumber}
+            onChange={(e) => setMomoNumber(e.target.value)}
             className="h-11 px-4 text-base"
             placeholder="e.g. 0241234567"
           />
@@ -118,20 +186,20 @@ export default function CustomerForm() {
           <Label htmlFor="creditLimit">Credit Limit (GHS)</Label>
           <Input
             id="creditLimit"
-            name="creditLimit"
             type="number"
             inputMode="decimal"
             min={0}
             step="0.01"
-            defaultValue="0"
+            value={creditLimit}
+            onChange={(e) => setCreditLimit(e.target.value)}
             className={cn(
               'h-11 px-4 text-base',
-              fieldErrors?.creditLimit && 'border-destructive focus-visible:ring-destructive/20',
+              fieldErrors.creditLimit && 'border-destructive focus-visible:ring-destructive/20',
             )}
             placeholder="0.00"
           />
           <p className="text-xs text-muted-foreground">0 = cash only, no credit</p>
-          {fieldErrors?.creditLimit && (
+          {fieldErrors.creditLimit && (
             <p className="text-sm text-destructive">{fieldErrors.creditLimit}</p>
           )}
         </div>
@@ -141,18 +209,24 @@ export default function CustomerForm() {
           <Label htmlFor="notes">Notes</Label>
           <textarea
             id="notes"
-            name="notes"
             rows={3}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
             className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
             placeholder="Any notes about this customer"
           />
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="h-11 w-full text-base font-semibold">
+        <Button
+          type="button"
+          disabled={isPending}
+          onClick={handleSubmit}
+          className="h-11 w-full text-base font-semibold"
+        >
           {isPending ? 'Saving...' : 'Save Customer'}
         </Button>
-      </form>
+      </div>
     </>
   )
 }

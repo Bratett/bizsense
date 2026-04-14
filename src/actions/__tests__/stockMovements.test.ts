@@ -112,17 +112,6 @@ function makeChain(result: unknown[]) {
   return chain
 }
 
-function makeInsertChain(returnData: unknown[] = []) {
-  return {
-    values: vi.fn(() => ({
-      returning: vi.fn().mockResolvedValue(returnData),
-      then: (f?: ((v: unknown) => unknown) | null) => Promise.resolve(returnData).then(f),
-      catch: (f?: ((e: unknown) => unknown) | null) => Promise.resolve(returnData).catch(f),
-      finally: (f?: (() => void) | null) => Promise.resolve(returnData).finally(f),
-    })),
-  }
-}
-
 // ─── Mock for db.transaction — executes callback with a mock tx ─────────────
 
 let capturedTxCalls: Array<{ action: string; data: unknown }> = []
@@ -132,7 +121,7 @@ function mockDbTransaction() {
 
   vi.mocked(db.transaction).mockImplementation(async (callback) => {
     const mockTx = {
-      insert: vi.fn((table: unknown) => {
+      insert: vi.fn((_table: unknown) => {
         const chain = {
           values: vi.fn((data: unknown) => {
             capturedTxCalls.push({ action: 'insert', data })
@@ -193,7 +182,7 @@ function mockAtomicWrite(orderId = 'order-001') {
     let insertCounter = 0
 
     const mockTx = {
-      insert: vi.fn((table: unknown) => ({
+      insert: vi.fn((_table: unknown) => ({
         values: vi.fn((data: unknown) => {
           capturedAtomicTxInserts.push({ index: insertCounter, data })
           insertCounter++
@@ -218,17 +207,6 @@ function mockAtomicWrite(orderId = 'order-001') {
 
     return writeSourceRecord(mockTx as never, 'journal-entry-001')
   })
-}
-
-// ─── Account lookup mock ────────────────────────────────────────────────────
-
-function mockAccountLookup() {
-  const accountRows = Object.entries(ACCOUNT_IDS).map(([code, id]) => ({
-    id,
-    code,
-  }))
-
-  vi.mocked(db.select).mockReturnValue(makeChain(accountRows) as never)
 }
 
 // Select that returns different results per call

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect, useRef } from 'react'
-import Link from 'next/link'
+import { useState, useTransition, useEffect } from 'react'
 import {
   createExpense,
   previewExpenseVat,
@@ -12,6 +11,9 @@ import {
 import { EXPENSE_CATEGORIES } from '@/lib/expenses/categories'
 import type { UserRole } from '@/lib/session'
 import { formatGhs } from '@/lib/format'
+import { withOfflineFallback } from '@/lib/offline/withOfflineFallback'
+import { writeExpenseOffline } from '@/lib/offline/offlineExpenses'
+import { mirrorExpenseToDexie } from '@/lib/offline/mirror'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -48,9 +50,11 @@ function todayISO(): string {
 export default function NewExpenseForm({
   vatRegistered,
   userRole,
+  businessId,
 }: {
   vatRegistered: boolean
   userRole: UserRole
+  businessId: string
 }) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +75,7 @@ export default function NewExpenseForm({
   const [isRecurring, setIsRecurring] = useState(false)
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>('monthly')
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
-  const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [_receiptFile, setReceiptFile] = useState<File | null>(null)
 
   // ─── VAT preview ──────────────────────────────────────────────────────────
   const [vatPreview, setVatPreview] = useState<{
@@ -133,12 +137,32 @@ export default function NewExpenseForm({
           recurrenceFrequency: isRecurring && !isCapital ? recurrenceFrequency : undefined,
         }
 
-        const result = await createExpense(input)
+        const approvalStatus = userRole === 'cashier' ? 'pending_approval' : 'approved'
+
+        const result = await withOfflineFallback(
+          () => createExpense(input),
+          () =>
+            writeExpenseOffline({
+              ...input,
+              businessId,
+              approvalStatus,
+            }).then((expenseId) => ({ success: true as const, expenseId })),
+        )
 
         if (result.success) {
-          const catLabel = EXPENSE_CATEGORIES.find((c) => c.key === category)?.label ?? category
+          if (!result.wasOffline) {
+            mirrorExpenseToDexie({ expenseId: result.expenseId }, input, approvalStatus).catch(
+              () => {},
+            )
+          }
 
-          setSuccess(`Expense recorded. ${formatGhs(amountNum)} ${catLabel} on ${expenseDate}.`)
+          const catLabel = EXPENSE_CATEGORIES.find((c) => c.key === category)?.label ?? category
+          const offlineNote = result.wasOffline
+            ? ' (saved offline — will sync when reconnected)'
+            : ''
+          setSuccess(
+            `Expense recorded. ${formatGhs(amountNum)} ${catLabel} on ${expenseDate}.${offlineNote}`,
+          )
 
           // Reset form
           setCategory('')

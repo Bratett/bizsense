@@ -10,6 +10,8 @@ import {
   type ExpenseListItem,
   type ExpenseSummary,
 } from '@/actions/expenses'
+import { useExpenses } from '@/lib/offline/dexieHooks'
+import { localDb } from '@/db/local/dexie'
 import { getCategoryLabel, EXPENSE_CATEGORIES } from '@/lib/expenses/categories'
 import type { UserRole } from '@/lib/session'
 import SwipeableRow from '@/components/SwipeableRow.client'
@@ -44,25 +46,69 @@ const PAYMENT_LABELS: Record<string, string> = {
   bank: 'Bank',
 }
 
+// Normalised display shape — compatible with ExpenseListItem and DexieExpense
+interface DisplayExpense {
+  id: string
+  expenseDate: string
+  category: string | null
+  description: string
+  amount: string
+  isCapitalExpense: boolean
+  paymentMethod: string | null
+  approvalStatus: string
+}
+
+function fromExpenseListItem(e: ExpenseListItem): DisplayExpense {
+  return {
+    id: e.id,
+    expenseDate: e.expenseDate,
+    category: e.category,
+    description: e.description,
+    amount: e.amount,
+    isCapitalExpense: e.isCapitalExpense,
+    paymentMethod: e.paymentMethod,
+    approvalStatus: e.approvalStatus,
+  }
+}
+
 export default function ExpenseList({
+  businessId,
   initialExpenses,
   summary,
   userRole,
 }: {
+  businessId: string
   initialExpenses: ExpenseListItem[]
   summary: ExpenseSummary
   userRole: UserRole
 }) {
   const router = useRouter()
-  const [expenses, setExpenses] = useState(initialExpenses)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [isPending, startTransition] = useTransition()
   const [actionError, setActionError] = useState<string | null>(null)
 
+  // Live from Dexie — returns all expenses for the business (no date cap).
+  const dexieExpenses = useExpenses(businessId)
+
   const canApprove = userRole === 'owner' || userRole === 'manager'
 
-  const filtered = expenses.filter((e) => {
+  // Build display list from Dexie (preferred) or SSR fallback
+  const allExpenses: DisplayExpense[] =
+    dexieExpenses !== undefined
+      ? dexieExpenses.map((e) => ({
+          id: e.id,
+          expenseDate: e.expenseDate,
+          category: e.category,
+          description: e.description,
+          amount: String(e.amount),
+          isCapitalExpense: e.isCapitalExpense,
+          paymentMethod: e.paymentMethod,
+          approvalStatus: e.approvalStatus,
+        }))
+      : initialExpenses.map(fromExpenseListItem)
+
+  const filtered = allExpenses.filter((e) => {
     if (search) {
       const term = search.toLowerCase()
       if (!e.description.toLowerCase().includes(term)) return false
@@ -79,9 +125,8 @@ export default function ExpenseList({
     startTransition(async () => {
       const result = await approveExpense(expenseId)
       if (result.success) {
-        setExpenses((prev) =>
-          prev.map((e) => (e.id === expenseId ? { ...e, approvalStatus: 'approved' } : e)),
-        )
+        // Update Dexie so the live query re-renders automatically
+        await localDb.expenses.update(expenseId, { approvalStatus: 'approved' })
       } else {
         setActionError(result.error)
       }
@@ -93,9 +138,8 @@ export default function ExpenseList({
     startTransition(async () => {
       const result = await rejectExpense(expenseId)
       if (result.success) {
-        setExpenses((prev) =>
-          prev.map((e) => (e.id === expenseId ? { ...e, approvalStatus: 'rejected' } : e)),
-        )
+        // Update Dexie so the live query re-renders automatically
+        await localDb.expenses.update(expenseId, { approvalStatus: 'rejected' })
       } else {
         setActionError(result.error)
       }
@@ -237,7 +281,8 @@ export default function ExpenseList({
                       {getCategoryLabel(expense.category ?? '') ??
                         expense.category ??
                         'Uncategorized'}{' '}
-                      &middot; {PAYMENT_LABELS[expense.paymentMethod] ?? expense.paymentMethod}
+                      &middot;{' '}
+                      {PAYMENT_LABELS[expense.paymentMethod ?? ''] ?? expense.paymentMethod}
                     </p>
                   </div>
                   <p className="ml-3 text-sm font-semibold text-gray-900 tabular-nums">

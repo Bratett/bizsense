@@ -5,12 +5,13 @@ import Fab from '@/components/Fab.client'
 import PullToRefresh from '@/components/PullToRefresh.client'
 
 export default async function CustomersPage() {
-  await getServerSession()
+  const session = await getServerSession()
+  const { businessId } = session.user
   const customers = await listCustomers({ isActive: true })
   return (
     <>
       <PullToRefresh>
-        <CustomerList initialCustomers={customers} />
+        <CustomerList businessId={businessId} initialCustomers={customers} />
       </PullToRefresh>
       <Fab href="/customers/new" label="New Customer" />
     </>

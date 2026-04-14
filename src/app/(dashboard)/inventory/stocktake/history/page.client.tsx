@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { History } from 'lucide-react'
 import type { StocktakeHistoryItem } from '@/actions/stocktakes'
 import { formatGhs } from '@/lib/format'

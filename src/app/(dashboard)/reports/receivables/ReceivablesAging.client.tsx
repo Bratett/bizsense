@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { getReceivablesAging, type ReceivablesAgingData } from '@/actions/sales'
 
 import { formatGhs } from '@/lib/format'
@@ -91,18 +90,7 @@ export default function ReceivablesAging({ initialData }: { initialData: Receiva
     URL.revokeObjectURL(url)
   }
 
-  // Prepare stacked bar chart data
   const total = data.totalReceivables || 1
-  const stackedData = [
-    {
-      name: 'Aging',
-      current: data.agingDistribution.current,
-      days1_30: data.agingDistribution.days1_30,
-      days31_60: data.agingDistribution.days31_60,
-      days61_90: data.agingDistribution.days61_90,
-      days90Plus: data.agingDistribution.days90Plus,
-    },
-  ]
 
   const percentages = {
     current: Math.round((data.agingDistribution.current / total) * 100),

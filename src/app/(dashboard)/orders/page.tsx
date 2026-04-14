@@ -9,7 +9,8 @@ interface PageProps {
 }
 
 export default async function OrdersPage({ searchParams }: PageProps) {
-  await getServerSession()
+  const session = await getServerSession()
+  const { businessId } = session.user
   const { tab, search } = await searchParams
 
   const paymentStatus = tab === 'unpaid' ? ('unpaid' as const) : undefined
@@ -32,7 +33,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   return (
     <>
       <PullToRefresh>
-        <OrderList initialOrders={orders} activeTab={tab ?? 'all'} />
+        <OrderList businessId={businessId} initialOrders={orders} activeTab={tab ?? 'all'} />
       </PullToRefresh>
       <Fab href="/orders/new" label="New Sale" />
     </>

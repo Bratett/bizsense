@@ -744,7 +744,6 @@ export async function processRecurringExpenses(): Promise<{
 }> {
   const session = await getServerSession()
   const { businessId } = session.user
-  const userId = session.user.id
 
   const today = new Date().toISOString().split('T')[0]
   let processed = 0

@@ -93,11 +93,6 @@ function makeOrder(overrides: MockOrder = {}) {
   }
 }
 
-function mockAccountLookup() {
-  const accountRows = Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))
-  vi.mocked(db.select).mockReturnValueOnce(makeChain(accountRows) as never)
-}
-
 type CapturedPayment = {
   journalInput: unknown
   txInserts: { field: string; data: unknown }[]

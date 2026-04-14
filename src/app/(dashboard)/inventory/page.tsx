@@ -7,7 +7,7 @@ import PullToRefresh from '@/components/PullToRefresh.client'
 
 export default async function InventoryPage() {
   const session = await getServerSession()
-  const role = session.user.role
+  const { businessId, role } = session.user
 
   const [products, categories] = await Promise.all([listProducts(), listDistinctCategories()])
 
@@ -22,7 +22,12 @@ export default async function InventoryPage() {
               </div>
             }
           >
-            <ProductList initialProducts={products} categories={categories} userRole={role} />
+            <ProductList
+              businessId={businessId}
+              initialProducts={products}
+              categories={categories}
+              userRole={role}
+            />
           </Suspense>
         </main>
       </PullToRefresh>

@@ -1,6 +1,6 @@
 'use server'
 
-import { and, eq, isNull, sql, desc } from 'drizzle-orm'
+import { and, eq, sql, desc } from 'drizzle-orm'
 import { db } from '@/db'
 import { products, stocktakes, stocktakeLines } from '@/db/schema'
 import { requireRole } from '@/lib/auth/requireRole'

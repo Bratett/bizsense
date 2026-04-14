@@ -86,7 +86,7 @@ function mockAtomicWrite(orderId = 'order-001') {
     let insertCounter = 0
 
     const mockTx = {
-      insert: vi.fn((table: unknown) => ({
+      insert: vi.fn((_table: unknown) => ({
         values: vi.fn((data: unknown) => {
           const tableName =
             insertCounter === 0 ? 'orders' : insertCounter === 1 ? 'orderLines' : 'paymentsReceived'
@@ -120,11 +120,6 @@ function mockSession(role: 'owner' | 'manager' | 'cashier' = 'owner') {
       fullName: 'Test Owner',
     },
   })
-}
-
-function mockAccountLookup() {
-  const accountRows = Object.entries(ACCOUNT_IDS).map(([code, id]) => ({ id, code }))
-  vi.mocked(db.select).mockReturnValue(makeChain(accountRows) as never)
 }
 
 /** Sets up db.select mock for credit sale: customer → outstanding → accounts */

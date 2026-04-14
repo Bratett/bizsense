@@ -256,7 +256,7 @@ describe('FX rate locking in createCashOrder', () => {
         let insertCounter = 0
 
         const mockTx = {
-          insert: vi.fn((table: unknown) => ({
+          insert: vi.fn((_table: unknown) => ({
             values: vi.fn((data: unknown) => {
               const tableName =
                 insertCounter === 0

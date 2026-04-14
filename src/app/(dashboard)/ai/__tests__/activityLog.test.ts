@@ -35,7 +35,7 @@ import { getAiActivityLog, reverseAiAction } from '@/actions/aiPromotions'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const BUSINESS_ID = 'biz-test-001'
-const OTHER_BIZ = 'biz-other-999'
+const _OTHER_BIZ = 'biz-other-999'
 const USER_ID = 'user-owner-001'
 const PENDING_ID = 'pending-001'
 

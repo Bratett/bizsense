@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronRight, Plus } from 'lucide-react'
 import type { OrderListItem } from '@/actions/orders'
+import { useOrders } from '@/lib/offline/dexieHooks'
 import SwipeableRow from '@/components/SwipeableRow.client'
 import { formatGhs, formatDate } from '@/lib/format'
 
@@ -39,8 +40,8 @@ function PaymentBadge({
   amountPaid,
 }: {
   paymentStatus: string
-  totalAmount: string | null
-  amountPaid: string | null
+  totalAmount: number | string | null
+  amountPaid: number | string | null
 }) {
   const outstanding = Math.max(0, Number(totalAmount ?? 0) - Number(amountPaid ?? 0))
   if (paymentStatus === 'paid') {
@@ -54,10 +55,38 @@ function PaymentBadge({
   )
 }
 
+// Normalised display shape used by the list — compatible with both
+// DexieOrderWithCustomer (numbers) and OrderListItem (strings)
+interface DisplayOrder {
+  id: string
+  orderNumber: string
+  customerName: string | null
+  orderDate: string
+  paymentStatus: string
+  totalAmount: number | string | null
+  amountPaid: number | string | null
+  paymentMethod: string | null
+}
+
+function fromOrderListItem(o: OrderListItem): DisplayOrder {
+  return {
+    id: o.id,
+    orderNumber: o.orderNumber,
+    customerName: o.customerName,
+    orderDate: o.orderDate,
+    paymentStatus: o.paymentStatus,
+    totalAmount: o.totalAmount,
+    amountPaid: o.amountPaid,
+    paymentMethod: o.paymentMethod,
+  }
+}
+
 export default function OrderList({
+  businessId,
   initialOrders,
   activeTab,
 }: {
+  businessId: string
   initialOrders: OrderListItem[]
   activeTab: string
 }) {
@@ -65,7 +94,26 @@ export default function OrderList({
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
 
-  const filtered = initialOrders.filter((o) => {
+  // Live from Dexie — handles tab-based date/status filtering.
+  const dexieOrders = useOrders(businessId, { tab: activeTab })
+
+  // Build display list from Dexie (preferred) or SSR fallback
+  const allOrders: DisplayOrder[] =
+    dexieOrders !== undefined
+      ? dexieOrders.map((o) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          customerName: o.customerName,
+          orderDate: o.orderDate,
+          paymentStatus: o.paymentStatus,
+          totalAmount: o.totalAmount,
+          amountPaid: o.amountPaid,
+          paymentMethod: o.paymentMethod ?? null,
+        }))
+      : initialOrders.map(fromOrderListItem)
+
+  // Search is applied client-side (avoids re-querying Dexie on every keystroke)
+  const filtered = allOrders.filter((o) => {
     if (!search) return true
     const term = search.toLowerCase()
     return (
@@ -82,7 +130,7 @@ export default function OrderList({
 
   // Outstanding summary for unpaid tab
   const showOutstandingSummary = activeTab === 'unpaid'
-  const totalOutstanding = initialOrders.reduce((sum, o) => {
+  const totalOutstanding = allOrders.reduce((sum, o) => {
     return sum + Math.max(0, Number(o.totalAmount ?? 0) - Number(o.amountPaid ?? 0))
   }, 0)
 
@@ -115,11 +163,11 @@ export default function OrderList({
         </Tabs>
 
         {/* Outstanding summary */}
-        {showOutstandingSummary && initialOrders.length > 0 && (
+        {showOutstandingSummary && allOrders.length > 0 && (
           <Alert className="mt-3 border-amber-200 bg-amber-50 text-amber-800">
             <AlertDescription>
-              GHS {totalOutstanding.toFixed(2)} outstanding across {initialOrders.length} invoice
-              {initialOrders.length !== 1 ? 's' : ''}
+              GHS {totalOutstanding.toFixed(2)} outstanding across {allOrders.length} invoice
+              {allOrders.length !== 1 ? 's' : ''}
             </AlertDescription>
           </Alert>
         )}
@@ -136,7 +184,7 @@ export default function OrderList({
 
         {/* List */}
         <div className="mt-4 space-y-3">
-          {filtered.length === 0 && initialOrders.length === 0 && (
+          {filtered.length === 0 && allOrders.length === 0 && (
             <EmptyState
               icon={
                 <svg
@@ -159,7 +207,7 @@ export default function OrderList({
             />
           )}
 
-          {filtered.length === 0 && initialOrders.length > 0 && (
+          {filtered.length === 0 && allOrders.length > 0 && (
             <EmptyState
               icon={
                 <svg
