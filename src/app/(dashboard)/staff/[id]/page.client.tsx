@@ -84,10 +84,7 @@ export default function StaffDetailView({ member }: { member: StaffDetail }) {
             <div>
               <h2 className="text-xl font-bold text-gray-900">{member.fullName}</h2>
               {member.roleTitle && <p className="text-sm text-gray-500">{member.roleTitle}</p>}
-              <Badge
-                className="mt-1"
-                variant={member.isActive ? 'default' : 'secondary'}
-              >
+              <Badge className="mt-1" variant={member.isActive ? 'default' : 'secondary'}>
                 {member.isActive ? 'Active' : 'Inactive'}
               </Badge>
             </div>
@@ -140,8 +137,8 @@ export default function StaffDetailView({ member }: { member: StaffDetail }) {
                 <div className="flex items-start gap-2 text-sm text-amber-700">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>
-                    This will mark the staff member as inactive. You can reactivate them by
-                    editing their profile. This cannot be done if they have unpaid payroll.
+                    This will mark the staff member as inactive. You can reactivate them by editing
+                    their profile. This cannot be done if they have unpaid payroll.
                   </span>
                 </div>
                 <div className="flex gap-3">

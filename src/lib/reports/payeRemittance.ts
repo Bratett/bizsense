@@ -74,9 +74,7 @@ export async function getPayeRemittanceReport(
   // ── 5. Due date: last calendar day of the period month ────────────────────
   // new Date(year, month + 1, 0) = day 0 of next month = last day of this month
   const periodEnd = new Date(run.periodEnd + 'T00:00:00Z')
-  const lastDay = new Date(
-    Date.UTC(periodEnd.getUTCFullYear(), periodEnd.getUTCMonth() + 1, 0),
-  )
+  const lastDay = new Date(Date.UTC(periodEnd.getUTCFullYear(), periodEnd.getUTCMonth() + 1, 0))
   const dueDate = lastDay.toISOString().slice(0, 10)
 
   return {

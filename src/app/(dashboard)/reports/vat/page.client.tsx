@@ -353,7 +353,6 @@ export default function VatReportClient({
               </tfoot>
             </Table>
           )}
-
         </CardContent>
       </Card>
 

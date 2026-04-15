@@ -38,8 +38,7 @@ export function computeMonthlyDepreciation(
 ): DepreciationResult {
   const depreciableAmount = input.purchaseCost - input.residualValue
 
-  const standardMonthlyAmount =
-    Math.round((depreciableAmount / input.usefulLifeMonths) * 100) / 100
+  const standardMonthlyAmount = Math.round((depreciableAmount / input.usefulLifeMonths) * 100) / 100
 
   const base: Pick<DepreciationResult, 'assetId' | 'standardMonthlyAmount'> = {
     assetId: input.assetId,
@@ -65,8 +64,7 @@ export function computeMonthlyDepreciation(
   const purchaseMonth = purchaseParts[1] // 1-based
 
   const purchasedAfterTarget =
-    purchaseYear > targetYear ||
-    (purchaseYear === targetYear && purchaseMonth > targetMonth)
+    purchaseYear > targetYear || (purchaseYear === targetYear && purchaseMonth > targetMonth)
 
   if (purchasedAfterTarget) {
     return {

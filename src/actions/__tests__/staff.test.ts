@@ -139,13 +139,11 @@ describe('createStaff', () => {
     mockUser('owner')
 
     // Phone uniqueness check returns an existing record
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: 'existing-staff-id' }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: 'existing-staff-id' }]) as never)
 
-    await expect(
-      createStaff({ fullName: 'Ama Asante', phone: '0244000001' }),
-    ).rejects.toThrow('A staff member with phone 0244000001 already exists.')
+    await expect(createStaff({ fullName: 'Ama Asante', phone: '0244000001' })).rejects.toThrow(
+      'A staff member with phone 0244000001 already exists.',
+    )
   })
 })
 

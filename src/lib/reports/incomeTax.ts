@@ -44,8 +44,7 @@ export async function getIncomeTaxEstimate(
   const pl = await getProfitAndLoss(businessId, { from: yearStart, to: asOfDate })
 
   // ── 4. Estimate tax (zero for a loss year) ────────────────────────────────
-  const estimatedTax =
-    pl.netProfit > 0 ? Math.round(pl.netProfit * GHANA_CIT_RATE * 100) / 100 : 0
+  const estimatedTax = pl.netProfit > 0 ? Math.round(pl.netProfit * GHANA_CIT_RATE * 100) / 100 : 0
 
   const [financialYear] = asOfDate.split('-')
 

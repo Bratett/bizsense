@@ -22,7 +22,8 @@ export default async function PayrollRemittanceServerPage({
   const [ssnitReport, payeReport, bizRows] = await Promise.all([
     getSsnitRemittanceReport(businessId, runId),
     getPayeRemittanceReport(businessId, runId),
-    db.select({ name: businesses.name, ssnitNumber: businesses.ssnitNumber })
+    db
+      .select({ name: businesses.name, ssnitNumber: businesses.ssnitNumber })
       .from(businesses)
       .where(eq(businesses.id, businessId)),
   ])

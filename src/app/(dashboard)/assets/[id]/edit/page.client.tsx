@@ -25,9 +25,7 @@ export default function EditAssetForm({ asset }: { asset: FixedAssetDetail }) {
   const [name, setName] = useState(asset.name)
   const [category, setCategory] = useState(asset.category ?? '')
   const [usefulLifeMonths, setUsefulLifeMonths] = useState(String(asset.usefulLifeMonths))
-  const [residualValue, setResidualValue] = useState(
-    parseFloat(asset.residualValue).toString(),
-  )
+  const [residualValue, setResidualValue] = useState(parseFloat(asset.residualValue).toString())
   const [notes, setNotes] = useState(asset.notes ?? '')
 
   const handleSubmit = () => {
@@ -62,7 +60,9 @@ export default function EditAssetForm({ asset }: { asset: FixedAssetDetail }) {
 
         {/* Read-only context */}
         <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-100">
-          Purchase cost ({parseFloat(asset.purchaseCost).toLocaleString('en-GH', { minimumFractionDigits: 2 })} GHS) and purchase date cannot be changed as this would affect posted journal entries.
+          Purchase cost (
+          {parseFloat(asset.purchaseCost).toLocaleString('en-GH', { minimumFractionDigits: 2 })}{' '}
+          GHS) and purchase date cannot be changed as this would affect posted journal entries.
         </div>
 
         <div className="mt-4 space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
@@ -102,10 +102,7 @@ export default function EditAssetForm({ asset }: { asset: FixedAssetDetail }) {
 
           {/* Useful Life */}
           <div>
-            <label
-              htmlFor="useful-life"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="useful-life" className="mb-1 block text-sm font-medium text-gray-700">
               Useful Life (months) *
             </label>
             <input
@@ -162,11 +159,7 @@ export default function EditAssetForm({ asset }: { asset: FixedAssetDetail }) {
           >
             Cancel
           </Button>
-          <Button
-            className="flex-1 h-13"
-            onClick={handleSubmit}
-            disabled={isPending || !name}
-          >
+          <Button className="flex-1 h-13" onClick={handleSubmit} disabled={isPending || !name}>
             {isPending ? 'Saving…' : 'Save Changes'}
           </Button>
         </div>

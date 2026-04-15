@@ -101,29 +101,107 @@ function makeUpdateChain() {
 
 // Active PAYE bands (GRA 2024) — used across multiple tests
 const PAYE_BANDS = [
-  { lowerBound: '0', upperBound: '4380', rate: '0.000000', effectiveFrom: '2024-01-01', effectiveTo: null, id: 'b1', businessId: BUSINESS_ID, createdAt: new Date() },
-  { lowerBound: '4380', upperBound: '5100', rate: '0.050000', effectiveFrom: '2024-01-01', effectiveTo: null, id: 'b2', businessId: BUSINESS_ID, createdAt: new Date() },
-  { lowerBound: '5100', upperBound: '6420', rate: '0.100000', effectiveFrom: '2024-01-01', effectiveTo: null, id: 'b3', businessId: BUSINESS_ID, createdAt: new Date() },
-  { lowerBound: '6420', upperBound: '47880', rate: '0.175000', effectiveFrom: '2024-01-01', effectiveTo: null, id: 'b4', businessId: BUSINESS_ID, createdAt: new Date() },
-  { lowerBound: '47880', upperBound: '240000', rate: '0.250000', effectiveFrom: '2024-01-01', effectiveTo: null, id: 'b5', businessId: BUSINESS_ID, createdAt: new Date() },
-  { lowerBound: '240000', upperBound: null, rate: '0.300000', effectiveFrom: '2024-01-01', effectiveTo: null, id: 'b6', businessId: BUSINESS_ID, createdAt: new Date() },
+  {
+    lowerBound: '0',
+    upperBound: '4380',
+    rate: '0.000000',
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+    id: 'b1',
+    businessId: BUSINESS_ID,
+    createdAt: new Date(),
+  },
+  {
+    lowerBound: '4380',
+    upperBound: '5100',
+    rate: '0.050000',
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+    id: 'b2',
+    businessId: BUSINESS_ID,
+    createdAt: new Date(),
+  },
+  {
+    lowerBound: '5100',
+    upperBound: '6420',
+    rate: '0.100000',
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+    id: 'b3',
+    businessId: BUSINESS_ID,
+    createdAt: new Date(),
+  },
+  {
+    lowerBound: '6420',
+    upperBound: '47880',
+    rate: '0.175000',
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+    id: 'b4',
+    businessId: BUSINESS_ID,
+    createdAt: new Date(),
+  },
+  {
+    lowerBound: '47880',
+    upperBound: '240000',
+    rate: '0.250000',
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+    id: 'b5',
+    businessId: BUSINESS_ID,
+    createdAt: new Date(),
+  },
+  {
+    lowerBound: '240000',
+    upperBound: null,
+    rate: '0.300000',
+    effectiveFrom: '2024-01-01',
+    effectiveTo: null,
+    id: 'b6',
+    businessId: BUSINESS_ID,
+    createdAt: new Date(),
+  },
 ]
 
 // Sample active staff (monthly, GHS 2,000 / month)
 const ACTIVE_STAFF = [
   {
-    id: STAFF_ID_1, businessId: BUSINESS_ID, fullName: 'Ama Asante',
-    baseSalary: '2000', salaryType: 'monthly', isActive: true,
-    phone: null, roleTitle: null, ssnitNumber: null, tin: null,
-    bankName: null, bankAccount: null, momoNumber: null,
-    startDate: null, userId: null, createdAt: new Date(), updatedAt: new Date(),
+    id: STAFF_ID_1,
+    businessId: BUSINESS_ID,
+    fullName: 'Ama Asante',
+    baseSalary: '2000',
+    salaryType: 'monthly',
+    isActive: true,
+    phone: null,
+    roleTitle: null,
+    ssnitNumber: null,
+    tin: null,
+    bankName: null,
+    bankAccount: null,
+    momoNumber: null,
+    startDate: null,
+    userId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
-    id: STAFF_ID_2, businessId: BUSINESS_ID, fullName: 'Kwame Mensah',
-    baseSalary: '2000', salaryType: 'monthly', isActive: true,
-    phone: null, roleTitle: null, ssnitNumber: null, tin: null,
-    bankName: null, bankAccount: null, momoNumber: null,
-    startDate: null, userId: null, createdAt: new Date(), updatedAt: new Date(),
+    id: STAFF_ID_2,
+    businessId: BUSINESS_ID,
+    fullName: 'Kwame Mensah',
+    baseSalary: '2000',
+    salaryType: 'monthly',
+    isActive: true,
+    phone: null,
+    roleTitle: null,
+    ssnitNumber: null,
+    tin: null,
+    bankName: null,
+    bankAccount: null,
+    momoNumber: null,
+    startDate: null,
+    userId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]
 
@@ -236,9 +314,13 @@ describe('updatePayrollLine', () => {
     )
 
     // PAYE bands for recompute
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ lineId: LINE_ID, runId: RUN_ID, grossSalary: '2000', currentOtherDeductions: '0' }]) as never,
-    ).mockReturnValueOnce(makeChain(PAYE_BANDS) as never)
+    vi.mocked(db.select)
+      .mockReturnValueOnce(
+        makeChain([
+          { lineId: LINE_ID, runId: RUN_ID, grossSalary: '2000', currentOtherDeductions: '0' },
+        ]) as never,
+      )
+      .mockReturnValueOnce(makeChain(PAYE_BANDS) as never)
 
     let capturedLineSet: unknown = null
     vi.mocked(db.transaction).mockImplementation(async (fn) => {
@@ -311,18 +393,38 @@ describe('approvePayrollRun', () => {
   // totalCostToEmployer = (2000 - 0) + 260 = 2260
   const LINES = [
     {
-      id: 'line-001', payrollRunId: RUN_ID, staffId: STAFF_ID_1,
-      grossSalary: '2000', ssnitEmployee: '110.00', ssnitEmployer: '260.00',
-      payeTax: '270.38', otherDeductions: '0', netSalary: '1619.62',
-      paymentMethod: null, isPaid: false, paidAt: null,
-      paymentJournalEntryId: null, createdAt: new Date(), updatedAt: new Date(),
+      id: 'line-001',
+      payrollRunId: RUN_ID,
+      staffId: STAFF_ID_1,
+      grossSalary: '2000',
+      ssnitEmployee: '110.00',
+      ssnitEmployer: '260.00',
+      payeTax: '270.38',
+      otherDeductions: '0',
+      netSalary: '1619.62',
+      paymentMethod: null,
+      isPaid: false,
+      paidAt: null,
+      paymentJournalEntryId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
-      id: 'line-002', payrollRunId: RUN_ID, staffId: STAFF_ID_2,
-      grossSalary: '2000', ssnitEmployee: '110.00', ssnitEmployer: '260.00',
-      payeTax: '270.38', otherDeductions: '0', netSalary: '1619.62',
-      paymentMethod: null, isPaid: false, paidAt: null,
-      paymentJournalEntryId: null, createdAt: new Date(), updatedAt: new Date(),
+      id: 'line-002',
+      payrollRunId: RUN_ID,
+      staffId: STAFF_ID_2,
+      grossSalary: '2000',
+      ssnitEmployee: '110.00',
+      ssnitEmployer: '260.00',
+      payeTax: '270.38',
+      otherDeductions: '0',
+      netSalary: '1619.62',
+      paymentMethod: null,
+      isPaid: false,
+      paidAt: null,
+      paymentJournalEntryId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ]
 
@@ -459,9 +561,7 @@ describe('approvePayrollRun', () => {
     })
 
     // atomicTransactionWrite throws → simulates journal insert failure
-    vi.mocked(atomicTransactionWrite).mockRejectedValue(
-      new Error('Journal entry insert failed'),
-    )
+    vi.mocked(atomicTransactionWrite).mockRejectedValue(new Error('Journal entry insert failed'))
 
     await expect(approvePayrollRun(RUN_ID)).rejects.toThrow('Journal entry insert failed')
 

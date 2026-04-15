@@ -33,8 +33,7 @@ async function fetchAccountByCode(businessId: string, code: string) {
     .select({ id: accounts.id, code: accounts.code })
     .from(accounts)
     .where(and(eq(accounts.businessId, businessId), eq(accounts.code, code)))
-  if (!acct)
-    throw new Error(`Required account ${code} not found. Please complete business setup.`)
+  if (!acct) throw new Error(`Required account ${code} not found. Please complete business setup.`)
   return acct
 }
 
@@ -204,10 +203,7 @@ export async function checkUnrunDepreciation(): Promise<UnrunDepreciationCheck> 
     .select({ entryDate: journalEntries.entryDate })
     .from(journalEntries)
     .where(
-      and(
-        eq(journalEntries.businessId, businessId),
-        eq(journalEntries.sourceType, 'depreciation'),
-      ),
+      and(eq(journalEntries.businessId, businessId), eq(journalEntries.sourceType, 'depreciation')),
     )
     .orderBy(desc(journalEntries.entryDate))
     .limit(1)

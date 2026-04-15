@@ -103,10 +103,10 @@ describe('recordPayrollPayment', () => {
     vi.mocked(db.select).mockImplementation(() => {
       selectCall++
       if (selectCall === 1) return makeChain([APPROVED_LINE]) as never // line+run lookup
-      if (selectCall === 2) return makeChain([ACCOUNT_CASH]) as never   // fetchAccountByCode payAcct
-      if (selectCall === 3) return makeChain([ACCOUNT_2500]) as never   // fetchAccountByCode 2500
-      if (selectCall === 4) return makeChain([STAFF_ROW]) as never       // staff name
-      return makeChain([{ cnt: 1 }]) as never                           // unpaid count
+      if (selectCall === 2) return makeChain([ACCOUNT_CASH]) as never // fetchAccountByCode payAcct
+      if (selectCall === 3) return makeChain([ACCOUNT_2500]) as never // fetchAccountByCode 2500
+      if (selectCall === 4) return makeChain([STAFF_ROW]) as never // staff name
+      return makeChain([{ cnt: 1 }]) as never // unpaid count
     })
 
     let capturedJournalInput: unknown = null
@@ -263,9 +263,7 @@ describe('recordBatchPayrollPayment', () => {
     mockUser()
 
     // Batch fetch returns two unpaid lines
-    vi.mocked(db.select).mockReturnValue(
-      makeChain([{ id: LINE_ID_1 }, { id: LINE_ID_2 }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValue(makeChain([{ id: LINE_ID_1 }, { id: LINE_ID_2 }]) as never)
 
     // recordPayrollPayment is called internally — mock db responses for each call
     // Since we're calling the real recordPayrollPayment, we need to set up full mocks.
@@ -282,7 +280,7 @@ describe('recordBatchPayrollPayment', () => {
 
     // For each recordPayrollPayment call within the batch, db.select will be
     // called for: line+run, payAcct, 2500, staff, unpaid count
-    let innerSelectCall = 0
+    const innerSelectCall = 0
     const mockLineData = [
       { ...APPROVED_LINE, lineId: LINE_ID_1 },
       { ...APPROVED_LINE, lineId: LINE_ID_2 },
@@ -320,11 +318,11 @@ describe('recordBatchPayrollPayment', () => {
     // Batch fetch: one unpaid line
     vi.mocked(db.select)
       .mockReturnValueOnce(makeChain([{ id: LINE_ID_1 }]) as never) // batch fetch
-      .mockReturnValueOnce(makeChain([APPROVED_LINE]) as never)     // line+run
-      .mockReturnValueOnce(makeChain([ACCOUNT_CASH]) as never)      // payAcct
-      .mockReturnValueOnce(makeChain([ACCOUNT_2500]) as never)      // 2500
-      .mockReturnValueOnce(makeChain([STAFF_ROW]) as never)          // staff
-      .mockReturnValueOnce(makeChain([{ cnt: 0 }]) as never)         // unpaid count = 0
+      .mockReturnValueOnce(makeChain([APPROVED_LINE]) as never) // line+run
+      .mockReturnValueOnce(makeChain([ACCOUNT_CASH]) as never) // payAcct
+      .mockReturnValueOnce(makeChain([ACCOUNT_2500]) as never) // 2500
+      .mockReturnValueOnce(makeChain([STAFF_ROW]) as never) // staff
+      .mockReturnValueOnce(makeChain([{ cnt: 0 }]) as never) // unpaid count = 0
 
     vi.mocked(atomicTransactionWrite).mockImplementation(async (_ji, callback) => {
       const tx = { update: vi.fn(() => makeUpdateChain()) }
@@ -355,7 +353,7 @@ describe('recordBatchPayrollPayment', () => {
 
     vi.mocked(db.select)
       .mockReturnValueOnce(makeChain([{ id: LINE_ID_1 }]) as never) // batch fetch
-      .mockReturnValueOnce(makeChain([APPROVED_LINE]) as never)     // line+run
+      .mockReturnValueOnce(makeChain([APPROVED_LINE]) as never) // line+run
       .mockReturnValueOnce(makeChain([ACCOUNT_CASH]) as never)
       .mockReturnValueOnce(makeChain([ACCOUNT_2500]) as never)
       .mockReturnValueOnce(makeChain([STAFF_ROW]) as never)

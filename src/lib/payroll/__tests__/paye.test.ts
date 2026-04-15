@@ -62,12 +62,8 @@ describe('computePayrollDeductions', () => {
     // payeTax = computeMonthlyPaye(2000) — annual 24000
     // 0 + 36 + 132 + (24000-6420)×0.175 / 12 = (0+36+132+3076.50)/12 = 3244.50/12 = 270.375 → 270.38
     expect(result.payeTax).toBe(270.38)
-    expect(result.netSalary).toBe(
-      Math.round((2000 - 110 - 270.38 - 0) * 100) / 100,
-    ) // 1619.62
-    expect(result.totalCostToEmployer).toBe(
-      Math.round((2000 - 0 + 260) * 100) / 100,
-    ) // 2260
+    expect(result.netSalary).toBe(Math.round((2000 - 110 - 270.38 - 0) * 100) / 100) // 1619.62
+    expect(result.totalCostToEmployer).toBe(Math.round((2000 - 0 + 260) * 100) / 100) // 2260
   })
 })
 

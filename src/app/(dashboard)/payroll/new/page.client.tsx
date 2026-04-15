@@ -73,14 +73,11 @@ export default function NewPayrollRun() {
             Payroll Period
           </h2>
           <p className="mb-4 text-sm text-gray-600">
-            Select the month to generate payroll for. BizSense will compute PAYE and SSNIT for
-            all active staff members using the current GRA schedule.
+            Select the month to generate payroll for. BizSense will compute PAYE and SSNIT for all
+            active staff members using the current GRA schedule.
           </p>
           <div>
-            <label
-              htmlFor="period-month"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="period-month" className="mb-1 block text-sm font-medium text-gray-700">
               Month
             </label>
             <input

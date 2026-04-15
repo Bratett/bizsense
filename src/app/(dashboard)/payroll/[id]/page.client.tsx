@@ -43,7 +43,11 @@ function formatPeriodLabel(periodStart: string): string {
 
 function formatDateShort(d: Date | null | undefined): string {
   if (!d) return '—'
-  return new Date(d).toLocaleDateString('en-GH', { day: '2-digit', month: 'short', year: 'numeric' })
+  return new Date(d).toLocaleDateString('en-GH', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 const METHOD_LABELS: Record<string, string> = {
@@ -78,7 +82,12 @@ function AdjustmentPanel({
   onCancel,
 }: {
   line: PayrollLineDetail
-  onSaved: (updated: { lineId: string; totalGross: string; totalDeductions: string; totalNet: string }) => void
+  onSaved: (updated: {
+    lineId: string
+    totalGross: string
+    totalDeductions: string
+    totalNet: string
+  }) => void
   onCancel: () => void
 }) {
   const [isPending, startTransition] = useTransition()
@@ -86,7 +95,11 @@ function AdjustmentPanel({
 
   const currentOther = Number(line.otherDeductions)
   const [rawValue, setRawValue] = useState(
-    currentOther < 0 ? String(Math.abs(currentOther)) : currentOther > 0 ? String(currentOther) : '',
+    currentOther < 0
+      ? String(Math.abs(currentOther))
+      : currentOther > 0
+        ? String(currentOther)
+        : '',
   )
   const [adjustType, setAdjustType] = useState<'bonus' | 'deduction'>(
     currentOther < 0 ? 'bonus' : 'deduction',
@@ -235,9 +248,7 @@ function JournalPreview({
               <tr>
                 <td className="py-1.5 text-gray-700">2500 Net Salaries Payable</td>
                 <td className="py-1.5 text-right text-gray-400">—</td>
-                <td className="py-1.5 text-right font-mono text-gray-900">
-                  {fmt(totalNet)}
-                </td>
+                <td className="py-1.5 text-right font-mono text-gray-900">{fmt(totalNet)}</td>
               </tr>
             </tbody>
             <tfoot>
@@ -376,9 +387,12 @@ export default function PayrollRunDetail({ initialRun }: { initialRun: PayrollRu
   const period = formatPeriodLabel(run.periodStart)
 
   // Called when a line adjustment is saved — updates the line in state + run totals
-  function handleLineSaved(
-    updated: { lineId: string; totalGross: string; totalDeductions: string; totalNet: string },
-  ) {
+  function handleLineSaved(updated: {
+    lineId: string
+    totalGross: string
+    totalDeductions: string
+    totalNet: string
+  }) {
     setRun((prev) => ({
       ...prev,
       totalGross: updated.totalGross,
@@ -604,49 +618,47 @@ export default function PayrollRunDetail({ initialRun }: { initialRun: PayrollRu
           </table>
 
           {/* Inline adjustment panel below edited row */}
-          {editingLineId && (() => {
-            const line = run.lines.find((l) => l.id === editingLineId)
-            if (!line) return null
-            return (
-              <div className="border-t border-gray-100 px-4 pb-4 pt-2">
-                <p className="mb-2 text-sm font-medium text-gray-700">
-                  Adjusting: {line.staffName}
-                </p>
-                <AdjustmentPanel
-                  line={line}
-                  onSaved={handleLineSaved}
-                  onCancel={() => setEditingLineId(null)}
-                />
-              </div>
-            )
-          })()}
+          {editingLineId &&
+            (() => {
+              const line = run.lines.find((l) => l.id === editingLineId)
+              if (!line) return null
+              return (
+                <div className="border-t border-gray-100 px-4 pb-4 pt-2">
+                  <p className="mb-2 text-sm font-medium text-gray-700">
+                    Adjusting: {line.staffName}
+                  </p>
+                  <AdjustmentPanel
+                    line={line}
+                    onSaved={handleLineSaved}
+                    onCancel={() => setEditingLineId(null)}
+                  />
+                </div>
+              )
+            })()}
 
           {/* Inline Pay Now panel */}
-          {payingLineId && (() => {
-            const line = run.lines.find((l) => l.id === payingLineId)
-            if (!line) return null
-            return (
-              <div className="border-t border-gray-100 px-4 pb-4 pt-2">
-                <PayNowPanel
-                  line={line}
-                  defaultMethod={batchMethod}
-                  defaultDate={batchDate}
-                  onPaid={handleLinePaid}
-                  onCancel={() => setPayingLineId(null)}
-                />
-              </div>
-            )
-          })()}
+          {payingLineId &&
+            (() => {
+              const line = run.lines.find((l) => l.id === payingLineId)
+              if (!line) return null
+              return (
+                <div className="border-t border-gray-100 px-4 pb-4 pt-2">
+                  <PayNowPanel
+                    line={line}
+                    defaultMethod={batchMethod}
+                    defaultDate={batchDate}
+                    onPaid={handleLinePaid}
+                    onCancel={() => setPayingLineId(null)}
+                  />
+                </div>
+              )
+            })()}
         </div>
 
         {/* ── Approval section (draft only) ── */}
         {isDraft && (
           <div className="mt-6 space-y-4">
-            <JournalPreview
-              lines={run.lines}
-              totalGross={run.totalGross}
-              totalNet={run.totalNet}
-            />
+            <JournalPreview lines={run.lines} totalGross={run.totalGross} totalNet={run.totalNet} />
 
             <Button
               className="h-13 w-full text-base"
@@ -661,7 +673,6 @@ export default function PayrollRunDetail({ initialRun }: { initialRun: PayrollRu
         {/* ── Payment section (approved or paid) ── */}
         {showPaymentSection && (
           <div className="mt-6 space-y-4">
-
             {/* Paid banner */}
             {isPaidStatus && (
               <Alert className="border-green-200 bg-green-50">
@@ -708,20 +719,14 @@ export default function PayrollRunDetail({ initialRun }: { initialRun: PayrollRu
                       disabled={batchPending}
                     />
                   </div>
-                  <Button
-                    onClick={handleBatchPay}
-                    disabled={batchPending}
-                    className="h-9"
-                  >
+                  <Button onClick={handleBatchPay} disabled={batchPending} className="h-9">
                     {batchPending
                       ? 'Processing…'
                       : `Pay All Staff — ${METHOD_LABELS[batchMethod] ?? batchMethod}`}
                   </Button>
                 </div>
 
-                {batchError && (
-                  <p className="mt-3 text-xs text-red-600">{batchError}</p>
-                )}
+                {batchError && <p className="mt-3 text-xs text-red-600">{batchError}</p>}
                 {batchResult && (
                   <p className="mt-3 text-xs text-green-700">
                     {batchResult.paid} payment{batchResult.paid !== 1 ? 's' : ''} recorded
@@ -730,7 +735,8 @@ export default function PayrollRunDetail({ initialRun }: { initialRun: PayrollRu
                 )}
 
                 <p className="mt-3 text-xs text-gray-400">
-                  To pay staff via different methods, use the &ldquo;Pay Now&rdquo; link on each row.
+                  To pay staff via different methods, use the &ldquo;Pay Now&rdquo; link on each
+                  row.
                 </p>
               </div>
             )}

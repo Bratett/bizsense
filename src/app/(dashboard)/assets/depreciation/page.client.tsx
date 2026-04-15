@@ -83,10 +83,7 @@ export default function DepreciationRunPage({
                 Target Month
               </h2>
               <div>
-                <label
-                  htmlFor="dep-month"
-                  className="mb-1 block text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="dep-month" className="mb-1 block text-sm font-medium text-gray-700">
                   Month
                 </label>
                 <input
@@ -110,10 +107,14 @@ export default function DepreciationRunPage({
                 </h2>
                 <p className="mb-3 text-sm text-gray-600">
                   This will post depreciation for{' '}
-                  <span className="font-semibold">{activeAssets.length} active asset{activeAssets.length !== 1 ? 's' : ''}</span>:
+                  <span className="font-semibold">
+                    {activeAssets.length} active asset{activeAssets.length !== 1 ? 's' : ''}
+                  </span>
+                  :
                 </p>
                 <p className="mb-4 text-base font-semibold text-gray-900">
-                  Total monthly depreciation: {formatGhs(Math.round(totalMonthlyDepreciation * 100) / 100)}
+                  Total monthly depreciation:{' '}
+                  {formatGhs(Math.round(totalMonthlyDepreciation * 100) / 100)}
                 </p>
                 <ul className="divide-y divide-gray-50 text-sm">
                   {activeAssets.slice(0, 5).map((a) => {
@@ -171,8 +172,8 @@ export default function DepreciationRunPage({
 
                 {result.alreadyRun > 0 && (
                   <p className="mb-3 text-sm text-blue-700">
-                    {result.alreadyRun}{' '}
-                    {result.alreadyRun === 1 ? 'asset was' : 'assets were'} already depreciated for this month.
+                    {result.alreadyRun} {result.alreadyRun === 1 ? 'asset was' : 'assets were'}{' '}
+                    already depreciated for this month.
                   </p>
                 )}
 
@@ -225,9 +226,7 @@ export default function DepreciationRunPage({
                 onClick={handleRun}
                 disabled={isPending || activeAssets.length === 0}
               >
-                {isPending
-                  ? 'Running…'
-                  : `Run Depreciation — ${yearMonth}`}
+                {isPending ? 'Running…' : `Run Depreciation — ${yearMonth}`}
               </Button>
             </div>
           </>

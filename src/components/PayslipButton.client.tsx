@@ -148,7 +148,17 @@ export default function PayslipButton({
     } finally {
       setIsSharing(false)
     }
-  }, [generatePdf, payrollRunId, staffId, staffName, businessName, businessPhone, period, netSalary, staffPhone])
+  }, [
+    generatePdf,
+    payrollRunId,
+    staffId,
+    staffName,
+    businessName,
+    businessPhone,
+    period,
+    netSalary,
+    staffPhone,
+  ])
 
   const isLoading = isGenerating || isSharing
 

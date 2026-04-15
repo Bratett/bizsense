@@ -50,9 +50,7 @@ export default function NewAssetForm() {
   const residual = parseFloat(residualValue) || 0
   const life = parseInt(usefulLifeMonths) || 0
   const monthlyDepreciation =
-    cost > residual && life > 0
-      ? Math.round(((cost - residual) / life) * 100) / 100
-      : null
+    cost > residual && life > 0 ? Math.round(((cost - residual) / life) * 100) / 100 : null
 
   const handleSubmit = () => {
     setError(null)
@@ -125,10 +123,7 @@ export default function NewAssetForm() {
 
           {/* Purchase Date */}
           <div>
-            <label
-              htmlFor="purchase-date"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="purchase-date" className="mb-1 block text-sm font-medium text-gray-700">
               Purchase Date *
             </label>
             <input
@@ -142,10 +137,7 @@ export default function NewAssetForm() {
 
           {/* Purchase Cost */}
           <div>
-            <label
-              htmlFor="purchase-cost"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="purchase-cost" className="mb-1 block text-sm font-medium text-gray-700">
               Purchase Cost (GHS) *
             </label>
             <input
@@ -162,10 +154,7 @@ export default function NewAssetForm() {
 
           {/* Useful Life */}
           <div>
-            <label
-              htmlFor="useful-life"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="useful-life" className="mb-1 block text-sm font-medium text-gray-700">
               Useful Life (months) *
             </label>
             <input
@@ -229,8 +218,7 @@ export default function NewAssetForm() {
               Monthly depreciation: {formatGhs(monthlyDepreciation)}
             </p>
             <p className="mt-1 text-sm text-green-700">
-              Fully depreciated by:{' '}
-              {getFullyDepreciatedBy(purchaseDate, life)}
+              Fully depreciated by: {getFullyDepreciatedBy(purchaseDate, life)}
             </p>
           </div>
         )}

@@ -27,13 +27,9 @@ function StatusBadge({ status }: { status: string }) {
     )
   }
   if (status === 'paid') {
-    return (
-      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Paid</Badge>
-    )
+    return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Paid</Badge>
   }
-  return (
-    <Badge variant="secondary">Draft — pending approval</Badge>
-  )
+  return <Badge variant="secondary">Draft — pending approval</Badge>
 }
 
 export default function PayrollList({ initialRuns }: { initialRuns: PayrollRunSummary[] }) {
@@ -84,9 +80,7 @@ export default function PayrollList({ initialRuns }: { initialRuns: PayrollRunSu
                     </div>
                     <div className="text-right sm:text-left">
                       <p className="text-xs text-gray-400">Net</p>
-                      <p className="text-sm font-medium text-gray-700">
-                        {formatGHS(run.totalNet)}
-                      </p>
+                      <p className="text-sm font-medium text-gray-700">{formatGHS(run.totalNet)}</p>
                     </div>
                     <StatusBadge status={run.status} />
                   </div>

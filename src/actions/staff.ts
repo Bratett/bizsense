@@ -114,11 +114,7 @@ export async function updateStaff(staffId: string, input: UpdateStaffInput): Pro
       .select({ id: staff.id })
       .from(staff)
       .where(
-        and(
-          eq(staff.businessId, businessId),
-          eq(staff.phone, input.phone),
-          ne(staff.id, staffId),
-        ),
+        and(eq(staff.businessId, businessId), eq(staff.phone, input.phone), ne(staff.id, staffId)),
       )
       .limit(1)
 

@@ -64,8 +64,7 @@ export default function AssetList({
         ) : (
           <ul className="mt-6 space-y-3">
             {initialAssets.map((asset) => {
-              const depreciableAmount =
-                Number(asset.purchaseCost) - Number(asset.residualValue)
+              const depreciableAmount = Number(asset.purchaseCost) - Number(asset.residualValue)
               const pctDepreciated =
                 depreciableAmount > 0
                   ? Math.min(

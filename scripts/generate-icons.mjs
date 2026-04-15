@@ -44,18 +44,16 @@ function buildSvg(size, maskable = false) {
 }
 
 const icons = [
-  { file: 'icon-192.png',         size: 192, maskable: false },
-  { file: 'icon-512.png',         size: 512, maskable: false },
-  { file: 'icon-maskable-512.png',size: 512, maskable: true  },
+  { file: 'icon-192.png', size: 192, maskable: false },
+  { file: 'icon-512.png', size: 512, maskable: false },
+  { file: 'icon-maskable-512.png', size: 512, maskable: true },
   { file: 'apple-touch-icon.png', size: 180, maskable: false },
 ]
 
 for (const { file, size, maskable } of icons) {
   const svg = buildSvg(size, maskable)
   const outPath = resolve(publicDir, file)
-  await sharp(Buffer.from(svg))
-    .png()
-    .toFile(outPath)
+  await sharp(Buffer.from(svg)).png().toFile(outPath)
   console.log(`✓  ${file}  (${size}×${size}${maskable ? ', maskable' : ''})`)
 }
 

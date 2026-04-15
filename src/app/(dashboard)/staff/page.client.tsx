@@ -37,7 +37,8 @@ export default function StaffList({
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
-    const period = item.salaryType === 'daily' ? '/ day' : item.salaryType === 'hourly' ? '/ hr' : '/ mo'
+    const period =
+      item.salaryType === 'daily' ? '/ day' : item.salaryType === 'hourly' ? '/ hr' : '/ mo'
     return `GHS ${amount} ${period}`
   }
 
@@ -67,7 +68,9 @@ export default function StaffList({
             icon={<Users className="h-8 w-8" />}
             title={search ? 'No staff match your search' : 'No staff members yet'}
             subtitle={
-              search ? 'Try a different search term.' : 'Add your first staff member to get started.'
+              search
+                ? 'Try a different search term.'
+                : 'Add your first staff member to get started.'
             }
           />
         ) : (

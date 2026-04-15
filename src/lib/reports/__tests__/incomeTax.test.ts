@@ -2,20 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ─── Hoisted mock handles ─────────────────────────────────────────────────────
 
-const {
-  mockWhere,
-  mockFrom,
-  mockSelect,
-  mockGetProfitAndLoss,
-  mockGetFinancialYearStart,
-} = vi.hoisted(() => {
-  const mockWhere = vi.fn()
-  const mockFrom = vi.fn(() => ({ where: mockWhere }))
-  const mockSelect = vi.fn(() => ({ from: mockFrom }))
-  const mockGetProfitAndLoss = vi.fn()
-  const mockGetFinancialYearStart = vi.fn()
-  return { mockWhere, mockFrom, mockSelect, mockGetProfitAndLoss, mockGetFinancialYearStart }
-})
+const { mockWhere, mockFrom, mockSelect, mockGetProfitAndLoss, mockGetFinancialYearStart } =
+  vi.hoisted(() => {
+    const mockWhere = vi.fn()
+    const mockFrom = vi.fn(() => ({ where: mockWhere }))
+    const mockSelect = vi.fn(() => ({ from: mockFrom }))
+    const mockGetProfitAndLoss = vi.fn()
+    const mockGetFinancialYearStart = vi.fn()
+    return { mockWhere, mockFrom, mockSelect, mockGetProfitAndLoss, mockGetFinancialYearStart }
+  })
 
 vi.mock('@/db', () => ({
   db: { select: mockSelect },

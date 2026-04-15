@@ -6,10 +6,5 @@ export default async function DepreciationPage() {
   const session = await getServerSession()
   const assets = await listFixedAssets()
 
-  return (
-    <DepreciationRunPage
-      initialAssets={assets}
-      userRole={session.user.role}
-    />
-  )
+  return <DepreciationRunPage initialAssets={assets} userRole={session.user.role} />
 }

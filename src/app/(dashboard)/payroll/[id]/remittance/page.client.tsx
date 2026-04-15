@@ -83,7 +83,14 @@ export default function RemittancePage({
 
   // ── SSNIT CSV download ───────────────────────────────────────────────────
   function handleSsnitCsv() {
-    const header = ['Staff Name', 'SSNIT No', 'Gross Salary', 'Employee (5.5%)', 'Employer (13%)', 'Total SSNIT']
+    const header = [
+      'Staff Name',
+      'SSNIT No',
+      'Gross Salary',
+      'Employee (5.5%)',
+      'Employer (13%)',
+      'Total SSNIT',
+    ]
     const rows = ssnitReport.lines.map((l) => [
       l.staffName,
       l.ssnitNumber ?? '',
@@ -92,7 +99,14 @@ export default function RemittancePage({
       l.ssnitEmployer.toFixed(2),
       l.totalSsnit.toFixed(2),
     ])
-    rows.push(['TOTAL', '', ssnitReport.totalGross.toFixed(2), ssnitReport.totalEmployee.toFixed(2), ssnitReport.totalEmployer.toFixed(2), ssnitReport.totalRemittable.toFixed(2)])
+    rows.push([
+      'TOTAL',
+      '',
+      ssnitReport.totalGross.toFixed(2),
+      ssnitReport.totalEmployee.toFixed(2),
+      ssnitReport.totalEmployer.toFixed(2),
+      ssnitReport.totalRemittable.toFixed(2),
+    ])
     downloadCsv(`ssnit-remittance-${ssnitReport.period.end}.csv`, [header, ...rows])
   }
 
@@ -112,15 +126,9 @@ export default function RemittancePage({
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-4xl p-4 md:p-8">
-        <PageHeader
-          title="Remittance Summary"
-          subtitle={periodLabel}
-        />
+        <PageHeader title="Remittance Summary" subtitle={periodLabel} />
 
-        <Tabs
-          defaultValue="ssnit"
-          onValueChange={(v) => setActiveTab(v as 'ssnit' | 'paye')}
-        >
+        <Tabs defaultValue="ssnit" onValueChange={(v) => setActiveTab(v as 'ssnit' | 'paye')}>
           <TabsList className="mb-6">
             <TabsTrigger value="ssnit">SSNIT Remittance</TabsTrigger>
             <TabsTrigger value="paye">PAYE Remittance</TabsTrigger>
@@ -170,12 +178,16 @@ export default function RemittancePage({
                         <tr key={line.staffId} className="hover:bg-muted/30">
                           <td className="px-4 py-3 font-medium">{line.staffName}</td>
                           <td className="px-4 py-3 text-muted-foreground">
-                            {line.ssnitNumber ?? <span className="italic text-muted-foreground/60">—</span>}
+                            {line.ssnitNumber ?? (
+                              <span className="italic text-muted-foreground/60">—</span>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-right">{fmtGHS(line.grossSalary)}</td>
                           <td className="px-4 py-3 text-right">{fmtGHS(line.ssnitEmployee)}</td>
                           <td className="px-4 py-3 text-right">{fmtGHS(line.ssnitEmployer)}</td>
-                          <td className="px-4 py-3 text-right font-medium">{fmtGHS(line.totalSsnit)}</td>
+                          <td className="px-4 py-3 text-right font-medium">
+                            {fmtGHS(line.totalSsnit)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -184,9 +196,15 @@ export default function RemittancePage({
                         <td colSpan={2} className="px-4 py-3 font-semibold">
                           TOTAL SSNIT TO REMIT
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold">{fmtGHS(ssnitReport.totalGross)}</td>
-                        <td className="px-4 py-3 text-right font-semibold">{fmtGHS(ssnitReport.totalEmployee)}</td>
-                        <td className="px-4 py-3 text-right font-semibold">{fmtGHS(ssnitReport.totalEmployer)}</td>
+                        <td className="px-4 py-3 text-right font-semibold">
+                          {fmtGHS(ssnitReport.totalGross)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold">
+                          {fmtGHS(ssnitReport.totalEmployee)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold">
+                          {fmtGHS(ssnitReport.totalEmployer)}
+                        </td>
                         <td className="px-4 py-3 text-right font-semibold text-primary">
                           {fmtGHS(ssnitReport.totalRemittable)}
                         </td>
@@ -208,7 +226,10 @@ export default function RemittancePage({
                 <p className="mt-1 text-sm text-blue-800 dark:text-blue-300">
                   Reference: <strong>{businessName}</strong>
                   {businessSsnitNumber && (
-                    <> — SSNIT Employer No: <strong>{businessSsnitNumber}</strong></>
+                    <>
+                      {' '}
+                      — SSNIT Employer No: <strong>{businessSsnitNumber}</strong>
+                    </>
                   )}
                 </p>
                 <p className="mt-1 text-sm text-blue-800 dark:text-blue-300">
@@ -263,7 +284,9 @@ export default function RemittancePage({
                             {line.tin ?? <span className="italic text-muted-foreground/60">—</span>}
                           </td>
                           <td className="px-4 py-3 text-right">{fmtGHS(line.grossSalary)}</td>
-                          <td className="px-4 py-3 text-right font-medium">{fmtGHS(line.payeTax)}</td>
+                          <td className="px-4 py-3 text-right font-medium">
+                            {fmtGHS(line.payeTax)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -272,7 +295,9 @@ export default function RemittancePage({
                         <td colSpan={2} className="px-4 py-3 font-semibold">
                           TOTAL PAYE TO REMIT
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold">{fmtGHS(payeReport.totalGross)}</td>
+                        <td className="px-4 py-3 text-right font-semibold">
+                          {fmtGHS(payeReport.totalGross)}
+                        </td>
                         <td className="px-4 py-3 text-right font-semibold text-primary">
                           {fmtGHS(payeReport.totalPaye)}
                         </td>

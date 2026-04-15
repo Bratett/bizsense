@@ -71,14 +71,15 @@ async function fetchAccountByCode(businessId: string, code: string) {
     .select({ id: accounts.id, code: accounts.code })
     .from(accounts)
     .where(and(eq(accounts.businessId, businessId), eq(accounts.code, code)))
-  if (!acct)
-    throw new Error(`Required account ${code} not found. Please complete business setup.`)
+  if (!acct) throw new Error(`Required account ${code} not found. Please complete business setup.`)
   return acct
 }
 
-async function resolveAssetAccounts(
-  businessId: string,
-): Promise<{ assetAccountId: string; depreciationAccountId: string; accDepreciationAccountId: string }> {
+async function resolveAssetAccounts(businessId: string): Promise<{
+  assetAccountId: string
+  depreciationAccountId: string
+  accDepreciationAccountId: string
+}> {
   const codes = ['1500', '6008', '1510']
   const rows = await db
     .select({ id: accounts.id, code: accounts.code })
@@ -315,7 +316,11 @@ export async function getDepreciationSchedule(id: string): Promise<DepreciationS
   let year = purchaseParts[0]
   let month = purchaseParts[1] // 1-based
 
-  for (let i = 0; i < usefulLifeMonths + 1 && accumulated < purchaseCost - residualValue - 0.01; i++) {
+  for (
+    let i = 0;
+    i < usefulLifeMonths + 1 && accumulated < purchaseCost - residualValue - 0.01;
+    i++
+  ) {
     const result = computeMonthlyDepreciation(
       {
         assetId: row.id,

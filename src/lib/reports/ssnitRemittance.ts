@@ -84,9 +84,7 @@ export async function getSsnitRemittanceReport(
 
   // ── 5. Due date: 15th of month following periodEnd ────────────────────────
   const periodEnd = new Date(run.periodEnd + 'T00:00:00Z')
-  const dueMonth = new Date(
-    Date.UTC(periodEnd.getUTCFullYear(), periodEnd.getUTCMonth() + 1, 15),
-  )
+  const dueMonth = new Date(Date.UTC(periodEnd.getUTCFullYear(), periodEnd.getUTCMonth() + 1, 15))
   const dueDate = dueMonth.toISOString().slice(0, 10)
 
   return {

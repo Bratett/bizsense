@@ -27,10 +27,7 @@ const DEFAULT_PAYE_BANDS: PayeBandSeed[] = [
  * Called once inside a Drizzle transaction during onboarding Step 1.
  * Idempotent — if active bands already exist for this business, does nothing.
  */
-export async function seedPayeBands(
-  tx: DrizzleTransaction,
-  businessId: string,
-): Promise<void> {
+export async function seedPayeBands(tx: DrizzleTransaction, businessId: string): Promise<void> {
   // Check idempotency — if any active (effectiveTo IS NULL) bands exist, skip
   const existing = await tx
     .select({ id: payeBands.id })

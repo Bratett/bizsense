@@ -46,9 +46,7 @@ export default function AssetDetailView({
   const depreciableAmount = Number(asset.purchaseCost) - Number(asset.residualValue)
   const accumulated = Number(asset.accumulatedDepreciation)
   const pctDepreciated =
-    depreciableAmount > 0
-      ? Math.min(100, Math.round((accumulated / depreciableAmount) * 100))
-      : 100
+    depreciableAmount > 0 ? Math.min(100, Math.round((accumulated / depreciableAmount) * 100)) : 100
 
   const handleDispose = () => {
     setError(null)
@@ -73,9 +71,7 @@ export default function AssetDetailView({
           backHref="/assets"
           actions={
             <div className="flex items-center gap-2">
-              {asset.category && (
-                <span className="text-sm text-gray-500">{asset.category}</span>
-              )}
+              {asset.category && <span className="text-sm text-gray-500">{asset.category}</span>}
               <AssetStatusBadge asset={asset} />
             </div>
           }

@@ -229,8 +229,10 @@ function fmtDate(iso: string): string {
 
 function fmtPeriod(start: string, end: string): string {
   const d = new Date(start + 'T00:00:00Z')
-  return d.toLocaleDateString('en-GH', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-    + ` (${fmtDate(start)} – ${fmtDate(end)})`
+  return (
+    d.toLocaleDateString('en-GH', { month: 'long', year: 'numeric', timeZone: 'UTC' }) +
+    ` (${fmtDate(start)} – ${fmtDate(end)})`
+  )
 }
 
 function fmtPeriodShort(start: string): string {
@@ -276,23 +278,16 @@ export function PayslipDocument({ data }: { data: PayslipData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-
         {/* ── Header ── */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <Text style={styles.businessName}>{business.name}</Text>
-            {business.address && (
-              <Text style={styles.businessDetail}>{business.address}</Text>
-            )}
-            {business.phone && (
-              <Text style={styles.businessDetail}>Tel: {business.phone}</Text>
-            )}
+            {business.address && <Text style={styles.businessDetail}>{business.address}</Text>}
+            {business.phone && <Text style={styles.businessDetail}>Tel: {business.phone}</Text>}
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.payslipLabel}>PAYSLIP</Text>
-            <Text style={styles.periodText}>
-              Pay Period: {fmtPeriod(period.start, period.end)}
-            </Text>
+            <Text style={styles.periodText}>Pay Period: {fmtPeriod(period.start, period.end)}</Text>
             <Text style={styles.periodText}>Date Issued: {today}</Text>
           </View>
         </View>
@@ -403,7 +398,7 @@ export function PayslipDocument({ data }: { data: PayslipData }) {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Method</Text>
               <Text style={styles.infoValue}>
-                {METHOD_LABELS[line.paymentMethod ?? ''] ?? (line.paymentMethod ?? '—')}
+                {METHOD_LABELS[line.paymentMethod ?? ''] ?? line.paymentMethod ?? '—'}
               </Text>
             </View>
             {line.paymentReference && (
@@ -436,7 +431,6 @@ export function PayslipDocument({ data }: { data: PayslipData }) {
             {`${fmtPeriodShort(period.start)} payslip`}
           </Text>
         </View>
-
       </Page>
     </Document>
   )

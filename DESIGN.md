@@ -15,6 +15,7 @@ This is a **production UI**, not a prototype. Every screen must be implementatio
 ### Who Is the User
 
 A Ghanaian SME owner or staff member. Primary examples:
+
 - A rice and provisions trader in Kumasi Market
 - A small clothing boutique owner in Accra
 - A food vendor with 3 staff members in Tema
@@ -63,6 +64,7 @@ Used for: overdue invoices, negative balances, destructive actions, errors.
 Used for: low stock alerts, approaching limits, caution states.
 
 **Neutral Scale:**
+
 - `#111827` — primary text
 - `#374151` — secondary text
 - `#6B7280` — placeholder / hint text
@@ -71,6 +73,7 @@ Used for: low stock alerts, approaching limits, caution states.
 - `#FFFFFF` — card backgrounds, page background
 
 **Semantic Colours:**
+
 - Paid / In Stock / Positive: `#00704A` (primary green)
 - Pending / Partial: `#F5A623` (gold)
 - Overdue / Critical / Negative: `#D93025` (danger red)
@@ -79,12 +82,14 @@ Used for: low stock alerts, approaching limits, caution states.
 ### Typography
 
 **Font family:** Inter (Google Fonts)
+
 - Headings: Inter SemiBold (600)
 - Body: Inter Regular (400)
 - Numbers/amounts: Inter Medium (500), tabular numbers (`font-variant-numeric: tabular-nums`)
 - Monospace (ledger/codes): JetBrains Mono
 
 **Type scale (mobile):**
+
 - Page title: 20px / 600
 - Section header: 16px / 600
 - Body: 14px / 400
@@ -106,6 +111,7 @@ Use subtle shadow, not heavy drop shadows. Cards: `box-shadow: 0 1px 3px rgba(0,
 ### Component Defaults
 
 **Buttons:**
+
 - Primary: Green fill `#00704A`, white text, 48px height, 8px border-radius, full-width on mobile
 - Secondary: White fill, green border `#00704A`, green text
 - Destructive: Red fill `#D93025`, white text
@@ -114,6 +120,7 @@ Use subtle shadow, not heavy drop shadows. Cards: `box-shadow: 0 1px 3px rgba(0,
 - Minimum touch target: 44×44px — never smaller
 
 **Inputs:**
+
 - Height: 48px on mobile (large enough to tap comfortably)
 - Border: 1px `#D1D5DB`, 8px border-radius
 - Focus: 2px green border `#00704A`
@@ -123,6 +130,7 @@ Use subtle shadow, not heavy drop shadows. Cards: `box-shadow: 0 1px 3px rgba(0,
 - Label: 14px, above the input, never placeholder-only
 
 **Cards:**
+
 - White background, 12px border-radius, 1px border `#E5E7EB`, 16px padding
 - Tappable cards: show pressed state (slight grey fill) on tap
 
@@ -130,6 +138,7 @@ Use subtle shadow, not heavy drop shadows. Cards: `box-shadow: 0 1px 3px rgba(0,
 5 items maximum. Icons with labels. Active item uses primary green. Height 60px. Safe area at bottom for modern Android notches.
 
 **Status Badges / Pills:**
+
 - Paid: green fill light `#E8F5EF`, green text `#00704A`
 - Pending: gold fill light `#FEF3C7`, gold text `#B45309`
 - Overdue: red fill light `#FEE2E2`, red text `#DC2626`
@@ -148,6 +157,7 @@ Skeleton loaders for lists and cards. Spinner for form submissions. Never a blan
 
 **Sync Indicator:**
 Persistent but subtle. Small dot in the header or status bar area:
+
 - Green dot: synced
 - Amber dot + "Syncing..." text: sync in progress
 - Grey dot + "Offline": no connectivity (not alarming — the app still works)
@@ -213,6 +223,7 @@ Same layout as signup.
 ### 3. Onboarding Wizard — All 6 Steps
 
 Show all 6 steps as separate screens. Each step has:
+
 - Progress bar at top (e.g., "Step 2 of 6" with filled segments)
 - Step title and subtitle in plain business language
 - Input area (varies per step — see below)
@@ -251,11 +262,13 @@ Green success banner: "✓ Your books are balanced and ready." (or red error if 
 The most important screen. Everything visible without scrolling on mobile.
 
 **Top section (white card):**
+
 - Business name + "Good morning, [Name]" greeting
 - Date: today's date in DD/MM/YYYY
 - Sync status indicator (small, top right)
 
 **4 metric tiles (2×2 grid):**
+
 - Today's Sales: large GHS amount, green
 - Cash Balance: large GHS amount, black
 - Receivables: large GHS amount, amber if > 0
@@ -271,6 +284,7 @@ Compact list. Red row for overdue invoices. Amber row for low stock. Each row ta
 **Activity Feed:**
 "Recent Activity" section header.
 Last 10 transactions. Each row:
+
 - Left: transaction type icon (receipt for sale, wallet for expense, arrow for payment)
 - Centre: description + customer/supplier name
 - Right: amount (green for money in, red for money out)
@@ -296,12 +310,13 @@ Recent customers shown as tappable chips below (last 3 used).
 
 **Section 2 — Items**
 Each line item row:
+
 - Product search field (autocomplete from product list)
 - Quantity (numeric input, large)
 - Unit price (GHS, pre-filled from product, editable)
 - Line total (calculated, right-aligned, greyed out — not editable)
 - Remove (×) button on right
-"+ Add item" button below last row.
+  "+ Add item" button below last row.
 
 **Section 3 — Discount (expandable)**
 "Add discount?" chevron toggle. Reveals: discount type (% or GHS fixed) + amount.
@@ -331,10 +346,11 @@ Header: "Sales" with search icon and filter icon.
 Active filter: green pill.
 
 **Each sale row:**
+
 - Left: date (DD/MM/YYYY), grey, small
 - Centre: customer name (bold) + order number (grey, small)
 - Right: GHS amount (monospace) + payment status badge (Paid/Partial/Unpaid)
-Tappable row → opens sale detail.
+  Tappable row → opens sale detail.
 
 **Sale Detail (bottom sheet or new screen):**
 Order number, date, customer name + phone.
@@ -351,6 +367,7 @@ If AI-generated: indigo "AI" badge near the order number.
 **Header:** "New Expense" with close (×).
 
 Fields:
+
 - Date (date picker, default today)
 - Category (large dropdown/select: Rent, Utilities, Transport & Fuel, Salaries, Marketing, Bank Charges, Repairs, Other)
 - Amount (large GHS input, prominent)
@@ -368,6 +385,7 @@ Fields:
 Header: "Customers" with search icon.
 
 **Each customer row:**
+
 - Avatar circle (initials, coloured by first letter)
 - Customer name (bold)
 - Phone number (grey, small)
@@ -376,6 +394,7 @@ Header: "Customers" with search icon.
 Tappable → Customer Detail screen.
 
 **Customer Detail:**
+
 - Header: large initials avatar, name, phone, location
 - Balance card: "Owes GHS X" in amber (or "All settled" in green)
 - Tabs: Transactions | Details
@@ -392,6 +411,7 @@ Header: "Inventory" with search icon and filter icon.
 **Filter bar:** All | Low Stock | Out of Stock | By Category
 
 **Each product row:**
+
 - Product name (bold)
 - Category tag (grey pill)
 - Right: current stock quantity + unit (e.g., "24 bags")
@@ -439,13 +459,13 @@ White card, green left border.
 Title: "I'm about to record this:"
 Content: plain-English summary of the proposed transaction.
 Example:
-  ┌─────────────────────────────────────┐
-  │ 📝 Record Expense                    │
-  │ Transport & Fuel — GHS 200.00        │
-  │ Payment: Cash · Today, 10/04/2026    │
-  ├─────────────────────────────────────┤
-  │  ✓ Confirm       ✗ Cancel           │
-  └─────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│ 📝 Record Expense │
+│ Transport & Fuel — GHS 200.00 │
+│ Payment: Cash · Today, 10/04/2026 │
+├─────────────────────────────────────┤
+│ ✓ Confirm ✗ Cancel │
+└─────────────────────────────────────┘
 "Confirm" button: green. "Cancel" button: ghost/outline.
 
 **Input area (fixed at bottom):**
@@ -467,6 +487,7 @@ Header: "Reports" with a period selector (This Month | Last Month | YTD | Custom
 
 **Report cards (tappable list):**
 Each card shows: report name, icon, brief description.
+
 - Profit & Loss — "Revenue vs expenses for the period"
 - Balance Sheet — "Your assets, liabilities, and equity"
 - Cash Flow — "Cash in and out by activity"
@@ -535,23 +556,28 @@ Approve button (disabled for non-owners).
 
 Section list (grouped):
 **Business**
+
 - Business Profile (name, logo, TIN, VAT number)
 - Chart of Accounts
 - Tax Settings (view/manage GRA levy rates)
 - Financial Year
 
 **Team**
+
 - Users & Roles (invite staff, assign roles)
 
 **Integrations**
+
 - Mobile Money (account references)
 - WhatsApp Notifications (toggle per notification type)
 
 **Data**
+
 - Export All Data (CSV)
 - Sync Status (last synced timestamp, manual sync button)
 
 **Account**
+
 - Change Password
 - Sign Out (red text, destructive style)
 

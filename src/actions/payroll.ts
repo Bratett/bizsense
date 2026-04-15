@@ -136,9 +136,7 @@ async function resolvePayrollAccounts(businessId: string): Promise<Record<string
 
   for (const code of codes) {
     if (!map[code]) {
-      throw new Error(
-        `Required payroll account ${code} not found. Please complete business setup.`,
-      )
+      throw new Error(`Required payroll account ${code} not found. Please complete business setup.`)
     }
   }
 
@@ -266,9 +264,7 @@ export async function initiatePayrollRun(input: {
   const bands = await fetchPayeBands(businessId)
 
   if (bands.length === 0) {
-    throw new Error(
-      'PAYE bands not configured. Contact support to seed the tax configuration.',
-    )
+    throw new Error('PAYE bands not configured. Contact support to seed the tax configuration.')
   }
 
   // 4. Compute deductions for each staff member
@@ -309,9 +305,7 @@ export async function initiatePayrollRun(input: {
       })
       .returning({ id: payrollRuns.id })
 
-    await tx.insert(payrollLines).values(
-      lineData.map((l) => ({ ...l, payrollRunId: run.id })),
-    )
+    await tx.insert(payrollLines).values(lineData.map((l) => ({ ...l, payrollRunId: run.id })))
 
     return run.id
   })
@@ -383,11 +377,14 @@ export async function updatePayrollLine(
       .from(payrollLines)
       .where(eq(payrollLines.payrollRunId, lineRow.runId))
 
-    const newTotalGross = Math.round(allLines.reduce((s, l) => s + Number(l.grossSalary), 0) * 100) / 100
-    const newTotalDeductions = Math.round(
-      allLines.reduce((s, l) => s + Number(l.ssnitEmployee) + Number(l.payeTax), 0) * 100,
-    ) / 100
-    const newTotalNet = Math.round(allLines.reduce((s, l) => s + Number(l.netSalary), 0) * 100) / 100
+    const newTotalGross =
+      Math.round(allLines.reduce((s, l) => s + Number(l.grossSalary), 0) * 100) / 100
+    const newTotalDeductions =
+      Math.round(
+        allLines.reduce((s, l) => s + Number(l.ssnitEmployee) + Number(l.payeTax), 0) * 100,
+      ) / 100
+    const newTotalNet =
+      Math.round(allLines.reduce((s, l) => s + Number(l.netSalary), 0) * 100) / 100
 
     await tx
       .update(payrollRuns)
@@ -449,10 +446,7 @@ export async function approvePayrollRun(runId: string): Promise<{ isSingleUser: 
   }
 
   // 3. Fetch all payroll lines
-  const lines = await db
-    .select()
-    .from(payrollLines)
-    .where(eq(payrollLines.payrollRunId, runId))
+  const lines = await db.select().from(payrollLines).where(eq(payrollLines.payrollRunId, runId))
 
   if (lines.length === 0) throw new Error('Payroll run has no lines.')
 
@@ -642,12 +636,7 @@ export async function recordPayrollPayment(input: {
   const [unpaid] = await db
     .select({ cnt: count(payrollLines.id) })
     .from(payrollLines)
-    .where(
-      and(
-        eq(payrollLines.payrollRunId, row.runId),
-        eq(payrollLines.isPaid, false),
-      ),
-    )
+    .where(and(eq(payrollLines.payrollRunId, row.runId), eq(payrollLines.isPaid, false)))
 
   if (Number(unpaid.cnt) === 0) {
     await db
@@ -739,12 +728,7 @@ export async function getPayslipData(payrollLineId: string): Promise<PayslipData
     .innerJoin(payrollRuns, eq(payrollLines.payrollRunId, payrollRuns.id))
     .innerJoin(staff, eq(payrollLines.staffId, staff.id))
     .innerJoin(businesses, eq(payrollRuns.businessId, businesses.id))
-    .where(
-      and(
-        eq(payrollLines.id, payrollLineId),
-        eq(payrollRuns.businessId, businessId),
-      ),
-    )
+    .where(and(eq(payrollLines.id, payrollLineId), eq(payrollRuns.businessId, businessId)))
 
   if (!row) throw new Error('Payroll line not found.')
 

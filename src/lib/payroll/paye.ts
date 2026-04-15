@@ -123,13 +123,12 @@ export function verifyPayrollBalance(lines: PayrollDeductions[]): {
   creditTotal: number
   isBalanced: boolean
 } {
-  const debitTotal = Math.round(
-    lines.reduce((s, l) => s + l.totalCostToEmployer, 0) * 100,
-  ) / 100
-  const creditTotal = Math.round(
-    lines.reduce((s, l) => s + l.ssnitEmployee + l.ssnitEmployer + l.payeTax + l.netSalary, 0) *
-      100,
-  ) / 100
+  const debitTotal = Math.round(lines.reduce((s, l) => s + l.totalCostToEmployer, 0) * 100) / 100
+  const creditTotal =
+    Math.round(
+      lines.reduce((s, l) => s + l.ssnitEmployee + l.ssnitEmployer + l.payeTax + l.netSalary, 0) *
+        100,
+    ) / 100
 
   return {
     debitTotal,

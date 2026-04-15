@@ -24,7 +24,7 @@ describe('computeMonthlyDepreciation', () => {
     const result = computeMonthlyDepreciation(makeInput(), 2025, 6)
 
     expect(result.skip).toBe(false)
-    expect(result.monthlyAmount).toBe(200)             // 12000 / 60
+    expect(result.monthlyAmount).toBe(200) // 12000 / 60
     expect(result.standardMonthlyAmount).toBe(200)
     expect(result.newAccumulatedDepreciation).toBe(200)
     expect(result.willBeFullyDepreciated).toBe(false)
@@ -63,11 +63,7 @@ describe('computeMonthlyDepreciation', () => {
   // Test 4 — Asset purchased after target month is skipped
   it('skips an asset purchased after the target month', () => {
     // Asset purchased in March 2026, target is February 2026
-    const result = computeMonthlyDepreciation(
-      makeInput({ purchaseDate: '2026-03-01' }),
-      2026,
-      2,
-    )
+    const result = computeMonthlyDepreciation(makeInput({ purchaseDate: '2026-03-01' }), 2026, 2)
 
     expect(result.skip).toBe(true)
     expect(result.skipReason).toBe('not_yet_purchased')

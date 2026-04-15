@@ -151,9 +151,7 @@ export default function StaffForm({ businessId: _businessId, mode, initialData }
       </div>
 
       <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Salary
-        </h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Salary</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {/* Salary Type */}
           <div>

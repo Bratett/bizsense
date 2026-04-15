@@ -74,7 +74,7 @@ const ACTIVE_ASSET = {
   accumulatedDepreciation: '0',
   depreciationMethod: 'straight_line',
   isActive: true,
-  depreciationAccountId: null,    // falls back to code-resolved ACCT_6008
+  depreciationAccountId: null, // falls back to code-resolved ACCT_6008
   accDepreciationAccountId: null, // falls back to code-resolved ACCT_1510
   assetAccountId: null,
   category: null,
@@ -217,7 +217,9 @@ describe('runMonthlyDepreciation', () => {
     ])
 
     let capturedSetValues: Record<string, unknown> | null = null
-    mockDefaultTransaction((data) => { capturedSetValues = data })
+    mockDefaultTransaction((data) => {
+      capturedSetValues = data
+    })
 
     await runMonthlyDepreciation({ year: 2025, month: 6 })
 
@@ -240,7 +242,9 @@ describe('runMonthlyDepreciation', () => {
     ])
 
     let capturedSetValues: Record<string, unknown> | null = null
-    mockDefaultTransaction((data) => { capturedSetValues = data })
+    mockDefaultTransaction((data) => {
+      capturedSetValues = data
+    })
 
     await runMonthlyDepreciation({ year: 2025, month: 6 })
 
