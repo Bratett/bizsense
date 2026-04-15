@@ -3,6 +3,7 @@
 import {
   localDb,
   type DexieBusiness,
+  type DexieBusinessSettings,
   type DexieAccount,
   type DexieTaxComponent,
   type DexieCustomer,
@@ -72,6 +73,7 @@ async function pullFromServer(since?: string): Promise<void> {
     'rw',
     [
       localDb.businesses,
+      localDb.businessSettings,
       localDb.accounts,
       localDb.taxComponents,
       localDb.customers,
@@ -87,6 +89,8 @@ async function pullFromServer(since?: string): Promise<void> {
     ],
     async () => {
       await bulkUpsertWithConflictResolution(localDb.businesses, data.businesses)
+      // Business settings: server is always authoritative — use bulkPut (same as fxRates)
+      await localDb.businessSettings.bulkPut(data.businessSettings)
       await bulkUpsertWithConflictResolution(localDb.accounts, data.accounts)
       await bulkUpsertWithConflictResolution(localDb.taxComponents, data.taxComponents)
       await bulkUpsertWithConflictResolution(localDb.customers, data.customers)
@@ -123,6 +127,7 @@ async function pullFromServer(since?: string): Promise<void> {
 
 interface SyncPullData {
   businesses: DexieBusiness[]
+  businessSettings: DexieBusinessSettings[]
   accounts: DexieAccount[]
   taxComponents: DexieTaxComponent[]
   customers: DexieCustomer[]

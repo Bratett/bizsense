@@ -19,17 +19,9 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page-header'
-import { Pencil, Trash2, ListOrdered } from 'lucide-react'
+import { Pencil, Trash2, ListOrdered, TrendingUp, Package, ArrowUpDown } from 'lucide-react'
 
 const TYPE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   opening: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Opening' },
@@ -93,11 +85,10 @@ export default function ProductDetailView({
   const grossMargin = sellingPrice - costPrice
   const grossMarginPct = sellingPrice > 0 ? (grossMargin / sellingPrice) * 100 : 0
 
-  // Stock visualizer
   const reorder = product.reorderLevel > 0 ? product.reorderLevel : 0
   const maxBar = Math.max(product.currentStock * 1.5, reorder * 3, 1)
   const stockBarPct = Math.min((product.currentStock / maxBar) * 100, 100)
-  const reorderMarkerPct = Math.min((reorder / maxBar) * 100, 100)
+  const reorderPct = Math.min((reorder / maxBar) * 100, 100)
 
   const handleDeactivate = () => {
     setError(null)
@@ -113,9 +104,12 @@ export default function ProductDetailView({
     })
   }
 
+  const hasPricing = !!(product.costPrice || product.sellingPrice)
+
   return (
-    <div className="mx-auto max-w-5xl">
-      <Breadcrumb className="mb-4">
+    <div className="mx-auto max-w-5xl space-y-5">
+      {/* Breadcrumb */}
+      <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link href="/inventory" />}>Inventory</BreadcrumbLink>
@@ -127,6 +121,7 @@ export default function ProductDetailView({
         </BreadcrumbList>
       </Breadcrumb>
 
+      {/* Page header */}
       <PageHeader
         title={product.name}
         subtitle={product.sku ? `SKU: ${product.sku}` : undefined}
@@ -147,49 +142,66 @@ export default function ProductDetailView({
         }
       />
 
-      {!product.isActive && (
-        <Badge variant="destructive" className="mb-4">
-          Deactivated
-        </Badge>
-      )}
+      {!product.isActive && <Badge variant="destructive">Deactivated</Badge>}
 
-      {/* Error */}
       {error && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* ── Left Card: Stock & Pricing ── */}
-        <div className="space-y-4">
+      {/* ── Main two-column grid ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+        {/* ── Left column (3/5) ── */}
+        <div className="space-y-5 lg:col-span-3">
+          {/* Card A — Product Details */}
           <Card>
-            <CardContent>
-              {/* Category + unit */}
-              <div className="grid grid-cols-2 gap-4">
-                {product.category && (
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Category
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-foreground">{product.category}</p>
-                  </div>
-                )}
-                {product.unit && (
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Unit
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-foreground">{product.unit}</p>
-                  </div>
-                )}
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Package className="h-4 w-4 text-muted-foreground" />
+                Product Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <div className="grid grid-cols-3 gap-4">
+                {/* Category */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Track Inventory
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Category
                   </p>
                   <p className="mt-1 text-sm font-medium text-foreground">
-                    {product.trackInventory ? 'Yes' : 'No'}
+                    {product.category ?? <span className="text-muted-foreground">—</span>}
+                  </p>
+                </div>
+                {/* Unit */}
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Unit
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-foreground">
+                    {product.unit ?? <span className="text-muted-foreground">—</span>}
+                  </p>
+                </div>
+                {/* Inventory tracking */}
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Inventory
+                  </p>
+                  <p className="mt-1">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        product.trackInventory
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          product.trackInventory ? 'bg-green-500' : 'bg-gray-400'
+                        }`}
+                      />
+                      {product.trackInventory ? 'Tracked' : 'Not tracked'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -198,167 +210,193 @@ export default function ProductDetailView({
                 <>
                   <Separator className="my-4" />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Description
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground">{product.description}</p>
-                  </div>
-                </>
-              )}
-
-              {/* Stock Visualizer */}
-              {product.trackInventory && (
-                <>
-                  <Separator className="my-4" />
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Stock Visualizer
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                      {product.description}
                     </p>
-                    <div className="mt-3 flex items-start justify-between">
-                      <div>
-                        <p className={`text-3xl font-bold tabular-nums ${status.textColor}`}>
-                          {product.currentStock}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{product.unit ?? 'Units'}</p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}
-                      >
-                        {status.label}
-                      </span>
-                    </div>
-
-                    {/* Bar */}
-                    <div className="relative mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className={`h-full rounded-full transition-all ${status.dot}`}
-                        style={{ width: `${stockBarPct}%` }}
-                      />
-                      {reorder > 0 && (
-                        <div
-                          className="absolute top-0 h-full w-0.5 bg-gray-400"
-                          style={{ left: `${reorderMarkerPct}%` }}
-                        />
-                      )}
-                    </div>
-
-                    <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                      {reorder > 0 && <span>Reorder point: {reorder}</span>}
-                      {product.trackInventory && product.stockValue > 0 && (
-                        <span className="ml-auto">Value: {formatGhs(product.stockValue)}</span>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Pricing & Margins */}
-              {(product.costPrice || product.sellingPrice) && (
-                <>
-                  <Separator className="my-4" />
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Pricing &amp; Margins
-                    </p>
-                    <div className="mt-3 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Cost Price</span>
-                        <span className="text-sm font-semibold tabular-nums text-foreground">
-                          {formatGhs(product.costPrice ?? '0')}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Selling Price</span>
-                        <div className="text-right">
-                          <span className="text-sm font-semibold tabular-nums text-foreground">
-                            {formatGhs(product.sellingPrice ?? '0')}
-                          </span>
-                          {product.sellingPriceUsd && (
-                            <p className="text-xs text-muted-foreground">
-                              / USD {formatGhs(product.sellingPriceUsd)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      {grossMargin > 0 && (
-                        <div className="flex items-center justify-between border-t border-gray-100 pt-2.5">
-                          <span className="text-sm text-muted-foreground">Gross Margin</span>
-                          <div className="text-right">
-                            <span className="text-base font-bold tabular-nums text-green-700">
-                              {formatGhs(grossMargin)}
-                            </span>
-                            <p className="text-xs text-green-600">
-                              {grossMarginPct.toFixed(2)}% Profit
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </>
               )}
             </CardContent>
           </Card>
 
-          {/* Additional quick actions for tracked products */}
-          {product.trackInventory && product.isActive && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                render={<Link href={`/inventory/${product.id}/opening-stock`} />}
-              >
-                Set Opening Stock
-              </Button>
-              {canAdjust && (
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  render={<Link href={`/inventory/${product.id}/adjust`} />}
-                >
-                  Adjust Stock
-                </Button>
-              )}
-            </div>
+          {/* Card B — Stock Level */}
+          {product.trackInventory && (
+            <Card>
+              <CardHeader className="border-b pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                    Stock Level
+                  </CardTitle>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}
+                  >
+                    {status.label}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-5">
+                {/* Hero stock number */}
+                <div className="flex items-end gap-3">
+                  <p className={`text-5xl font-bold tabular-nums leading-none ${status.textColor}`}>
+                    {product.currentStock}
+                  </p>
+                  <p className="mb-1 text-sm text-muted-foreground">{product.unit ?? 'units'}</p>
+                </div>
+
+                {/* Progress bar */}
+                <div className="relative mt-4 h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className={`h-full rounded-full transition-all ${status.dot}`}
+                    style={{ width: `${stockBarPct}%` }}
+                  />
+                  {reorder > 0 && (
+                    <div
+                      className="absolute top-0 h-full w-0.5 bg-gray-400"
+                      style={{ left: `${reorderPct}%` }}
+                    />
+                  )}
+                </div>
+
+                {/* Stats below bar */}
+                <div className="mt-2.5 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    {reorder > 0
+                      ? `Reorder point: ${reorder} ${product.unit ?? 'units'}`
+                      : 'No reorder point set'}
+                  </span>
+                  {product.stockValue > 0 && (
+                    <span className="font-medium text-foreground">
+                      Value: {formatGhs(product.stockValue)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                {product.isActive && (
+                  <>
+                    <Separator className="my-4" />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        render={<Link href={`/inventory/${product.id}/opening-stock`} />}
+                      >
+                        Set Opening Stock
+                      </Button>
+                      {canAdjust && (
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          render={<Link href={`/inventory/${product.id}/adjust`} />}
+                        >
+                          Adjust Stock
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Card C — Pricing */}
+          {hasPricing && (
+            <Card>
+              <CardHeader className="border-b pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  Pricing &amp; Margins
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-5">
+                {/* Two price columns */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-lg bg-gray-50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Cost Price
+                    </p>
+                    <p className="mt-1.5 text-xl font-bold tabular-nums text-foreground">
+                      {formatGhs(product.costPrice ?? '0')}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-gray-50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Selling Price
+                    </p>
+                    <p className="mt-1.5 text-xl font-bold tabular-nums text-foreground">
+                      {formatGhs(product.sellingPrice ?? '0')}
+                    </p>
+                    {product.sellingPriceUsd && (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        USD {formatGhs(product.sellingPriceUsd)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Margin row */}
+                {grossMargin > 0 && (
+                  <div className="mt-4 flex items-center justify-between rounded-lg bg-green-50 px-4 py-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">
+                        Gross Margin
+                      </p>
+                      <p className="mt-0.5 text-xs text-green-600">per unit sold</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold tabular-nums text-green-700">
+                        {formatGhs(grossMargin)}
+                      </p>
+                      <p className="text-xs font-semibold text-green-600">
+                        {grossMarginPct.toFixed(1)}% profit
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
         </div>
 
-        {/* ── Right Card: Stock Movement History ── */}
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle>Stock Movement History</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
+        {/* ── Right column (2/5) — Stock Movement History ── */}
+        <div className="lg:col-span-2">
+          <Card className="flex h-full flex-col">
+            <CardHeader className="border-b pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ListOrdered className="h-4 w-4 text-muted-foreground" />
+                  Stock Movements
+                </CardTitle>
+                {product.movements.length > 0 && (
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                    {product.movements.length}
+                  </span>
+                )}
+              </div>
+            </CardHeader>
+
             {product.movements.length === 0 ? (
-              <EmptyState
-                icon={<ListOrdered className="h-8 w-8" />}
-                title="No stock movements yet"
-              />
+              <CardContent className="flex flex-1 items-center justify-center">
+                <EmptyState
+                  icon={<ListOrdered className="h-8 w-8" />}
+                  title="No stock movements yet"
+                />
+              </CardContent>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Qty</TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <div className="flex-1 overflow-y-auto">
+                <div className="divide-y divide-gray-50">
                   {product.movements.map((m) => (
                     <MovementRow key={m.id} movement={m} unit={product.unit} />
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              </div>
             )}
-          </CardContent>
-          {product.movements.length > 0 && (
-            <div className="border-t px-4 py-3 text-xs text-muted-foreground">
-              Showing last {product.movements.length} movement
-              {product.movements.length !== 1 ? 's' : ''}
-            </div>
-          )}
-        </Card>
+          </Card>
+        </div>
       </div>
 
       {/* Deactivate confirmation */}
@@ -384,6 +422,8 @@ export default function ProductDetailView({
   )
 }
 
+// ─── Movement row ─────────────────────────────────────────────────────────────
+
 function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: string | null }) {
   const style = TYPE_STYLES[movement.transactionType] ?? {
     bg: 'bg-gray-100',
@@ -394,27 +434,36 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
   const isPositive = qty > 0
 
   return (
-    <TableRow>
-      <TableCell className="text-xs text-muted-foreground">
-        {formatDate(movement.transactionDate)}
-      </TableCell>
-      <TableCell>
-        <Badge variant="secondary" className={`${style.bg} ${style.text}`}>
-          {style.label}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <span
-          className={`text-sm font-semibold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}
+    <div className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-gray-50/60">
+      {/* Left: type badge + date */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span
+            className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ${style.bg} ${style.text}`}
+          >
+            {style.label}
+          </span>
+          <span className="truncate text-xs text-muted-foreground">
+            {formatDate(movement.transactionDate)}
+          </span>
+        </div>
+        {movement.notes && (
+          <p className="mt-1 truncate text-xs text-muted-foreground">{movement.notes}</p>
+        )}
+      </div>
+
+      {/* Right: qty + cost */}
+      <div className="shrink-0 text-right">
+        <p
+          className={`text-sm font-bold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}
         >
           {isPositive ? '+' : ''}
           {qty} {unit ?? 'units'}
-        </span>
-        {movement.notes && <p className="mt-0.5 text-xs text-muted-foreground">{movement.notes}</p>}
-      </TableCell>
-      <TableCell className="text-right text-xs tabular-nums text-muted-foreground">
-        {formatGhs(movement.unitCost)}
-      </TableCell>
-    </TableRow>
+        </p>
+        <p className="text-[11px] tabular-nums text-muted-foreground">
+          {formatGhs(movement.unitCost)}/unit
+        </p>
+      </div>
+    </div>
   )
 }

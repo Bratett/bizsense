@@ -100,6 +100,12 @@ export function DashboardMetrics({
               {formatGhs(cashBalance)}
             </p>
             <p className="mt-0.5 text-xs text-gray-500">Cash + MoMo + Bank</p>
+            <Link
+              href="/momo/reconcile"
+              className="mt-1 inline-block text-xs font-medium text-green-700 hover:underline"
+            >
+              Reconcile →
+            </Link>
           </CardContent>
         </Card>
       ) : (

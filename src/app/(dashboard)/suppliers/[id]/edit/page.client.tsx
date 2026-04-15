@@ -67,12 +67,15 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
         </Alert>
       )}
 
-      <form action={formAction} className="space-y-4">
+      <form
+        action={formAction}
+        className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0"
+      >
         {/* Hidden ID */}
         <input type="hidden" name="id" value={supplier.id} />
 
         {/* Name */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="name">
             Name <span className="text-destructive">*</span>
           </Label>
@@ -164,7 +167,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
         </div>
 
         {/* Credit Terms */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="creditTermsDays">
             Credit Terms (days) <span className="text-destructive">*</span>
           </Label>
@@ -186,7 +189,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
         </div>
 
         {/* Notes */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="notes">Notes</Label>
           <textarea
             id="notes"
@@ -198,7 +201,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="w-full">
+        <Button type="submit" disabled={isPending} className="w-full md:col-span-2">
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>
       </form>

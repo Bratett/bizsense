@@ -6,7 +6,8 @@ import { downloadCsv, generateReportPdf } from '@/lib/reports/export'
 import { ArAgingDocument } from '@/lib/pdf/arAging'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { WhatsAppButton } from '@/components/whatsapp/WhatsAppButton'
+import { paymentReminderTemplate } from '@/lib/whatsapp/templates'
 import type { ArAgingReport, ArAgingCustomer, ArAgingLine } from '@/lib/reports/arAging'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -16,6 +17,8 @@ interface Props {
   arLedgerBalance: number
   isReconciled: boolean
   reconciliationDiff: number
+  businessName: string
+  businessPhone: string | null
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -59,23 +62,17 @@ function AgeBadge({ bucket }: { bucket: ArAgingLine['bucket'] }) {
   )
 }
 
-function buildWhatsAppMessage(
-  name: string,
-  orderNumber: string,
-  outstanding: number,
-  dueDate: string,
-): string {
-  return `Hello ${name}, your invoice ${orderNumber} for GHS ${outstanding.toFixed(2)} was due on ${dueDate}. Please arrange payment. Thank you.`
-}
-
-function formatWhatsAppPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  return digits.startsWith('0') ? '233' + digits.slice(1) : digits
-}
-
 // ─── Customer section ─────────────────────────────────────────────────────────
 
-function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
+function CustomerRow({
+  customer,
+  businessName,
+  businessPhone,
+}: {
+  customer: ArAgingCustomer
+  businessName: string
+  businessPhone: string | null
+}) {
   const [expanded, setExpanded] = useState(false)
   const t = customer.totals
   const totalWidth = t.total || 1
@@ -147,15 +144,18 @@ function CustomerRow({ customer }: { customer: ArAgingCustomer }) {
               {customer.invoices.slice(0, 1).map((inv) => (
                 <WhatsAppButton
                   key={`wa-${inv.orderId}`}
-                  phone={formatWhatsAppPhone(customer.customerPhone!)}
-                  message={buildWhatsAppMessage(
-                    customer.customerName,
-                    inv.orderNumber,
-                    inv.outstanding,
-                    inv.dueDate,
-                  )}
-                  label="Send Reminder (WhatsApp)"
-                  className="h-auto px-3 py-1.5 text-xs"
+                  phone={customer.customerPhone}
+                  message={paymentReminderTemplate({
+                    businessName,
+                    customerName: customer.customerName,
+                    orderNumber: inv.orderNumber,
+                    outstanding: inv.outstanding,
+                    dueDate: inv.dueDate,
+                    businessPhone: businessPhone ?? customer.customerPhone ?? '',
+                  })}
+                  label="Send Reminder"
+                  variant="secondary"
+                  className="h-auto px-3 py-1.5 text-xs min-h-[36px]"
                 />
               ))}
             </div>
@@ -242,6 +242,8 @@ export default function ArAgingClient({
   arLedgerBalance,
   isReconciled,
   reconciliationDiff,
+  businessName,
+  businessPhone,
 }: Props) {
   const [pdfLoading, setPdfLoading] = useState(false)
   const gt = report.grandTotals
@@ -353,7 +355,12 @@ export default function ArAgingClient({
       ) : (
         <Card className="overflow-hidden">
           {report.customers.map((c) => (
-            <CustomerRow key={c.customerId ?? 'walk-in'} customer={c} />
+            <CustomerRow
+              key={c.customerId ?? 'walk-in'}
+              customer={c}
+              businessName={businessName}
+              businessPhone={businessPhone}
+            />
           ))}
         </Card>
       )}

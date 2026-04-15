@@ -218,10 +218,45 @@ export interface DexieMeta {
   value: string | number
 }
 
+export interface DexieHubtelPaymentLink {
+  id: string
+  businessId: string
+  orderId: string
+  clientReference: string
+  checkoutUrl: string | null
+  amount: number
+  status: string // 'pending' | 'paid' | 'expired' | 'cancelled'
+  expiresAt: string | null // ISO timestamp string — Dexie indexes strings, not Dates
+  paidAt: string | null
+  momoReference: string | null
+  createdAt: string
+}
+
+export interface DexieBusinessSettings {
+  id: string
+  businessId: string
+  allowNegativeStock: boolean
+  lowStockThreshold: number
+  defaultPaymentTermsDays: number
+  defaultCreditLimit: number // server sends numeric as string — parse with Number() at usage site
+  invoiceFooterText: string | null
+  momoMtnNumber: string | null
+  momoTelecelNumber: string | null
+  momoAirtelNumber: string | null
+  whatsappBusinessNumber: string | null
+  whatsappNotifyInvoice: boolean
+  whatsappNotifyPayment: boolean
+  whatsappNotifyLowStock: boolean
+  whatsappNotifyOverdue: boolean
+  whatsappNotifyPayroll: boolean
+  updatedAt: string
+}
+
 // ── Dexie database class ────────────────────────────────────────────────────
 
 class BizSenseLocalDb extends Dexie {
   businesses!: Table<DexieBusiness>
+  businessSettings!: Table<DexieBusinessSettings>
   accounts!: Table<DexieAccount>
   taxComponents!: Table<DexieTaxComponent>
   journalEntries!: Table<DexieJournalEntry>
@@ -237,6 +272,7 @@ class BizSenseLocalDb extends Dexie {
   deferredJournals!: Table<DexieDeferredJournal>
   syncQueue!: Table<DexieSyncQueueItem>
   meta!: Table<DexieMeta>
+  hubtelPaymentLinks!: Table<DexieHubtelPaymentLink>
 
   constructor() {
     super('bizsense')
@@ -265,6 +301,18 @@ class BizSenseLocalDb extends Dexie {
     this.version(2).stores({
       orders:
         'id, businessId, customerId, orderDate, status, paymentStatus, syncStatus, [businessId+paymentStatus]',
+    })
+
+    // Version 3: add business_settings table for Sprint 12 configurable preferences.
+    // One row per business, synced server→client via /api/sync/pull.
+    this.version(3).stores({
+      businessSettings: 'id, businessId',
+    })
+
+    // Version 4: add hubtelPaymentLinks table for Sprint 10 MoMo payment links.
+    // Mirrors server-side hubtel_payment_links for offline status checks.
+    this.version(4).stores({
+      hubtelPaymentLinks: 'id, businessId, orderId, clientReference, status',
     })
   }
 }

@@ -104,9 +104,12 @@ export default function EditProductForm({
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0"
+      >
         {/* Name */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="name">Product Name *</Label>
           <Input
             id="name"
@@ -163,8 +166,18 @@ export default function EditProductForm({
           </datalist>
         </div>
 
+        {/* Selling Price USD — pairs with Unit on desktop */}
+        <MoneyInput
+          id="sellingPriceUsd"
+          label="Selling Price (USD)"
+          currency="USD"
+          value={String(sellingPriceUsd)}
+          onChange={setSellingPriceUsd}
+          placeholder="Optional"
+        />
+
         {/* Cost Price + Selling Price */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:col-span-2">
           <MoneyInput
             id="costPrice"
             label="Cost Price (GHS) *"
@@ -183,18 +196,8 @@ export default function EditProductForm({
           />
         </div>
 
-        {/* Selling Price USD */}
-        <MoneyInput
-          id="sellingPriceUsd"
-          label="Selling Price (USD)"
-          currency="USD"
-          value={String(sellingPriceUsd)}
-          onChange={setSellingPriceUsd}
-          placeholder="Optional"
-        />
-
         {/* Track Inventory toggle */}
-        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
           <div>
             <p className="text-sm font-medium text-foreground">Track Inventory</p>
             <p className="text-xs text-muted-foreground">Monitor stock levels for this product</p>
@@ -204,7 +207,7 @@ export default function EditProductForm({
 
         {/* Reorder Level */}
         {trackInventory && (
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="reorderLevel">Reorder Level</Label>
             <p className="text-xs text-muted-foreground">
               Alert me when stock falls below this quantity
@@ -224,7 +227,7 @@ export default function EditProductForm({
         )}
 
         {/* Description */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
@@ -236,7 +239,7 @@ export default function EditProductForm({
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="w-full">
+        <Button type="submit" disabled={isPending} className="w-full md:col-span-2">
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>
       </form>

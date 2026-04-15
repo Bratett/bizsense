@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { buildWhatsAppLink } from '@/lib/whatsapp'
 
 interface WhatsAppButtonProps {
   phone?: string
@@ -27,11 +28,14 @@ export function WhatsAppButton({
   className,
 }: WhatsAppButtonProps) {
   const handleClick = () => {
-    const encoded = encodeURIComponent(message)
-    const url = phone
-      ? `https://wa.me/${phone.replace(/\D/g, '')}?text=${encoded}`
-      : `https://api.whatsapp.com/send?text=${encoded}`
-    window.open(url, '_blank')
+    const result = buildWhatsAppLink(phone, message)
+    if (result.ok) {
+      window.open(result.url, '_blank', 'noopener,noreferrer')
+    } else {
+      // Fallback: open generic WhatsApp share (no specific contact)
+      const encoded = encodeURIComponent(message)
+      window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer')
+    }
   }
 
   if (variant === 'icon-only') {

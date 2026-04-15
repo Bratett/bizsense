@@ -4,12 +4,17 @@ import { useState, useCallback } from 'react'
 import { getInvoiceData } from '@/actions/invoices'
 import type { InvoiceData } from '@/lib/pdf/types'
 import type { InvoiceWorkerResponse } from '@/lib/pdf/invoice.worker'
+import { buildWhatsAppLink } from '@/lib/whatsapp'
+import { invoiceTemplate } from '@/lib/whatsapp/templates'
 
 type InvoiceButtonProps = {
   orderId: string
   orderNumber: string
   totalAmount: string | null
   customerPhone?: string | null
+  customerName?: string | null
+  businessName?: string | null
+  businessPhone?: string | null
 }
 
 async function generatePdfViaWorker(data: InvoiceData): Promise<Blob> {
@@ -46,6 +51,9 @@ export default function InvoiceButton({
   orderNumber,
   totalAmount,
   customerPhone,
+  customerName,
+  businessName,
+  businessPhone,
 }: InvoiceButtonProps) {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -107,15 +115,27 @@ export default function InvoiceButton({
       const { signedUrl } = await response.json()
 
       // Build WhatsApp deep link
-      const total = totalAmount ? `GHS ${Number(totalAmount).toFixed(2)}` : ''
-      const message = `Invoice ${orderNumber}${total ? ` for ${total}` : ''}: ${signedUrl}`
-      const encoded = encodeURIComponent(message)
-
-      const whatsappUrl = customerPhone
-        ? `https://wa.me/${customerPhone.replace(/\D/g, '')}?text=${encoded}`
-        : `https://api.whatsapp.com/send?text=${encoded}`
-
-      window.open(whatsappUrl, '_blank')
+      const message = invoiceTemplate({
+        businessName: businessName ?? '',
+        customerName: customerName ?? '',
+        orderNumber,
+        totalAmount: Number(totalAmount ?? 0),
+        dueDate: new Date().toISOString().slice(0, 10),
+        invoiceUrl: signedUrl,
+        businessPhone: businessPhone ?? undefined,
+      })
+      const result = buildWhatsAppLink(customerPhone, message)
+      if (result.ok) {
+        window.open(result.url, '_blank', 'noopener,noreferrer')
+      } else {
+        // No customer phone — open generic WhatsApp share
+        const encoded = encodeURIComponent(message)
+        window.open(
+          `https://api.whatsapp.com/send?text=${encoded}`,
+          '_blank',
+          'noopener,noreferrer',
+        )
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to share invoice'
       setError(msg)

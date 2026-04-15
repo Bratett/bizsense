@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import SyncIndicator from '@/components/SyncIndicator.client'
+import { InstallPrompt } from '@/components/InstallPrompt.client'
 
 type NavItem = { label: string; href: string; match: (p: string) => boolean }
 
@@ -20,6 +21,8 @@ const MAIN_NAV: NavItem[] = [
 const FINANCE_NAV: NavItem[] = [
   { label: 'General Ledger', href: '/ledger', match: (p) => p.startsWith('/ledger') },
   { label: 'Reports', href: '/reports', match: (p) => p.startsWith('/reports') },
+  { label: 'MoMo Reconciliation', href: '/momo/reconcile', match: (p) => p.startsWith('/momo') },
+  { label: 'Alerts', href: '/alerts', match: (p) => p.startsWith('/alerts') },
 ]
 
 const OPERATIONS_NAV: NavItem[] = [
@@ -78,12 +81,17 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex flex-1 flex-col gap-5 overflow-y-auto p-3">
+      <nav className="flex flex-1 flex-col gap-5 overflow-y-auto p-3 pb-0">
         <NavGroup title="Main" items={MAIN_NAV} pathname={pathname} />
         <NavGroup title="Finance" items={FINANCE_NAV} pathname={pathname} />
         <NavGroup title="Operations" items={OPERATIONS_NAV} pathname={pathname} />
         <NavGroup title="" items={SETTINGS_NAV} pathname={pathname} />
       </nav>
+
+      {/* Install prompt — hidden until browser fires beforeinstallprompt */}
+      <div className="border-t border-gray-100 p-3">
+        <InstallPrompt variant="sidebar" />
+      </div>
     </aside>
   )
 }

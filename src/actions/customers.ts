@@ -1,8 +1,8 @@
 'use server'
 
-import { and, eq, ne, or, ilike, asc, sql } from 'drizzle-orm'
+import { and, desc, eq, ne, or, ilike, asc, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { customers, orders } from '@/db/schema'
+import { customers, orders, paymentsReceived } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
 import { normaliseGhanaPhone } from '@/lib/csvImport'
 
@@ -35,6 +35,23 @@ export type CustomerWithBalance = {
   createdAt: Date
   updatedAt: Date
   outstandingBalance: number
+}
+
+export type CustomerStats = {
+  totalOrders: number
+  ordersThisMonth: number
+  totalPaid: number
+  lifetimeValue: number
+}
+
+export type CustomerTransaction = {
+  id: string
+  type: 'invoice' | 'payment'
+  reference: string
+  date: string
+  amount: number
+  status: 'paid' | 'partial' | 'unpaid' | 'overdue' | 'completed'
+  orderId?: string
 }
 
 type CustomerListFilters = {
@@ -311,4 +328,107 @@ export async function getCustomerById(id: string): Promise<CustomerWithBalance> 
     ...customer,
     outstandingBalance: Number(balanceResult?.outstanding ?? '0'),
   }
+}
+
+// ─── Get Customer Stats ───────────────────────────────────────────────────────
+
+export async function getCustomerStats(customerId: string): Promise<CustomerStats> {
+  const session = await getServerSession()
+  const businessId = session.user.businessId
+
+  const now = new Date()
+  const startOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+
+  const [result] = await db
+    .select({
+      totalOrders: sql<string>`COUNT(*)`,
+      ordersThisMonth: sql<string>`COUNT(*) FILTER (WHERE ${orders.orderDate} >= ${startOfMonth}::date)`,
+      totalPaid: sql<string>`COALESCE(SUM(CAST(${orders.amountPaid} AS numeric)), 0)`,
+      lifetimeValue: sql<string>`COALESCE(SUM(CAST(${orders.totalAmount} AS numeric)), 0)`,
+    })
+    .from(orders)
+    .where(and(eq(orders.customerId, customerId), eq(orders.businessId, businessId)))
+
+  return {
+    totalOrders: Number(result?.totalOrders ?? '0'),
+    ordersThisMonth: Number(result?.ordersThisMonth ?? '0'),
+    totalPaid: Number(result?.totalPaid ?? '0'),
+    lifetimeValue: Number(result?.lifetimeValue ?? '0'),
+  }
+}
+
+// ─── Get Customer Recent Transactions ────────────────────────────────────────
+
+export async function getCustomerRecentTransactions(
+  customerId: string,
+): Promise<CustomerTransaction[]> {
+  const session = await getServerSession()
+  const businessId = session.user.businessId
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
+  const [orderRows, paymentRows] = await Promise.all([
+    db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        orderDate: orders.orderDate,
+        paymentStatus: orders.paymentStatus,
+        totalAmount: orders.totalAmount,
+      })
+      .from(orders)
+      .where(and(eq(orders.customerId, customerId), eq(orders.businessId, businessId)))
+      .orderBy(desc(orders.orderDate))
+      .limit(10),
+    db
+      .select({
+        id: paymentsReceived.id,
+        amount: paymentsReceived.amount,
+        paymentDate: paymentsReceived.paymentDate,
+        paymentMethod: paymentsReceived.paymentMethod,
+        momoReference: paymentsReceived.momoReference,
+        bankReference: paymentsReceived.bankReference,
+      })
+      .from(paymentsReceived)
+      .where(
+        and(
+          eq(paymentsReceived.customerId, customerId),
+          eq(paymentsReceived.businessId, businessId),
+        ),
+      )
+      .orderBy(desc(paymentsReceived.paymentDate))
+      .limit(10),
+  ])
+
+  const invoices: CustomerTransaction[] = orderRows.map((o) => ({
+    id: o.id,
+    type: 'invoice',
+    reference: o.orderNumber,
+    date: o.orderDate,
+    amount: Number(o.totalAmount ?? '0'),
+    status: deriveOrderStatus(o.paymentStatus, o.orderDate, thirtyDaysAgo),
+    orderId: o.id,
+  }))
+
+  const payments: CustomerTransaction[] = paymentRows.map((p) => ({
+    id: p.id,
+    type: 'payment',
+    reference: p.momoReference ?? p.bankReference ?? p.paymentMethod,
+    date: p.paymentDate,
+    amount: Number(p.amount),
+    status: 'completed',
+  }))
+
+  return [...invoices, ...payments].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10)
+}
+
+function deriveOrderStatus(
+  paymentStatus: string,
+  orderDate: string,
+  thirtyDaysAgo: string,
+): CustomerTransaction['status'] {
+  if (paymentStatus === 'paid') return 'paid'
+  if (paymentStatus === 'partial') return 'partial'
+  if (orderDate < thirtyDaysAgo) return 'overdue'
+  return 'unpaid'
 }

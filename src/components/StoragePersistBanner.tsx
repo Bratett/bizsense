@@ -20,15 +20,26 @@ export function StoragePersistBanner() {
   }
 
   return (
-    <div className="mx-4 mt-2 rounded-lg border border-red-200 bg-red-50 p-4">
-      <p className="text-sm font-medium text-red-800">⚠ Storage permission required</p>
-      <p className="mt-1 text-sm text-red-700">
-        BizSense needs permission to store data safely on your device. Without this, your offline
-        records may be lost if your phone runs low on storage.
+    <div
+      className="fixed bottom-24 left-4 right-4 z-30 rounded-lg border border-amber-200 bg-amber-50 p-3 shadow-lg
+                 md:bottom-4 md:left-64 md:right-auto md:max-w-sm"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-amber-800">⚠ Storage permission needed</p>
+        <button
+          onClick={() => setShow(false)}
+          aria-label="Dismiss"
+          className="shrink-0 text-amber-500 hover:text-amber-700"
+        >
+          ✕
+        </button>
+      </div>
+      <p className="mt-1 text-xs text-amber-700">
+        Without this, offline records may be lost if your phone runs low on storage.
       </p>
       <button
         onClick={handleRetry}
-        className="mt-2 rounded bg-red-600 px-4 py-2 text-sm font-medium text-white"
+        className="mt-2 rounded bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
       >
         Grant Storage Permission
       </button>

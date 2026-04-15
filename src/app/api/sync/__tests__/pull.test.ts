@@ -22,7 +22,14 @@ vi.mock('@/db', () => {
       Promise.resolve([]).then(resolve, reject)
     return chain
   }
-  return { db: { select: vi.fn(() => makeChain()) } }
+  // tx mirrors the select interface so queries inside db.transaction() work
+  const makeTx = () => ({ select: vi.fn(() => makeChain()) })
+  return {
+    db: {
+      select: vi.fn(() => makeChain()),
+      transaction: vi.fn((fn: (tx: ReturnType<typeof makeTx>) => Promise<unknown>) => fn(makeTx())),
+    },
+  }
 })
 
 // ── Session helper ────────────────────────────────────────────────────────────
@@ -116,8 +123,8 @@ describe('GET /api/sync/pull', () => {
     // getServerSession must have been called — proving businessId came from session
     expect(mockGetServerSession).toHaveBeenCalledTimes(1)
 
-    // db.select was called — queries ran using the session's businessId
+    // db.transaction was called — queries ran using the session's businessId
     const { db } = await import('@/db')
-    expect(db.select).toHaveBeenCalled()
+    expect(db.transaction).toHaveBeenCalled()
   })
 })

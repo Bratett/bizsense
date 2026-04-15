@@ -32,7 +32,7 @@ vi.mock('@/lib/inventory/queries', () => ({
 }))
 
 vi.mock('@/lib/inventory/settings', () => ({
-  getAllowNegativeStock: vi.fn(() => false),
+  getAllowNegativeStock: vi.fn(() => Promise.resolve(false)),
 }))
 
 import { getServerSession } from '@/lib/session'

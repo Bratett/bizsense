@@ -10,6 +10,7 @@ import {
   getDashboardActivity,
   getDashboardChartData,
   getDashboardLowStock,
+  getDashboardPendingMomoLinks,
 } from '@/lib/dashboard/queries'
 import FirstTimeOverlay from './FirstTimeOverlay.client'
 import DashboardChart from './DashboardChart.client'
@@ -144,6 +145,7 @@ export default async function DashboardPage() {
     activity,
     chartData,
     lowStock,
+    pendingMomoLinks,
   ] = await Promise.all([
     getDashboardData(businessId),
     getDashboardTodaySales(businessId),
@@ -154,6 +156,7 @@ export default async function DashboardPage() {
     getDashboardActivity(businessId, userId, role),
     showFinancials ? getDashboardChartData(businessId) : null,
     getDashboardLowStock(businessId),
+    showFinancials ? getDashboardPendingMomoLinks(businessId) : null,
   ])
 
   const greeting = getGreeting()
@@ -356,6 +359,55 @@ export default async function DashboardPage() {
                       stroke="currentColor"
                       strokeWidth={2}
                       className="shrink-0 text-yellow-600"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                      />
+                    </svg>
+                  </Card>
+                </Link>
+              )}
+
+              {/* Pending MoMo payment links alert */}
+              {showFinancials && pendingMomoLinks && pendingMomoLinks.count > 0 && (
+                <Link href="/orders?filter=has_pending_momo_link" className="block">
+                  <Card
+                    size="sm"
+                    className="flex-row items-center gap-3 bg-indigo-50 px-4 py-3 transition-colors hover:bg-indigo-100"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3"
+                        />
+                      </svg>
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-indigo-800">
+                        {pendingMomoLinks.count}{' '}
+                        {pendingMomoLinks.count === 1 ? 'invoice' : 'invoices'} waiting for MoMo
+                        payment &middot; {formatGhs(pendingMomoLinks.total)}
+                      </p>
+                    </div>
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      className="shrink-0 text-indigo-500"
                     >
                       <path
                         strokeLinecap="round"

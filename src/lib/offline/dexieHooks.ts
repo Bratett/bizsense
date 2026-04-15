@@ -210,7 +210,7 @@ export async function queryDashboardMetrics(businessId: string): Promise<Dashboa
     .filter((o) => o.orderDate === today && o.status === 'fulfilled' && o.paymentStatus === 'paid')
     .toArray()
 
-  const todaySales = todayOrders.reduce((s, o) => s + o.totalAmount, 0)
+  const todaySales = todayOrders.reduce((s, o) => s + Number(o.totalAmount), 0)
   const todaySalesCount = todayOrders.length
 
   // Outstanding receivables (unpaid + partial)
@@ -236,7 +236,7 @@ export async function queryDashboardMetrics(businessId: string): Promise<Dashboa
   let cashBalance = 0
   if (cashAccountIds.length > 0) {
     const cashLines = await localDb.journalLines.where('accountId').anyOf(cashAccountIds).toArray()
-    cashBalance = cashLines.reduce((s, l) => s + l.debitAmount - l.creditAmount, 0)
+    cashBalance = cashLines.reduce((s, l) => s + Number(l.debitAmount) - Number(l.creditAmount), 0)
   }
 
   // Low stock count
