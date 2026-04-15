@@ -55,9 +55,23 @@ export function DashboardMetrics({
   ssrReceivablesCount,
   ssrLowStockCount,
 }: DashboardMetricsProps) {
-  const metrics = useDashboardMetrics(businessId)
+  // Build SSR-shaped initial data so useLiveQuery returns non-undefined
+  // on the very first render — eliminates skeleton flash entirely.
+  const ssrInitial =
+    ssrCashBalance !== null && ssrReceivables !== null && ssrReceivablesCount !== null
+      ? {
+          todaySales: ssrTodaySales,
+          todaySalesCount: ssrTodaySalesCount,
+          cashBalance: ssrCashBalance,
+          outstandingReceivables: ssrReceivables,
+          receivablesCount: ssrReceivablesCount,
+          lowStockCount: ssrLowStockCount,
+        }
+      : undefined
 
-  // useLiveQuery returns undefined on first render before Dexie responds.
+  const metrics = useDashboardMetrics(businessId, ssrInitial)
+
+  // useLiveQuery returns undefined on first render if no initialData is passed.
   // Fall back to SSR values so there is no skeleton flash.
   const todaySales = metrics?.todaySales ?? ssrTodaySales
   const todaySalesCount = metrics?.todaySalesCount ?? ssrTodaySalesCount

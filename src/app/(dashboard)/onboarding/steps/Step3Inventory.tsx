@@ -267,7 +267,7 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
                   </select>
                   <div className="relative">
                     <input
-                      type="number"
+                      type="text"
                       inputMode="decimal"
                       min="0"
                       step="1"
@@ -284,7 +284,7 @@ export default function Step3Inventory({ onComplete, onBack }: Props) {
                       GHS
                     </span>
                     <input
-                      type="number"
+                      type="text"
                       inputMode="decimal"
                       min="0"
                       step="0.01"

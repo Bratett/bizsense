@@ -1,11 +1,17 @@
-const MAX_DIMENSION = 1920
+const DEFAULT_MAX_DIMENSION = 1920
 const JPEG_QUALITY = 0.8
 
 /**
- * Resize an image file to max 1920px on the longest side and export as JPEG.
+ * Resize an image file to at most maxDimension px on the longest side and export as JPEG.
  * Returns the raw base64 string and a data URL for preview.
+ *
+ * @param file - The image File to resize.
+ * @param maxDimension - Maximum pixels on the longest side (default 1920). Pass 800 for product images.
  */
-export function resizeImage(file: File): Promise<{ base64: string; dataUrl: string }> {
+export function resizeImage(
+  file: File,
+  maxDimension = DEFAULT_MAX_DIMENSION,
+): Promise<{ base64: string; dataUrl: string }> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const img = new Image()
@@ -14,13 +20,13 @@ export function resizeImage(file: File): Promise<{ base64: string; dataUrl: stri
       URL.revokeObjectURL(url)
 
       let { width, height } = img
-      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      if (width > maxDimension || height > maxDimension) {
         if (width > height) {
-          height = Math.round((height / width) * MAX_DIMENSION)
-          width = MAX_DIMENSION
+          height = Math.round((height / width) * maxDimension)
+          width = maxDimension
         } else {
-          width = Math.round((width / height) * MAX_DIMENSION)
-          height = MAX_DIMENSION
+          width = Math.round((width / height) * maxDimension)
+          height = maxDimension
         }
       }
 

@@ -202,7 +202,7 @@ export default function Step2CashBalances({ onComplete, onBack }: Props) {
                     GHS
                   </span>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="decimal"
                     step="0.01"
                     min="0"

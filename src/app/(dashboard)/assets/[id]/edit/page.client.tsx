@@ -107,7 +107,7 @@ export default function EditAssetForm({ asset }: { asset: FixedAssetDetail }) {
             </label>
             <input
               id="useful-life"
-              type="number"
+              type="text"
               min="1"
               step="1"
               value={usefulLifeMonths}
@@ -126,7 +126,7 @@ export default function EditAssetForm({ asset }: { asset: FixedAssetDetail }) {
             </label>
             <input
               id="residual-value"
-              type="number"
+              type="text"
               min="0"
               step="0.01"
               value={residualValue}

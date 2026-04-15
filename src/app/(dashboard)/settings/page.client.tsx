@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import BusinessProfileSection from './_components/BusinessProfileSection.client'
@@ -10,6 +11,8 @@ import ChartOfAccountsSection from './_components/ChartOfAccountsSection.client'
 import IntegrationsSection from './_components/IntegrationsSection.client'
 import DataExportSection from './_components/DataExportSection.client'
 import AccountSection from './_components/AccountSection.client'
+import PayeBandsSection from './_components/PayeBandsSection.client'
+import InventorySettingsSection from './_components/InventorySettingsSection.client'
 
 // ─── Plain TypeScript interfaces (no Drizzle imports in client) ───────────────
 
@@ -76,6 +79,22 @@ export interface TeamMemberRecord {
   createdAt: Date
 }
 
+export interface PayeBandRecord {
+  id: string
+  lowerBound: string
+  upperBound: string | null
+  rate: string
+  effectiveFrom: string
+}
+
+export interface PendingInvitationRecord {
+  id: string
+  email: string
+  role: string
+  createdAt: Date | null
+  expiresAt: Date
+}
+
 // ─── Nav config ───────────────────────────────────────────────────────────────
 
 type UserRole = 'owner' | 'manager' | 'accountant' | 'cashier'
@@ -84,10 +103,13 @@ type SectionId =
   | 'profile'
   | 'coa'
   | 'tax'
+  | 'paye-bands'
   | 'team'
+  | 'inventory'
   | 'integrations'
   | 'export'
   | 'sync'
+  | 'sync-conflicts'
   | 'password'
   | 'signout'
 
@@ -95,6 +117,7 @@ interface NavSection {
   id: SectionId
   label: string
   allowedRoles: UserRole[]
+  href?: string
 }
 
 interface NavGroup {
@@ -113,11 +136,26 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { id: 'coa', label: 'Chart of Accounts', allowedRoles: ['owner', 'manager', 'accountant'] },
       { id: 'tax', label: 'Tax Settings', allowedRoles: ['owner', 'manager', 'accountant'] },
+      {
+        id: 'paye-bands',
+        label: 'PAYE Tax Bands',
+        allowedRoles: ['owner', 'accountant'],
+      },
     ],
   },
   {
     group: 'Team',
     sections: [{ id: 'team', label: 'Users & Roles', allowedRoles: ['owner', 'manager'] }],
+  },
+  {
+    group: 'Inventory',
+    sections: [
+      {
+        id: 'inventory',
+        label: 'Negative Stock',
+        allowedRoles: ['owner'],
+      },
+    ],
   },
   {
     group: 'Integrations',
@@ -137,6 +175,12 @@ const NAV_GROUPS: NavGroup[] = [
         id: 'sync',
         label: 'Sync Status',
         allowedRoles: ['owner', 'manager', 'accountant', 'cashier'],
+      },
+      {
+        id: 'sync-conflicts',
+        label: 'Sync Conflicts',
+        allowedRoles: ['owner', 'accountant'],
+        href: '/settings/sync-conflicts',
       },
     ],
   },
@@ -165,6 +209,8 @@ interface SettingsPageClientProps {
   taxComponents: TaxComponentRecord[]
   accounts: AccountRecord[]
   teamMembers: TeamMemberRecord[]
+  payeBands: PayeBandRecord[]
+  pendingInvitations: PendingInvitationRecord[]
   userRole: UserRole
   userId: string
 }
@@ -177,6 +223,8 @@ export default function SettingsPageClient({
   taxComponents,
   accounts,
   teamMembers,
+  payeBands,
+  pendingInvitations,
   userRole,
   userId,
 }: SettingsPageClientProps) {
@@ -201,25 +249,34 @@ export default function SettingsPageClient({
     <nav className="flex flex-col gap-6 py-6 px-3">
       {visibleGroups.map((group) => (
         <div key={group.group}>
-          <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+          <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-600">
             {group.group}
           </p>
           {group.sections.map((section) => {
             const active = selectedSection === section.id
+            const className = cn(
+              'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              active
+                ? 'bg-green-50 text-green-700'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              section.id === 'signout' &&
+                !active &&
+                'text-red-600 hover:bg-red-50 hover:text-red-700',
+            )
+            if (section.href) {
+              return (
+                <Link key={section.id} href={section.href} className={className}>
+                  {section.label}
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              )
+            }
             return (
               <button
                 key={section.id}
                 type="button"
                 onClick={() => selectSection(section.id)}
-                className={cn(
-                  'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  active
-                    ? 'bg-green-50 text-green-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                  section.id === 'signout' &&
-                    !active &&
-                    'text-red-600 hover:bg-red-50 hover:text-red-700',
-                )}
+                className={className}
               >
                 {section.label}
                 {/* Show chevron on mobile only */}
@@ -242,8 +299,19 @@ export default function SettingsPageClient({
         return <ChartOfAccountsSection accounts={accounts} userRole={userRole} />
       case 'tax':
         return <TaxSettingsSection taxComponents={taxComponents} userRole={userRole} />
+      case 'paye-bands':
+        return <PayeBandsSection payeBands={payeBands} userRole={userRole} />
       case 'team':
-        return <TeamSection teamMembers={teamMembers} userRole={userRole} currentUserId={userId} />
+        return (
+          <TeamSection
+            teamMembers={teamMembers}
+            pendingInvitations={pendingInvitations}
+            userRole={userRole}
+            currentUserId={userId}
+          />
+        )
+      case 'inventory':
+        return <InventorySettingsSection businessSettings={businessSettings} userRole={userRole} />
       case 'integrations':
         return <IntegrationsSection businessSettings={businessSettings} userRole={userRole} />
       case 'export':

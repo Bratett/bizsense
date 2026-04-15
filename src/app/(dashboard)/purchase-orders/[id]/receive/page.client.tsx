@@ -253,7 +253,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                     </TableCell>
                     <TableCell className="px-3 text-right">
                       <Input
-                        type="number"
+                        type="text"
                         min="0"
                         max={line.quantityOutstanding}
                         step="0.01"
@@ -271,7 +271,7 @@ export default function ReceiveGoodsForm({ po }: { po: PoWithLinesAndGrns }) {
                     </TableCell>
                     <TableCell className="px-3 text-right">
                       <Input
-                        type="number"
+                        type="text"
                         min="0"
                         step="0.01"
                         value={line.unitCost}

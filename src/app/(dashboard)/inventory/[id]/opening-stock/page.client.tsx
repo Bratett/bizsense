@@ -73,7 +73,7 @@ export default function OpeningStockForm({ product }: { product: ProductDetail }
           </Label>
           <Input
             id="quantity"
-            type="number"
+            type="text"
             inputMode="decimal"
             step="any"
             min="0.01"
@@ -93,7 +93,7 @@ export default function OpeningStockForm({ product }: { product: ProductDetail }
           </Label>
           <Input
             id="unitCost"
-            type="number"
+            type="text"
             inputMode="decimal"
             step="0.01"
             min="0"

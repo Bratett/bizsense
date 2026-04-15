@@ -174,7 +174,7 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
           <Input
             id="creditTermsDays"
             name="creditTermsDays"
-            type="number"
+            type="text"
             inputMode="numeric"
             min={0}
             step="1"

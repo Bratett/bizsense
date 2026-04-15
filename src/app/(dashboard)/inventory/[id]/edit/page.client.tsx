@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useRef, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { updateProduct, type ProductDetail, type UpdateProductInput } from '@/actions/products'
+import ProductImageUpload, {
+  type ProductImageUploadRef,
+} from '@/components/products/ProductImageUpload.client'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,6 +37,7 @@ export default function EditProductForm({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const imageUploadRef = useRef<ProductImageUploadRef>(null)
 
   // Form state -- pre-populated from product
   const [name, setName] = useState(product.name)
@@ -64,7 +68,10 @@ export default function EditProductForm({
     }
 
     startTransition(async () => {
-      const result = await updateProduct(product.id, input)
+      const [result] = await Promise.all([
+        updateProduct(product.id, input),
+        imageUploadRef.current?.flush(),
+      ])
       if (result.success) {
         router.push(`/inventory/${product.id}`)
         router.refresh()
@@ -235,6 +242,16 @@ export default function EditProductForm({
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="Optional product description"
+          />
+        </div>
+
+        {/* Product Image */}
+        <div className="space-y-1.5 md:col-span-2">
+          <Label>Product Image (optional)</Label>
+          <ProductImageUpload
+            ref={imageUploadRef}
+            productId={product.id}
+            currentImageUrl={product.imageUrl}
           />
         </div>
 

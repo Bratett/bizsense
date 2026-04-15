@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Banknote } from 'lucide-react'
+import { Banknote, RefreshCw } from 'lucide-react'
 import {
   approveExpense,
   rejectExpense,
@@ -16,7 +16,7 @@ import { getCategoryLabel, EXPENSE_CATEGORIES } from '@/lib/expenses/categories'
 import type { UserRole } from '@/lib/session'
 import SwipeableRow from '@/components/SwipeableRow.client'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Card, CardContent } from '@/components/ui/card'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Badge } from '@/components/ui/badge'
@@ -56,6 +56,9 @@ interface DisplayExpense {
   isCapitalExpense: boolean
   paymentMethod: string | null
   approvalStatus: string
+  isRecurring?: boolean
+  recurrenceRule?: string | null
+  parentExpenseId?: string | null
 }
 
 function fromExpenseListItem(e: ExpenseListItem): DisplayExpense {
@@ -68,6 +71,9 @@ function fromExpenseListItem(e: ExpenseListItem): DisplayExpense {
     isCapitalExpense: e.isCapitalExpense,
     paymentMethod: e.paymentMethod,
     approvalStatus: e.approvalStatus,
+    isRecurring: e.isRecurring,
+    recurrenceRule: e.recurrenceRule,
+    parentExpenseId: e.parentExpenseId,
   }
 }
 
@@ -154,15 +160,18 @@ export default function ExpenseList({
     <div className="mx-auto max-w-4xl">
       <PageHeader
         title="Expenses"
-        actions={<Button render={<Link href="/expenses/new" />}>Record Expense</Button>}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" render={<Link href="/expenses/import" />}>
+              Import CSV
+            </Button>
+            <Button render={<Link href="/expenses/new" />}>Record Expense</Button>
+          </div>
+        }
       />
 
       {/* Error banner */}
-      {actionError && (
-        <Alert variant="destructive" className="mt-3">
-          <AlertDescription>{actionError}</AlertDescription>
-        </Alert>
-      )}
+      <ErrorMessage message={actionError} className="mt-3" />
 
       {/* Filters */}
       <div className="mt-4 flex gap-2">
@@ -217,6 +226,7 @@ export default function ExpenseList({
                     </span>
                     <Button
                       size="sm"
+                      className="min-h-[44px]"
                       onClick={() => handleApprove(expense.id)}
                       disabled={isPending}
                     >
@@ -225,6 +235,7 @@ export default function ExpenseList({
                     <Button
                       variant="destructive"
                       size="sm"
+                      className="min-h-[44px]"
                       onClick={() => handleReject(expense.id)}
                       disabled={isPending}
                     >
@@ -275,6 +286,18 @@ export default function ExpenseList({
                         </StatusBadge>
                       )}
                       {expense.isCapitalExpense && <Badge variant="secondary">Asset</Badge>}
+                      {expense.isRecurring && (
+                        <Badge variant="outline" className="gap-1 text-xs">
+                          <RefreshCw className="h-3 w-3" />
+                          {expense.recurrenceRule
+                            ? expense.recurrenceRule.charAt(0).toUpperCase() +
+                              expense.recurrenceRule.slice(1)
+                            : 'Recurring'}
+                        </Badge>
+                      )}
+                      {expense.parentExpenseId && !expense.isRecurring && (
+                        <span className="text-xs text-muted-foreground">Auto-posted</span>
+                      )}
                     </div>
                     <p className="mt-0.5 text-xs text-gray-500">
                       {formatDate(expense.expenseDate)} &middot;{' '}

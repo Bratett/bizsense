@@ -263,7 +263,7 @@ export default function WalkInGrnForm({
                     )}
                   </div>
                   <Input
-                    type="number"
+                    type="text"
                     min="0.01"
                     step="0.01"
                     placeholder="Qty"
@@ -272,7 +272,7 @@ export default function WalkInGrnForm({
                     className="w-20 text-right"
                   />
                   <Input
-                    type="number"
+                    type="text"
                     min="0"
                     step="0.01"
                     placeholder="Cost"

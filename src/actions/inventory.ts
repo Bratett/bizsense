@@ -8,6 +8,11 @@ import { postJournalEntry } from '@/lib/ledger'
 import { getProductTransactions } from '@/lib/inventory/queries'
 import { computeFifoCogs } from '@/lib/inventory/fifo'
 import { getAllowNegativeStock } from '@/lib/inventory/settings'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+const PRODUCT_IMAGES_BUCKET = 'product-images'
+const MAX_PRODUCT_IMAGE_BYTES = 3 * 1024 * 1024 // 3 MB
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -335,4 +340,84 @@ export async function adjustStock(input: AdjustStockInput): Promise<InventoryAct
   })
 
   return { success: true, transactionId }
+}
+
+// ─── Product Image Upload ────────────────────────────────────────────────────
+
+export type UploadProductImageInput = {
+  productId: string
+  fileBase64: string
+  mimeType: string
+  extension: string
+}
+
+export async function uploadProductImage(
+  input: UploadProductImageInput,
+): Promise<{ imageUrl: string }> {
+  const user = await requireRole(['owner', 'manager', 'accountant'])
+  const { businessId } = user
+
+  const [product] = await db
+    .select({ id: products.id })
+    .from(products)
+    .where(and(eq(products.id, input.productId), eq(products.businessId, businessId)))
+
+  if (!product) throw new Error('Forbidden: product not found for this business')
+
+  if (!ALLOWED_MIME_TYPES.includes(input.mimeType as (typeof ALLOWED_MIME_TYPES)[number])) {
+    throw new Error('Invalid file type. Only JPEG, PNG, and WebP are accepted.')
+  }
+
+  const buffer = Buffer.from(input.fileBase64, 'base64')
+  if (buffer.length > MAX_PRODUCT_IMAGE_BYTES) {
+    throw new Error('Image must be under 3 MB.')
+  }
+
+  const supabase = await createSupabaseServerClient()
+  const storagePath = `${businessId}/${input.productId}.${input.extension}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(PRODUCT_IMAGES_BUCKET)
+    .upload(storagePath, buffer, { contentType: input.mimeType, upsert: true })
+
+  if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`)
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(storagePath)
+
+  await db
+    .update(products)
+    .set({ imageUrl: publicUrl, updatedAt: new Date() })
+    .where(and(eq(products.id, input.productId), eq(products.businessId, businessId)))
+
+  return { imageUrl: publicUrl }
+}
+
+export async function removeProductImage(productId: string): Promise<void> {
+  const user = await requireRole(['owner', 'manager', 'accountant'])
+  const { businessId } = user
+
+  const [product] = await db
+    .select({ id: products.id, imageUrl: products.imageUrl })
+    .from(products)
+    .where(and(eq(products.id, productId), eq(products.businessId, businessId)))
+
+  if (!product) throw new Error('Forbidden: product not found for this business')
+
+  if (product.imageUrl) {
+    const url = new URL(product.imageUrl)
+    const pathParts = url.pathname.split('/')
+    const bucketIdx = pathParts.indexOf(PRODUCT_IMAGES_BUCKET)
+    if (bucketIdx !== -1) {
+      const storagePath = pathParts.slice(bucketIdx + 1).join('/')
+      const supabase = await createSupabaseServerClient()
+      await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([storagePath])
+    }
+  }
+
+  await db
+    .update(products)
+    .set({ imageUrl: null, updatedAt: new Date() })
+    .where(and(eq(products.id, productId), eq(products.businessId, businessId)))
 }

@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useRef, useTransition } from 'react'
 import Link from 'next/link'
 import { createProduct, type CreateProductInput } from '@/actions/products'
+import ProductImageUpload, {
+  type ProductImageUploadRef,
+} from '@/components/products/ProductImageUpload.client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { MoneyInput } from '@/components/ui/money-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Card, CardContent } from '@/components/ui/card'
 import { PageHeader } from '@/components/ui/page-header'
 import { CheckCircle } from 'lucide-react'
@@ -21,6 +25,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [createdId, setCreatedId] = useState<string | null>(null)
+  const imageUploadRef = useRef<ProductImageUploadRef>(null)
 
   // Form state
   const [name, setName] = useState('')
@@ -56,6 +61,8 @@ export default function NewProductForm({ categories }: { categories: string[] })
     startTransition(async () => {
       const result = await createProduct(input)
       if (result.success) {
+        // Upload image now that we have a real productId
+        await imageUploadRef.current?.flush(result.productId)
         setCreatedId(result.productId)
       } else {
         setError(result.error)
@@ -108,11 +115,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
       <PageHeader title="Add Product" backHref="/inventory" />
 
       {/* Error */}
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      <ErrorMessage message={error} className="mb-4" />
 
       <form
         onSubmit={handleSubmit}
@@ -265,8 +268,14 @@ export default function NewProductForm({ categories }: { categories: string[] })
           />
         </div>
 
+        {/* Product Image */}
+        <div className="space-y-1.5 md:col-span-2">
+          <Label>Product Image (optional)</Label>
+          <ProductImageUpload ref={imageUploadRef} productId="" currentImageUrl={null} />
+        </div>
+
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="w-full md:col-span-2">
+        <Button type="submit" disabled={isPending} className="w-full min-h-[44px] md:col-span-2">
           {isPending ? 'Saving...' : 'Save Product'}
         </Button>
       </form>

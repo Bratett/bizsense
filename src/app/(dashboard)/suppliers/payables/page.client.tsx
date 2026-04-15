@@ -157,7 +157,7 @@ function PaymentModal({ supplier, onClose, onSuccess }: PaymentModalProps) {
             <div className="space-y-1.5">
               <Label>Amount (GHS)</Label>
               <Input
-                type="number"
+                type="text"
                 step="0.01"
                 min="0.01"
                 value={amount}

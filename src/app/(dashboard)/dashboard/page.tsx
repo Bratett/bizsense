@@ -13,8 +13,10 @@ import {
   getDashboardPendingMomoLinks,
   getDashboardUnrunDepreciation,
 } from '@/lib/dashboard/queries'
+import { getExpenseBudgetStatus } from '@/actions/expenseBudgets'
+import { getUnreviewedSyncConflictsCount } from '@/actions/syncConflicts'
 import FirstTimeOverlay from './FirstTimeOverlay.client'
-import DashboardChart from './DashboardChart.client'
+import DashboardChartLoader from './DashboardChartLoader.client'
 import ActivityFeed from './ActivityFeed.client'
 import { DashboardMetrics } from './DashboardMetrics.client'
 import SyncIndicator from '@/components/SyncIndicator.client'
@@ -131,12 +133,16 @@ export default async function DashboardPage() {
   const showFinancials = ['owner', 'manager', 'accountant'].includes(role)
   const showApprovals = ['owner', 'manager'].includes(role)
   const showDepreciationAlert = ['owner', 'accountant'].includes(role)
+  const showConflictAlert = role === 'owner' || role === 'accountant'
 
   // Fetch all dashboard data in parallel.
   // The 4 metric cards (todaySales, cashBalance, receivables, lowStock) are
   // passed as SSR fallback values to DashboardMetrics.client.tsx, which
   // switches to live Dexie data after hydration — making the metrics update
   // instantly when a sale is recorded offline without any network request.
+  const now = new Date()
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
   const [
     legacy,
     todaySales,
@@ -149,6 +155,8 @@ export default async function DashboardPage() {
     lowStock,
     pendingMomoLinks,
     unrunDepreciation,
+    budgetStatuses,
+    unreviewedConflictsCount,
   ] = await Promise.all([
     getDashboardData(businessId),
     getDashboardTodaySales(businessId),
@@ -161,6 +169,8 @@ export default async function DashboardPage() {
     getDashboardLowStock(businessId),
     showFinancials ? getDashboardPendingMomoLinks(businessId) : null,
     showFinancials && showDepreciationAlert ? getDashboardUnrunDepreciation(businessId) : null,
+    showFinancials ? getExpenseBudgetStatus(currentMonth) : null,
+    showConflictAlert ? getUnreviewedSyncConflictsCount() : Promise.resolve(0),
   ])
 
   const greeting = getGreeting()
@@ -226,6 +236,34 @@ export default async function DashboardPage() {
                 </Link>
               ))}
             </div>
+
+            {/* ─── Budget Alerts ───────────────────────────────────── */}
+            {budgetStatuses &&
+              budgetStatuses.filter((b) => b.isNearLimit || b.isOverBudget).length > 0 && (
+                <Link href="/expenses/budgets" className="block">
+                  <Card
+                    size="sm"
+                    className="space-y-1.5 px-4 py-3 transition-colors hover:bg-muted/50"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Budget Alerts
+                    </p>
+                    {budgetStatuses
+                      .filter((b) => b.isOverBudget || b.isNearLimit)
+                      .map((b) => (
+                        <p
+                          key={b.id}
+                          className={`text-sm ${b.isOverBudget ? 'text-red-700' : 'text-amber-700'}`}
+                        >
+                          {b.isOverBudget ? '🔴' : '⚠'} {b.category}: {formatGhs(b.spentThisMonth)}
+                          {b.isOverBudget
+                            ? ` — OVER BUDGET by ${formatGhs(b.spentThisMonth - b.monthlyBudget)}`
+                            : ` of ${formatGhs(b.monthlyBudget)} budget used (${b.percentUsed}%)`}
+                        </p>
+                      ))}
+                  </Card>
+                </Link>
+              )}
 
             {/* ─── Alerts Panel ───────────────────────────────────── */}
             <div className="space-y-2">
@@ -426,6 +464,55 @@ export default async function DashboardPage() {
                 </Link>
               )}
 
+              {/* Sync conflicts alert */}
+              {showConflictAlert && unreviewedConflictsCount > 0 && (
+                <Link href="/settings/sync-conflicts" className="block">
+                  <Card
+                    size="sm"
+                    className="flex-row items-center gap-3 bg-amber-50 px-4 py-3 ring-amber-200 transition-colors hover:bg-amber-100"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"
+                        />
+                      </svg>
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-amber-800">
+                        {unreviewedConflictsCount}{' '}
+                        {unreviewedConflictsCount === 1 ? 'sync conflict' : 'sync conflicts'}{' '}
+                        detected. Tap to review.
+                      </p>
+                    </div>
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      className="shrink-0 text-amber-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                      />
+                    </svg>
+                  </Card>
+                </Link>
+              )}
+
               {/* Pending MoMo payment links alert */}
               {showFinancials && pendingMomoLinks && pendingMomoLinks.count > 0 && (
                 <Link href="/orders?filter=has_pending_momo_link" className="block">
@@ -480,7 +567,7 @@ export default async function DashboardPage() {
           {/* Right column: activity feed + chart */}
           <div className="md:w-[400px] space-y-6">
             {/* ─── Revenue vs Expenses Chart ──────────────────────── */}
-            {showFinancials && chartData && <DashboardChart data={chartData} />}
+            {showFinancials && chartData && <DashboardChartLoader data={chartData} />}
 
             {/* ─── Activity Feed ──────────────────────────────────── */}
             <ActivityFeed items={activity} />

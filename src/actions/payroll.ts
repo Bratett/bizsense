@@ -1,6 +1,6 @@
 'use server'
 
-import { and, asc, count, desc, eq, inArray, isNull, lte, or, gte } from 'drizzle-orm'
+import { and, asc, count, desc, eq, inArray, isNull, lte, or, gte, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { payeBands, payrollLines, payrollRuns, staff } from '@/db/schema/payroll'
 import { businesses, users } from '@/db/schema/core'
@@ -766,4 +766,82 @@ export async function getPayslipData(payrollLineId: string): Promise<PayslipData
       paymentReference: row.paymentReference,
     },
   }
+}
+
+// ─── PAYE Bands — Update ──────────────────────────────────────────────────────
+
+export interface PayeBandInput {
+  lowerBound: number
+  upperBound: number | null // null = no upper ceiling
+  rate: number // percentage, e.g. 17.5 → stored as 0.175
+}
+
+export async function updatePayeBands(bands: PayeBandInput[]): Promise<void> {
+  const user = await requireRole(['owner', 'accountant'])
+  const { businessId } = user
+
+  if (!bands || bands.length === 0) {
+    throw new Error('At least one PAYE band is required')
+  }
+
+  for (const b of bands) {
+    if (b.rate < 0 || b.rate > 100) {
+      throw new Error(`Rate must be between 0 and 100 (got ${b.rate})`)
+    }
+    if (b.lowerBound < 0) {
+      throw new Error('Lower bound must be 0 or greater')
+    }
+    if (b.upperBound !== null && b.upperBound <= b.lowerBound) {
+      throw new Error('Upper bound must be greater than lower bound')
+    }
+  }
+
+  const today = new Date().toISOString().split('T')[0] as string
+
+  await db.transaction(async (tx) => {
+    // Expire all currently active bands for this business
+    await tx
+      .update(payeBands)
+      .set({ effectiveTo: today })
+      .where(and(eq(payeBands.businessId, businessId), isNull(payeBands.effectiveTo)))
+
+    // Insert new bands
+    await tx.insert(payeBands).values(
+      bands.map((b) => ({
+        businessId,
+        lowerBound: String(b.lowerBound),
+        upperBound: b.upperBound !== null ? String(b.upperBound) : null,
+        rate: String(Math.round((b.rate / 100) * 1_000_000) / 1_000_000), // store as decimal e.g. 0.175
+        effectiveFrom: today,
+        effectiveTo: null,
+      })),
+    )
+  })
+}
+
+// ─── PAYE Bands — Read (for settings page) ───────────────────────────────────
+
+export interface ActivePayeBand {
+  id: string
+  lowerBound: string
+  upperBound: string | null
+  rate: string
+  effectiveFrom: string
+}
+
+export async function getActivePayeBands(): Promise<ActivePayeBand[]> {
+  const user = await requireRole(['owner', 'accountant', 'manager'])
+  const { businessId } = user
+
+  return db
+    .select({
+      id: payeBands.id,
+      lowerBound: payeBands.lowerBound,
+      upperBound: payeBands.upperBound,
+      rate: payeBands.rate,
+      effectiveFrom: payeBands.effectiveFrom,
+    })
+    .from(payeBands)
+    .where(and(eq(payeBands.businessId, businessId), isNull(payeBands.effectiveTo)))
+    .orderBy(asc(payeBands.lowerBound))
 }
