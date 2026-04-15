@@ -11,7 +11,7 @@ export const journalEntries = pgTable('journal_entries', {
   reference: text('reference'),
   description: text('description'),
   sourceType: text('source_type').notNull(),
-  // order | expense | payment | payroll | manual | ai_recorded | reversal | opening_balance
+  // order | expense | payment | payroll | manual | ai_recorded | reversal | opening_balance | depreciation | grn
   sourceId: uuid('source_id'),
   reversalOf: uuid('reversal_of'), // FK to journal_entries.id if this is a reversal
   createdBy: uuid('created_by').references(() => users.id),

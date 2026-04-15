@@ -3,6 +3,7 @@ import { db } from '@/db'
 import {
   accounts,
   journalLines,
+  journalEntries,
   orders,
   expenses,
   customers,
@@ -11,6 +12,7 @@ import {
   goodsReceivedNotes,
   supplierPayments,
   hubtelPaymentLinks,
+  fixedAssets,
 } from '@/db/schema'
 import { format, subDays } from 'date-fns'
 
@@ -410,4 +412,45 @@ export async function getDashboardPendingMomoLinks(businessId: string): Promise<
     count: result[0]?.count ?? 0,
     total: Math.round(Number(result[0]?.total ?? 0) * 100) / 100,
   }
+}
+
+// ─── getDashboardUnrunDepreciation ────────────────────────────────────────────
+
+export type UnrunDepreciation = { needsRun: boolean }
+
+/**
+ * Returns true if there are active depreciable assets and the current UTC month's
+ * depreciation has not yet been posted. Used for the dashboard amber alert.
+ */
+export async function getDashboardUnrunDepreciation(
+  businessId: string,
+): Promise<UnrunDepreciation> {
+  const [countResult] = await db
+    .select({ count: sql<number>`COUNT(*)::int` })
+    .from(fixedAssets)
+    .where(and(eq(fixedAssets.businessId, businessId), eq(fixedAssets.isActive, true)))
+
+  const activeCount = Number(countResult?.count ?? 0)
+  if (activeCount === 0) return { needsRun: false }
+
+  const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM
+  const monthStart = `${currentMonth}-01`
+  // Last day of current month
+  const [year, month] = currentMonth.split('-').map(Number)
+  const monthEnd = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10)
+
+  const [lastEntry] = await db
+    .select({ id: journalEntries.id })
+    .from(journalEntries)
+    .where(
+      and(
+        eq(journalEntries.businessId, businessId),
+        eq(journalEntries.sourceType, 'depreciation'),
+        gte(journalEntries.entryDate, monthStart),
+        lte(journalEntries.entryDate, monthEnd),
+      ),
+    )
+    .limit(1)
+
+  return { needsRun: !lastEntry }
 }

@@ -90,13 +90,6 @@ function BSDocument({ data }: { data: BalanceSheet }) {
           <Text style={pdfStyles.bold}>Net Book Value</Text>
           <Text style={pdfStyles.bold}>{formatGhs(assets.fixedAssets.netBookValue)}</Text>
         </View>
-        {assets.fixedAssets.accumulatedDepreciation === 0 && (
-          <Text style={pdfStyles.note}>
-            Accumulated depreciation tracking will be available after monthly depreciation is
-            processed.
-          </Text>
-        )}
-
         <View style={pdfStyles.grandTotal}>
           <Text style={pdfStyles.bold}>TOTAL ASSETS</Text>
           <Text style={pdfStyles.bold}>{formatGhs(assets.totalAssets)}</Text>
@@ -399,15 +392,6 @@ export default function BalanceSheetReport({ data }: { data: BalanceSheet }) {
                 </TableCell>
               </TableRow>
               <SubtotalRow label="Net Book Value" amount={assets.fixedAssets.netBookValue} />
-              {assets.fixedAssets.accumulatedDepreciation === 0 && (
-                <TableRow>
-                  <TableCell></TableCell>
-                  <TableCell colSpan={2} className="py-1 text-xs text-muted-foreground/60 italic">
-                    Accumulated depreciation tracking will be available after monthly depreciation
-                    is processed.
-                  </TableCell>
-                </TableRow>
-              )}
 
               {/* Total Assets */}
               <GrandTotalRow label="TOTAL ASSETS" amount={assets.totalAssets} />

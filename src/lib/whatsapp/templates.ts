@@ -262,3 +262,27 @@ export function purchaseOrderTemplate(params: {
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
+
+/**
+ * Payslip notification sent to employee via WhatsApp.
+ * Includes a signed Supabase Storage URL to download/view the PDF.
+ */
+export function payslipTemplate(params: {
+  businessName: string
+  staffName: string
+  period: string // "April 2026"
+  netSalary: number
+  payslipUrl: string
+}): string {
+  return [
+    `Dear ${params.staffName},`,
+    ``,
+    `Your payslip for ${params.period} from ${params.businessName} is ready.`,
+    ``,
+    `Net Salary: ${formatGhs(params.netSalary)}`,
+    ``,
+    `View payslip: ${params.payslipUrl}`,
+    ``,
+    `For queries, contact your employer.`,
+  ].join('\n')
+}

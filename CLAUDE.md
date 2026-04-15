@@ -5,6 +5,7 @@ Read it in full before writing any code. Every rule here exists because
 violating it causes structural damage that is expensive to repair.
 
 # Note:
+
 Always consult the `docs/SME_Product_Specification.md` for full product specs when confused
 Consult the `DESIGN.md` for UI Designs of the system
 
@@ -17,6 +18,7 @@ Ghanaian SMEs (1–20 employees). It manages sales, expenses, inventory,
 customers, suppliers, payroll, and financial reporting.
 
 **Core constraints that drive every technical decision:**
+
 - Works fully offline on low-end Android phones (Tecno, Itel, Infinix)
 - MoMo (Mobile Money) is the primary payment rail — not cards, not bank transfer
 - GHS is the base currency; USD dual-pricing is common among trading SMEs
@@ -29,21 +31,21 @@ customers, suppliers, payroll, and financial reporting.
 
 Do not suggest alternatives. Do not upgrade versions mid-build.
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 15, App Router, TypeScript strict mode |
-| Styling | Tailwind CSS only — no CSS modules, no styled-components |
-| Local DB | IndexedDB via Dexie.js |
-| Cloud DB / Auth / Storage / Realtime | Supabase (Postgres + Auth + Storage + Realtime) |
-| Auth SSR | `@supabase/ssr` |
-| ORM | Drizzle ORM — server-side only, never in browser |
-| Migrations | drizzle-kit |
-| Testing | Vitest |
-| PDF | react-pdf, always in a Web Worker |
-| PWA | next-pwa (Workbox) |
-| Payments | Hubtel API or Paystack Ghana |
-| Notifications | WhatsApp via Twilio or Hubtel; SMS via Africa's Talking as fallback |
-| Hosting | Vercel (full stack) + Supabase |
+| Layer                                | Technology                                                          |
+| ------------------------------------ | ------------------------------------------------------------------- |
+| Framework                            | Next.js 15, App Router, TypeScript strict mode                      |
+| Styling                              | Tailwind CSS only — no CSS modules, no styled-components            |
+| Local DB                             | IndexedDB via Dexie.js                                              |
+| Cloud DB / Auth / Storage / Realtime | Supabase (Postgres + Auth + Storage + Realtime)                     |
+| Auth SSR                             | `@supabase/ssr`                                                     |
+| ORM                                  | Drizzle ORM — server-side only, never in browser                    |
+| Migrations                           | drizzle-kit                                                         |
+| Testing                              | Vitest                                                              |
+| PDF                                  | react-pdf, always in a Web Worker                                   |
+| PWA                                  | next-pwa (Workbox)                                                  |
+| Payments                             | Hubtel API or Paystack Ghana                                        |
+| Notifications                        | WhatsApp via Twilio or Hubtel; SMS via Africa's Talking as fallback |
+| Hosting                              | Vercel (full stack) + Supabase                                      |
 
 ---
 
@@ -130,7 +132,7 @@ write partial entries.
 
 ```typescript
 // src/lib/ledger.ts — postJournalEntry() enforces this
-const totalDebits  = lines.reduce((s, l) => s + l.debitAmount, 0)
+const totalDebits = lines.reduce((s, l) => s + l.debitAmount, 0)
 const totalCredits = lines.reduce((s, l) => s + l.creditAmount, 0)
 if (Math.abs(totalDebits - totalCredits) > 0.001) {
   throw new Error(`Journal entry does not balance: dr=${totalDebits} cr=${totalCredits}`)
@@ -148,12 +150,15 @@ AND a journal entry must use `atomicTransactionWrite()` from `src/lib/atomic.ts`
 ```typescript
 // CORRECT
 await atomicTransactionWrite(journalInput, async (tx, journalEntryId) => {
-  return await tx.insert(orders).values({ ...data, journalEntryId }).returning()
+  return await tx
+    .insert(orders)
+    .values({ ...data, journalEntryId })
+    .returning()
 })
 
 // WRONG — never do this
 await db.insert(orders).values(data)
-await db.insert(journalEntries).values(entry)  // if this fails: orphan record
+await db.insert(journalEntries).values(entry) // if this fails: orphan record
 ```
 
 This is enforced by design. If you see a write to orders, expenses, grn,
@@ -169,13 +174,14 @@ user input, request body, URL params, or AI output.
 // CORRECT
 'use server'
 export async function getSales() {
-  const session = await getServerSession()          // throws if not authenticated
-  const businessId = session.user.businessId        // from verified session cookie
+  const session = await getServerSession() // throws if not authenticated
+  const businessId = session.user.businessId // from verified session cookie
   return db.select().from(orders).where(eq(orders.businessId, businessId))
 }
 
 // WRONG — never do this
-export async function getSales(businessId: string) { // businessId from client = security hole
+export async function getSales(businessId: string) {
+  // businessId from client = security hole
   return db.select().from(orders).where(eq(orders.businessId, businessId))
 }
 ```
@@ -206,10 +212,11 @@ const { totalTaxAmount } = await calculateTax(businessId, supplyAmount)
 ```
 
 The cascading calculation:
-- NHIL:    2.5% on base amount (non-compounded)
+
+- NHIL: 2.5% on base amount (non-compounded)
 - GETFund: 2.5% on base amount (non-compounded)
-- COVID:   1.0% on base amount (non-compounded, verify GRA current status)
-- VAT:     15% on (base + NHIL + GETFund + COVID) — compounded
+- COVID: 1.0% on base amount (non-compounded, verify GRA current status)
+- VAT: 15% on (base + NHIL + GETFund + COVID) — compounded
 
 When GRA changes levy rates or introduces new levies, only the database
 record changes. No code deployment required.
@@ -225,13 +232,15 @@ be locked at the moment of posting and stored in `journal_lines.fxRate` and
 // CORRECT — lock rate at transaction time
 const currentRate = await getCurrentFxRate(businessId, 'USD', 'GHS')
 await postJournalEntry(tx, {
-  lines: [{
-    accountId: cashAccountId,
-    debitAmount: usdAmount * currentRate.rate,
-    fxRate: currentRate.rate,
-    fxRateLockedAt: new Date(),
-    currency: 'USD',
-  }]
+  lines: [
+    {
+      accountId: cashAccountId,
+      debitAmount: usdAmount * currentRate.rate,
+      fxRate: currentRate.rate,
+      fxRateLockedAt: new Date(),
+      currency: 'USD',
+    },
+  ],
 })
 ```
 
@@ -239,12 +248,12 @@ await postJournalEntry(tx, {
 
 The following fields must NEVER appear on these tables:
 
-| Table | Forbidden Fields |
-|---|---|
-| accounts | balance, current_balance |
-| customers | balance, amount_owed, total_purchases |
-| suppliers | balance, amount_owed |
-| products | stock_count, quantity_on_hand, stock_value |
+| Table     | Forbidden Fields                           |
+| --------- | ------------------------------------------ |
+| accounts  | balance, current_balance                   |
+| customers | balance, amount_owed, total_purchases      |
+| suppliers | balance, amount_owed                       |
+| products  | stock_count, quantity_on_hand, stock_value |
 
 All of these are derived from transactions at query time.
 
@@ -255,11 +264,13 @@ All of these are derived from transactions at query time.
 ### Schema Rules (apply to every table)
 
 Every table has:
+
 - `id: uuid().primaryKey().defaultRandom()`
 - `createdAt: timestamp().defaultNow().notNull()`
 - `updatedAt: timestamp().defaultNow().notNull()`
 
 Every transactional table (everything except `businesses` and `users`) has:
+
 - `businessId: uuid().notNull().references(() => businesses.id)`
 
 All monetary amounts use `numeric({ precision: 15, scale: 2 })`.
@@ -288,22 +299,22 @@ businesses
 
 ### Default Chart of Accounts (seeded on business creation)
 
-| Code | Name | Type | Cash Flow |
-|---|---|---|---|
-| 1001–1005 | Cash, MoMo accounts, Bank | Asset | Operating |
-| 1100 | Accounts Receivable | Asset | Operating |
-| 1101 | Input VAT Recoverable | Asset | Operating |
-| 1200 | Inventory | Asset | Operating |
-| 1500 | Fixed Assets — Cost | Asset | Investing |
-| 1510 | Accumulated Depreciation | Asset (contra) | Investing |
-| 2001 | Accounts Payable | Liability | Operating |
-| 2100 | VAT Payable | Liability | Operating |
-| 2200–2300 | SSNIT, PAYE Payable | Liability | Operating |
-| 2400 | Loans Payable | Liability | Financing |
-| 3001 | Owner's Equity / Capital | Equity | Financing |
-| 4001–4004 | Revenue accounts | Revenue | Operating |
-| 5001 | Cost of Goods Sold | COGS | Operating |
-| 6001–6009 | Expense accounts | Expense | Operating |
+| Code      | Name                      | Type           | Cash Flow |
+| --------- | ------------------------- | -------------- | --------- |
+| 1001–1005 | Cash, MoMo accounts, Bank | Asset          | Operating |
+| 1100      | Accounts Receivable       | Asset          | Operating |
+| 1101      | Input VAT Recoverable     | Asset          | Operating |
+| 1200      | Inventory                 | Asset          | Operating |
+| 1500      | Fixed Assets — Cost       | Asset          | Investing |
+| 1510      | Accumulated Depreciation  | Asset (contra) | Investing |
+| 2001      | Accounts Payable          | Liability      | Operating |
+| 2100      | VAT Payable               | Liability      | Operating |
+| 2200–2300 | SSNIT, PAYE Payable       | Liability      | Operating |
+| 2400      | Loans Payable             | Liability      | Financing |
+| 3001      | Owner's Equity / Capital  | Equity         | Financing |
+| 4001–4004 | Revenue accounts          | Revenue        | Operating |
+| 5001      | Cost of Goods Sold        | COGS           | Operating |
+| 6001–6009 | Expense accounts          | Expense        | Operating |
 
 ---
 
@@ -315,6 +326,7 @@ All reads and writes go to IndexedDB first. The UI never waits for the
 network. Supabase sync is always background behaviour.
 
 On first app load:
+
 1. Call `navigator.storage.persist()` — required, not optional. Without
    this, Android browsers can evict IndexedDB silently. Handle the case
    where the user declines and surface a clear warning.
@@ -380,12 +392,13 @@ server-side. It is never a parameter Claude fills in from user input.
 ```typescript
 // /api/ai/chat/route.ts
 const session = await getServerSession()
-const businessId = session.user.businessId  // from session — never from req.body
+const businessId = session.user.businessId // from session — never from req.body
 const result = await runAIWithTools(userMessage, { businessId })
 ```
 
 Log any user message matching these patterns to
 `ai_conversation_logs.requiresReview = true`:
+
 - "ignore previous instructions"
 - "show me" + any business_id reference
 - "system prompt"
@@ -429,6 +442,7 @@ The AI never writes directly to transaction tables.
 
 AI-recorded transactions that are wrong must be reversed — not deleted.
 Reversal posts an equal and opposite journal entry with:
+
 - `sourceType = 'reversal'`
 - `reversalOf = original journalEntryId`
 
@@ -441,6 +455,7 @@ Both entries remain in the ledger permanently.
 ### Reconciliation Job
 
 `runLedgerReconciliation(businessId)` detects:
+
 1. Fulfilled orders with no `journalEntryId`
 2. Confirmed expenses with no `journalEntryId`
 3. Confirmed GRNs with no `journalEntryId`
@@ -458,14 +473,14 @@ and on demand from the accountant dashboard.
 
 ## 10. Performance Targets
 
-| Metric | Target |
-|---|---|
-| Dashboard load (from IndexedDB) | < 1 second |
-| Transaction write (to IndexedDB) | < 200ms |
-| Report generation (12 months) | < 3 seconds |
-| Invoice PDF generation | < 2 seconds |
-| AI assistant response | < 5 seconds |
-| Initial bundle size | < 5MB |
+| Metric                           | Target      |
+| -------------------------------- | ----------- |
+| Dashboard load (from IndexedDB)  | < 1 second  |
+| Transaction write (to IndexedDB) | < 200ms     |
+| Report generation (12 months)    | < 3 seconds |
+| Invoice PDF generation           | < 2 seconds |
+| AI assistant response            | < 5 seconds |
+| Initial bundle size              | < 5MB       |
 
 PDF generation runs in a Web Worker — never on the main thread.
 Route-based code splitting is automatic in Next.js — payroll and reporting
@@ -506,7 +521,7 @@ Round to 2 decimal places at the final step, not intermediate steps.
 const tax = Math.round(supplyAmount * rate * 100) / 100
 
 // WRONG
-const tax = supplyAmount * 0.219  // floating point error accumulates
+const tax = supplyAmount * 0.219 // floating point error accumulates
 ```
 
 ### Testing
@@ -527,39 +542,39 @@ The following tests must always pass — they are the ledger health check:
 These are the most common agent mistakes on this codebase. Treat this list
 as a checklist before submitting any code.
 
-| Action | Why It's Wrong |
-|---|---|
-| Import Drizzle in a `.client.tsx` file | Drizzle is server-only |
-| Store account balance on the `accounts` table | Balances are computed |
-| Hardcode `0.219` or any tax rate | Rates come from `tax_components` |
-| Use `businessId` from request body in a Server Action | Security hole |
-| Write to `orders` without `atomicTransactionWrite` | Creates orphan records |
-| Use `float` or `integer` for monetary amounts | Precision loss |
-| Write directly to transaction tables from the AI | Must stage in `pending_ai_actions` |
-| Delete a journal entry | Always reverse — never delete |
-| Use `fx_rates` to look up a past transaction's rate | Rates are locked at post time |
-| Use `NEXT_PUBLIC_` prefix for any secret | Exposed to browser |
-| Generate sequential IDs locally without device prefix | Offline collision risk |
-| Derive stock quantity from a stored field | Query `inventory_transactions` |
+| Action                                                | Why It's Wrong                     |
+| ----------------------------------------------------- | ---------------------------------- |
+| Import Drizzle in a `.client.tsx` file                | Drizzle is server-only             |
+| Store account balance on the `accounts` table         | Balances are computed              |
+| Hardcode `0.219` or any tax rate                      | Rates come from `tax_components`   |
+| Use `businessId` from request body in a Server Action | Security hole                      |
+| Write to `orders` without `atomicTransactionWrite`    | Creates orphan records             |
+| Use `float` or `integer` for monetary amounts         | Precision loss                     |
+| Write directly to transaction tables from the AI      | Must stage in `pending_ai_actions` |
+| Delete a journal entry                                | Always reverse — never delete      |
+| Use `fx_rates` to look up a past transaction's rate   | Rates are locked at post time      |
+| Use `NEXT_PUBLIC_` prefix for any secret              | Exposed to browser                 |
+| Generate sequential IDs locally without device prefix | Offline collision risk             |
+| Derive stock quantity from a stored field             | Query `inventory_transactions`     |
 
 ---
 
 ## 13. Sprint Reference
 
-| Sprint | Focus |
-|---|---|
-| 1 ✓ | Foundation — schema, auth, journal engine, tax engine, General Ledger |
-| 2 | Onboarding — setup wizard, opening balances, CSV import |
-| 3 | Core Sales — orders, invoices, FX rate locking |
-| 4 | Expenses — recording, receipts, basic dashboard |
-| 5 | Inventory — products, FIFO stock movements |
-| 6 | Suppliers — purchase orders, GRNs, payables |
-| 7 | Reporting — P&L, Balance Sheet, Cash Flow, Trial Balance, VAT |
-| 8 | AI Assistant — tool-use, staging flow, reversal |
-| 9 | Offline Sync — Dexie → Supabase sync engine |
-| 10 | MoMo & WhatsApp — payment integration, notifications |
-| 11 | Payroll & Tax — payroll run, depreciation, GRA compliance |
-| 12 | Polish & Beta — performance, error handling, pilot users |
-| 13 | Feedback Loop — AI refinement, pilot fixes |
+| Sprint | Focus                                                                 |
+| ------ | --------------------------------------------------------------------- |
+| 1 ✓    | Foundation — schema, auth, journal engine, tax engine, General Ledger |
+| 2      | Onboarding — setup wizard, opening balances, CSV import               |
+| 3      | Core Sales — orders, invoices, FX rate locking                        |
+| 4      | Expenses — recording, receipts, basic dashboard                       |
+| 5      | Inventory — products, FIFO stock movements                            |
+| 6      | Suppliers — purchase orders, GRNs, payables                           |
+| 7      | Reporting — P&L, Balance Sheet, Cash Flow, Trial Balance, VAT         |
+| 8      | AI Assistant — tool-use, staging flow, reversal                       |
+| 9      | Offline Sync — Dexie → Supabase sync engine                           |
+| 10     | MoMo & WhatsApp — payment integration, notifications                  |
+| 11     | Payroll & Tax — payroll run, depreciation, GRA compliance             |
+| 12     | Polish & Beta — performance, error handling, pilot users              |
+| 13     | Feedback Loop — AI refinement, pilot fixes                            |
 
 Build vertically. Complete one sprint fully before starting the next.

@@ -44,7 +44,7 @@ type RawVatLine = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const GRA_PURCHASES_NOTE =
-  'Input VAT from supplier invoices will appear here after the purchases VAT module is activated. Contact your accountant for a complete VAT position.'
+  'This report now includes input VAT from expense receipts and confirmed supplier invoices. Verify your VAT return with your accountant before filing.'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -165,7 +165,7 @@ export async function getVatReport(
         eq(journalEntries.businessId, businessId),
         gte(journalEntries.entryDate, period.from),
         lte(journalEntries.entryDate, period.to),
-        inArray(journalEntries.sourceType, ['expense', 'ai_recorded']),
+        inArray(journalEntries.sourceType, ['expense', 'ai_recorded', 'grn']),
       ),
     )
     .where(eq(journalLines.accountId, inputVatAccount.id))

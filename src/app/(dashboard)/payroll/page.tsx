@@ -1,7 +1,16 @@
-export default function PayrollPage() {
+import { getPayrollRuns } from '@/actions/payroll'
+import PayrollList from './page.client'
+import Fab from '@/components/Fab.client'
+import PullToRefresh from '@/components/PullToRefresh.client'
+
+export default async function PayrollPage() {
+  const runs = await getPayrollRuns()
   return (
-    <main className="p-4 md:p-8">
-      <h1 className="text-xl font-semibold">Payroll — coming soon</h1>
-    </main>
+    <>
+      <PullToRefresh>
+        <PayrollList initialRuns={runs} />
+      </PullToRefresh>
+      <Fab href="/payroll/new" label="Start Payroll Run" />
+    </>
   )
 }

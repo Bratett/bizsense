@@ -18,6 +18,7 @@ import { getServerSession } from '@/lib/session'
 import { postJournalEntry } from '@/lib/ledger'
 import { seedChartOfAccounts, type SeededAccounts } from '@/lib/seeds/seedChartOfAccounts'
 import { seedTaxComponents } from '@/lib/seeds/seedTaxComponents'
+import { seedPayeBands } from '@/lib/seeds/seedPayeBands'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -144,6 +145,7 @@ export async function completeOnboardingStep1(formData: FormData): Promise<Actio
       .where(eq(businesses.id, businessId))
 
     seededAccounts = await seedChartOfAccounts(tx, businessId)
+    await seedPayeBands(tx, businessId)
 
     if (vatRegistered) {
       const effectiveDate = vatEffectiveDate ? new Date(vatEffectiveDate) : new Date()
@@ -849,6 +851,8 @@ export async function seedBusiness(): Promise<{ accounts: number; taxComponents:
   await db.transaction(async (tx) => {
     const seeded = await seedChartOfAccounts(tx, businessId)
     accountCount = Object.keys(seeded).length
+
+    await seedPayeBands(tx, businessId)
 
     const vatAccountId = seeded['2100']
     if (vatAccountId) {
