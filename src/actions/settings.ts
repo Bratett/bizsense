@@ -1,8 +1,15 @@
 'use server'
 
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull, gt, lt } from 'drizzle-orm'
 import { db } from '@/db'
-import { businesses, businessSettings, taxComponents, accounts, users } from '@/db/schema'
+import {
+  businesses,
+  businessSettings,
+  taxComponents,
+  accounts,
+  users,
+  userInvitations,
+} from '@/db/schema'
 import { requireRole } from '@/lib/auth/requireRole'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -258,11 +265,40 @@ export async function inviteTeamMember(
     return { success: false, error: 'Please fix the errors below', fieldErrors }
   }
 
+  // Check for an existing pending invitation for this email + business
+  const now = new Date()
+  const [existingInvite] = await db
+    .select({ id: userInvitations.id })
+    .from(userInvitations)
+    .where(
+      and(
+        eq(userInvitations.businessId, businessId),
+        eq(userInvitations.email, email),
+        isNull(userInvitations.acceptedAt),
+        gt(userInvitations.expiresAt, now),
+      ),
+    )
+    .limit(1)
+
+  if (existingInvite) {
+    return {
+      success: false,
+      error: 'A pending invitation already exists for this email',
+      fieldErrors: { email: 'Already invited' },
+    }
+  }
+
+  // Generate invite token
+  const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+
   let newUserId: string
   try {
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       data: { businessId, role, fullName },
-    })
+      options: { redirectTo: `${appUrl}/invite/${token}` },
+    } as Parameters<typeof supabaseAdmin.auth.admin.inviteUserByEmail>[1])
     if (error) {
       if (error.message.toLowerCase().includes('already registered')) {
         return {
@@ -284,6 +320,16 @@ export async function inviteTeamMember(
     fullName,
     role,
     isActive: true,
+  })
+
+  // Track the invitation for pending display / cancel / resend
+  await db.insert(userInvitations).values({
+    businessId,
+    email,
+    role,
+    token,
+    invitedBy: user.id,
+    expiresAt,
   })
 
   return { success: true }
@@ -461,4 +507,152 @@ export async function changePassword(
   }
 
   return { success: true }
+}
+
+// ─── Invitation — Cancel ──────────────────────────────────────────────────────
+
+export async function cancelInvitation(
+  _prevState: SettingsActionResult,
+  formData: FormData,
+): Promise<SettingsActionResult> {
+  const user = await requireRole(['owner'])
+  const businessId = user.businessId
+
+  const invitationId = (formData.get('invitationId') as string | null)?.trim() ?? ''
+  if (!invitationId) return { success: false, error: 'Invitation ID is required' }
+
+  // IDOR guard
+  const [target] = await db
+    .select({ id: userInvitations.id })
+    .from(userInvitations)
+    .where(and(eq(userInvitations.id, invitationId), eq(userInvitations.businessId, businessId)))
+    .limit(1)
+
+  if (!target) return { success: false, error: 'Invitation not found' }
+
+  await db.delete(userInvitations).where(eq(userInvitations.id, invitationId))
+
+  return { success: true }
+}
+
+// ─── Invitation — Resend ──────────────────────────────────────────────────────
+
+export async function resendInvitation(
+  _prevState: SettingsActionResult,
+  formData: FormData,
+): Promise<SettingsActionResult> {
+  const user = await requireRole(['owner'])
+  const businessId = user.businessId
+
+  const invitationId = (formData.get('invitationId') as string | null)?.trim() ?? ''
+  if (!invitationId) return { success: false, error: 'Invitation ID is required' }
+
+  // IDOR guard + fetch invite
+  const [invite] = await db
+    .select({
+      id: userInvitations.id,
+      email: userInvitations.email,
+      role: userInvitations.role,
+      token: userInvitations.token,
+    })
+    .from(userInvitations)
+    .where(and(eq(userInvitations.id, invitationId), eq(userInvitations.businessId, businessId)))
+    .limit(1)
+
+  if (!invite) return { success: false, error: 'Invitation not found' }
+
+  const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+
+  try {
+    const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(invite.email, {
+      data: { businessId, role: invite.role },
+      options: { redirectTo: `${appUrl}/invite/${invite.token}` },
+    } as Parameters<typeof supabaseAdmin.auth.admin.inviteUserByEmail>[1])
+
+    if (error && !error.message.toLowerCase().includes('already registered')) {
+      return { success: false, error: error.message }
+    }
+  } catch {
+    return { success: false, error: 'Failed to resend invitation. Please try again.' }
+  }
+
+  // Refresh expiry
+  await db
+    .update(userInvitations)
+    .set({ expiresAt: newExpiresAt })
+    .where(eq(userInvitations.id, invitationId))
+
+  return { success: true }
+}
+
+// ─── Business Settings — Inventory ───────────────────────────────────────────
+
+export async function updateInventorySettings(input: {
+  allowNegativeStock: boolean
+}): Promise<void> {
+  const user = await requireRole(['owner'])
+  const businessId = user.businessId
+
+  await db
+    .insert(businessSettings)
+    .values({
+      businessId,
+      allowNegativeStock: input.allowNegativeStock,
+    })
+    .onConflictDoUpdate({
+      target: businessSettings.businessId,
+      set: {
+        allowNegativeStock: input.allowNegativeStock,
+        updatedAt: new Date(),
+      },
+    })
+}
+
+// ─── Business Logo — Upload ───────────────────────────────────────────────────
+
+export type LogoActionResult =
+  | { success: true; logoUrl: string }
+  | { success: false; error: string }
+
+export async function updateBusinessLogo(
+  _prevState: LogoActionResult | null,
+  formData: FormData,
+): Promise<LogoActionResult> {
+  const user = await requireRole(['owner', 'manager'])
+  const businessId = user.businessId
+
+  const file = formData.get('logo') as File | null
+  if (!file || file.size === 0) return { success: false, error: 'No file selected' }
+
+  if (!file.type.startsWith('image/')) {
+    return { success: false, error: 'File must be an image (JPEG, PNG, WebP, etc.)' }
+  }
+
+  const MAX_BYTES = 2 * 1024 * 1024 // 2 MB
+  if (file.size > MAX_BYTES) {
+    return { success: false, error: 'Image must be 2 MB or smaller' }
+  }
+
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `${businessId}/logo.${ext}`
+
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from('logos')
+    .upload(path, buffer, { contentType: file.type, upsert: true })
+
+  if (uploadError) return { success: false, error: uploadError.message }
+
+  const { data: urlData } = supabaseAdmin.storage.from('logos').getPublicUrl(path)
+  const logoUrl = urlData.publicUrl
+
+  await db
+    .update(businesses)
+    .set({ logoUrl, updatedAt: new Date() })
+    .where(eq(businesses.id, businessId))
+
+  return { success: true, logoUrl }
 }

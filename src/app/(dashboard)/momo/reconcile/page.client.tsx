@@ -147,7 +147,7 @@ export function MoMoReconcileClient({ accounts }: Props) {
                 <div className="md:w-36">
                   <p className="text-[10px] uppercase tracking-wide text-gray-400">Actual</p>
                   <input
-                    type="number"
+                    type="text"
                     inputMode="decimal"
                     step="0.01"
                     min="0"

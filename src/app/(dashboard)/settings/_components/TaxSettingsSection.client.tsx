@@ -125,10 +125,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
               <Input
                 id="add-rate"
                 name="rate"
-                type="number"
-                step="0.0001"
-                min="0"
-                max="100"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 placeholder="e.g. 2.5"
                 className={cn('h-9 text-sm', addFieldErrors?.rate && 'border-destructive')}
                 disabled={addPending}
@@ -141,8 +140,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
               <Input
                 id="add-order"
                 name="calculationOrder"
-                type="number"
-                min="1"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="e.g. 5"
                 className={cn(
                   'h-9 text-sm',
@@ -206,10 +206,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
                       <Input
                         form={`edit-form-${tc.id}`}
                         name="rate"
-                        type="number"
-                        step="0.0001"
-                        min="0"
-                        max="100"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*\.?[0-9]*"
                         defaultValue={(Number(tc.rate) * 100).toFixed(4)}
                         className="h-8 text-sm text-right"
                         disabled={updatePending}

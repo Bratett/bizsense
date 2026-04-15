@@ -54,6 +54,7 @@ export type ProductListItem = {
   trackInventory: boolean
   reorderLevel: number
   isActive: boolean
+  imageUrl: string | null
   currentStock: number
   stockValue: number
   isLowStock: boolean
@@ -84,6 +85,7 @@ export type ProductDetail = {
   trackInventory: boolean
   reorderLevel: number
   isActive: boolean
+  imageUrl: string | null
   createdAt: Date
   updatedAt: Date
   currentStock: number
@@ -369,6 +371,7 @@ export async function listProducts(filters?: ProductListFilters): Promise<Produc
       trackInventory: products.trackInventory,
       reorderLevel: products.reorderLevel,
       isActive: products.isActive,
+      imageUrl: products.imageUrl,
       currentStock: currentStockSubquery,
     })
     .from(products)
@@ -424,6 +427,7 @@ export async function getProductById(id: string): Promise<ProductDetail | null> 
       trackInventory: products.trackInventory,
       reorderLevel: products.reorderLevel,
       isActive: products.isActive,
+      imageUrl: products.imageUrl,
       createdAt: products.createdAt,
       updatedAt: products.updatedAt,
       currentStock: currentStockSubquery,

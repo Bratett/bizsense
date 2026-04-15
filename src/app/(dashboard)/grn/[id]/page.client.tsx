@@ -103,7 +103,7 @@ function ReversalModal({
                   </span>
                 </span>
                 <Input
-                  type="number"
+                  type="text"
                   min={0}
                   max={Number(line.quantityReceived)}
                   step="0.01"

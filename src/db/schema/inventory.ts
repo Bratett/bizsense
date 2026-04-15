@@ -47,6 +47,7 @@ export const products = pgTable('products', {
   trackInventory: boolean('track_inventory').default(true).notNull(),
   reorderLevel: integer('reorder_level').default(0).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
+  imageUrl: text('image_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -117,6 +118,7 @@ export const goodsReceivedNotes = pgTable('goods_received_notes', {
     .notNull()
     .references(() => businesses.id),
   grnNumber: text('grn_number').notNull(),
+  localGrnNumber: text('local_grn_number'),
   poId: uuid('po_id').references(() => purchaseOrders.id),
   supplierId: uuid('supplier_id')
     .notNull()

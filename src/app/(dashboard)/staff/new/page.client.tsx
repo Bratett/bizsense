@@ -179,7 +179,7 @@ export default function StaffForm({ businessId: _businessId, mode, initialData }
             </Label>
             <Input
               className={cn(inputClass, 'mt-1')}
-              type="number"
+              type="text"
               min="0"
               step="0.01"
               value={baseSalary}

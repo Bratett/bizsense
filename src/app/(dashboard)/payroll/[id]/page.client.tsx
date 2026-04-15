@@ -143,7 +143,7 @@ function AdjustmentPanel({
           <Label className="text-sm font-medium text-gray-700">Amount (GHS)</Label>
           <Input
             className="mt-1 h-10"
-            type="number"
+            type="text"
             min="0"
             step="0.01"
             value={rawValue}

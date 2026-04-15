@@ -77,6 +77,8 @@ function product(overrides: Partial<Parameters<typeof localDb.products.put>[0]> 
     trackInventory: true,
     reorderLevel: 5,
     isActive: true,
+    imageUrl: null,
+    syncStatus: 'synced' as const,
     updatedAt: new Date().toISOString(),
     ...overrides,
   }

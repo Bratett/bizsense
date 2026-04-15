@@ -142,7 +142,7 @@ export default function NewAssetForm() {
             </label>
             <input
               id="purchase-cost"
-              type="number"
+              type="text"
               min="0.01"
               step="0.01"
               placeholder="0.00"
@@ -159,7 +159,7 @@ export default function NewAssetForm() {
             </label>
             <input
               id="useful-life"
-              type="number"
+              type="text"
               min="1"
               step="1"
               placeholder="60"
@@ -182,7 +182,7 @@ export default function NewAssetForm() {
             </label>
             <input
               id="residual-value"
-              type="number"
+              type="text"
               min="0"
               step="0.01"
               placeholder="0.00"

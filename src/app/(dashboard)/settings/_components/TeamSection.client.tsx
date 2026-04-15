@@ -8,9 +8,12 @@ import {
   updateTeamMemberRole,
   deactivateTeamMember,
   reactivateTeamMember,
+  cancelInvitation,
+  resendInvitation,
   type SettingsActionResult,
 } from '@/actions/settings'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { formatDate } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +27,7 @@ import {
 } from '@/components/ui/select'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { cn } from '@/lib/utils'
-import type { TeamMemberRecord } from '../page.client'
+import type { TeamMemberRecord, PendingInvitationRecord } from '../page.client'
 
 const initialState: SettingsActionResult = { success: false, error: '' }
 
@@ -50,11 +53,17 @@ interface ConfirmTarget {
 
 interface Props {
   teamMembers: TeamMemberRecord[]
+  pendingInvitations: PendingInvitationRecord[]
   userRole: string
   currentUserId: string
 }
 
-export default function TeamSection({ teamMembers, userRole, currentUserId }: Props) {
+export default function TeamSection({
+  teamMembers,
+  pendingInvitations,
+  userRole,
+  currentUserId,
+}: Props) {
   const canManage = userRole === 'owner'
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null)
@@ -75,6 +84,8 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
     reactivateTeamMember,
     initialState,
   )
+  const [cancelState, cancelFormAction, cancelPending] = useActionState(cancelInvitation, initialState)
+  const [resendState, resendFormAction, resendPending] = useActionState(resendInvitation, initialState)
 
   useEffect(() => {
     if (inviteState.success) {
@@ -102,6 +113,16 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
       setConfirmTarget(null)
     }
   }, [reactivateState.success])
+
+  useEffect(() => {
+    if (cancelState.success) toast.success('Invitation cancelled')
+    else if (!cancelState.success && cancelState.error) toast.error(cancelState.error)
+  }, [cancelState])
+
+  useEffect(() => {
+    if (resendState.success) toast.success('Invitation resent')
+    else if (!resendState.success && resendState.error) toast.error(resendState.error)
+  }, [resendState])
 
   const activeMembers = teamMembers.filter((m) => m.isActive)
   const inactiveMembers = teamMembers.filter((m) => !m.isActive)
@@ -132,10 +153,8 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
       {showInviteForm && canManage && (
         <div className="mb-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
           <h3 className="mb-3 text-sm font-semibold text-gray-700">Invite New Team Member</h3>
-          {!inviteState.success && inviteState.error && (
-            <Alert variant="destructive" className="mb-3">
-              <AlertDescription>{inviteState.error}</AlertDescription>
-            </Alert>
+          {!inviteState.success && (
+            <ErrorMessage message={inviteState.error ?? null} className="mb-3" />
           )}
           <form action={inviteFormAction} className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div className="space-y-1">
@@ -204,10 +223,8 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
       )}
 
       {/* Role update errors */}
-      {!roleState.success && roleState.error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{roleState.error}</AlertDescription>
-        </Alert>
+      {!roleState.success && (
+        <ErrorMessage message={roleState.error ?? null} className="mb-4" />
       )}
 
       {/* Active members */}
@@ -226,7 +243,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                 <div>
                   <p className="text-sm font-medium text-gray-900">
                     {member.fullName ?? member.phone ?? 'Unknown'}
-                    {isSelf && <span className="ml-2 text-xs text-gray-400">(you)</span>}
+                    {isSelf && <span className="ml-2 text-xs text-gray-500">(you)</span>}
                   </p>
                   {member.phone && member.fullName && (
                     <p className="text-xs text-gray-500">{member.phone}</p>
@@ -255,7 +272,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                       size="sm"
                       variant="outline"
                       disabled={rolePending}
-                      className="h-8 text-xs"
+                      className="min-h-[44px] text-xs"
                     >
                       Update
                     </Button>
@@ -272,7 +289,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="min-h-[44px] text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
                     onClick={() =>
                       setConfirmTarget({
                         userId: member.id,
@@ -290,7 +307,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
         })}
 
         {activeMembers.length === 0 && (
-          <p className="py-6 text-center text-sm text-gray-400">No active team members</p>
+          <p className="py-6 text-center text-sm text-gray-500">No active team members</p>
         )}
       </div>
 
@@ -312,7 +329,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                     <p className="text-sm text-gray-600">
                       {member.fullName ?? member.phone ?? 'Unknown'}
                     </p>
-                    <Badge variant="outline" className="text-xs text-gray-400">
+                    <Badge variant="outline" className="text-xs text-gray-500">
                       {ROLE_LABELS[member.role] ?? member.role}
                     </Badge>
                   </div>
@@ -322,7 +339,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 text-xs"
+                    className="min-h-[44px] text-xs"
                     onClick={() =>
                       setConfirmTarget({
                         userId: member.id,
@@ -337,6 +354,105 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Pending invitations */}
+      {canManage && (
+        <div className="mt-8">
+          <h3 className="mb-3 text-sm font-semibold text-gray-700">
+            Pending Invitations
+            {pendingInvitations.length > 0 && (
+              <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                {pendingInvitations.length}
+              </span>
+            )}
+          </h3>
+
+          {pendingInvitations.length === 0 ? (
+            <p className="text-sm text-gray-500">No pending invitations</p>
+          ) : (
+            <div className="overflow-hidden rounded-lg border border-gray-200">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2.5 text-left font-medium text-gray-600">Email</th>
+                    <th className="px-4 py-2.5 text-left font-medium text-gray-600">Role</th>
+                    <th className="hidden px-4 py-2.5 text-left font-medium text-gray-600 sm:table-cell">
+                      Invited
+                    </th>
+                    <th className="hidden px-4 py-2.5 text-left font-medium text-gray-600 sm:table-cell">
+                      Expires
+                    </th>
+                    <th className="px-4 py-2.5 text-right font-medium text-gray-600">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {pendingInvitations.map((inv) => (
+                    <tr key={inv.id} className="bg-white">
+                      <td className="px-4 py-3 text-gray-900 truncate max-w-[160px]">
+                        {inv.email}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {ROLE_LABELS[inv.role] ?? inv.role}
+                        </Badge>
+                      </td>
+                      <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">
+                        {inv.createdAt
+                          ? formatDate(
+                              (inv.createdAt instanceof Date ? inv.createdAt : new Date(inv.createdAt as string))
+                                .toISOString()
+                                .split('T')[0],
+                            )
+                          : '—'}
+                      </td>
+                      <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">
+                        {formatDate(
+                          (inv.expiresAt instanceof Date
+                            ? inv.expiresAt
+                            : new Date(inv.expiresAt)
+                          )
+                            .toISOString()
+                            .split('T')[0],
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          {/* Resend */}
+                          <form action={resendFormAction}>
+                            <input type="hidden" name="invitationId" value={inv.id} />
+                            <Button
+                              type="submit"
+                              variant="outline"
+                              size="sm"
+                              className="min-h-[44px] text-xs"
+                              disabled={resendPending || cancelPending}
+                            >
+                              Resend
+                            </Button>
+                          </form>
+                          {/* Cancel */}
+                          <form action={cancelFormAction}>
+                            <input type="hidden" name="invitationId" value={inv.id} />
+                            <Button
+                              type="submit"
+                              variant="ghost"
+                              size="sm"
+                              className="min-h-[44px] text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+                              disabled={cancelPending || resendPending}
+                            >
+                              Cancel
+                            </Button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

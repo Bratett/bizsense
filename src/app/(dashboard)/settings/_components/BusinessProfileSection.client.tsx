@@ -1,9 +1,16 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { updateBusinessProfile, type SettingsActionResult } from '@/actions/settings'
+import { ImagePlus, Loader2 } from 'lucide-react'
+import {
+  updateBusinessProfile,
+  updateBusinessLogo,
+  type SettingsActionResult,
+  type LogoActionResult,
+} from '@/actions/settings'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,10 +46,15 @@ interface Props {
   userRole: string
 }
 
+const initialLogoState: LogoActionResult | null = null
+
 export default function BusinessProfileSection({ business, userRole }: Props) {
   const [state, formAction, isPending] = useActionState(updateBusinessProfile, initialState)
+  const [logoState, logoFormAction, logoPending] = useActionState(updateBusinessLogo, initialLogoState)
   const [vatRegistered, setVatRegistered] = useState(business.vatRegistered)
   const [fyMonth, setFyMonth] = useState(business.financialYearStart ?? '1')
+  const [previewUrl, setPreviewUrl] = useState<string | null>(business.logoUrl)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fieldErrors = !state.success ? state.fieldErrors : undefined
   const readOnly = userRole === 'accountant'
@@ -53,6 +65,27 @@ export default function BusinessProfileSection({ business, userRole }: Props) {
     }
   }, [state.success])
 
+  useEffect(() => {
+    if (logoState?.success) {
+      setPreviewUrl(logoState.logoUrl)
+      toast.success('Logo updated')
+    } else if (logoState && !logoState.success) {
+      toast.error(logoState.error)
+    }
+  }, [logoState])
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be 2 MB or smaller')
+      e.target.value = ''
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
+  }
+
   return (
     <div>
       <h2 className="mb-1 text-lg font-semibold text-gray-900">Business Profile</h2>
@@ -60,11 +93,63 @@ export default function BusinessProfileSection({ business, userRole }: Props) {
         Core business information printed on invoices and used for tax compliance.
       </p>
 
-      {!state.success && state.error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
+      {/* Logo upload */}
+      {!readOnly && (
+        <div className="mb-6 rounded-lg border border-gray-200 p-4">
+          <p className="mb-3 text-sm font-medium text-gray-700">Business Logo</p>
+          <div className="flex items-center gap-4">
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="Business logo"
+                className="h-16 w-16 rounded-lg object-contain border border-gray-200 bg-gray-50"
+              />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
+                <ImagePlus className="h-6 w-6 text-gray-400" />
+              </div>
+            )}
+            <form action={logoFormAction} className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                name="logo"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={logoPending}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-[44px]"
+                disabled={logoPending}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {logoPending ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="mr-1.5 h-4 w-4" />
+                )}
+                {logoPending ? 'Uploading…' : 'Choose Image'}
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                variant="default"
+                className="min-h-[44px]"
+                disabled={logoPending}
+              >
+                Upload Logo
+              </Button>
+            </form>
+          </div>
+          <p className="mt-2 text-xs text-gray-400">JPEG, PNG, or WebP · Max 2 MB</p>
+        </div>
       )}
+
+      {!state.success && <ErrorMessage message={state.error ?? null} className="mb-4" />}
 
       <form action={formAction} noValidate>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-x-6 md:gap-y-4">

@@ -6,20 +6,23 @@ import { accounts, expenses, businesses } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
 import { requireRole } from '@/lib/auth/requireRole'
 import { atomicTransactionWrite } from '@/lib/atomic'
-import { reverseJournalEntry } from '@/lib/ledger'
-import type { JournalLineInput, PostJournalEntryInput } from '@/lib/ledger'
+import { reverseJournalEntry, postJournalEntry } from '@/lib/ledger'
+import type { JournalLineInput, PostJournalEntryInput, DrizzleTransaction } from '@/lib/ledger'
 import { reverseCalculateVat } from '@/lib/expenses/vatReverse'
 import {
   categoryToAccountCode,
+  EXPENSE_CATEGORIES,
   FIXED_ASSETS_ACCOUNT_CODE,
   INPUT_VAT_ACCOUNT_CODE,
 } from '@/lib/expenses/categories'
+import { getNextDueDate } from '@/lib/expenses/recurring'
+import type { CsvExpenseRow } from '@/lib/expenses/csvImport'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type PaymentMethod = 'cash' | 'momo_mtn' | 'momo_telecel' | 'momo_airtel' | 'bank'
 
-export type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly'
+export type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly'
 
 export type CreateExpenseInput = {
   expenseDate: string
@@ -36,6 +39,7 @@ export type CreateExpenseInput = {
   bankReference?: string
   isRecurring?: boolean
   recurrenceFrequency?: RecurrenceFrequency
+  parentExpenseId?: string
 }
 
 export type ExpenseActionResult =
@@ -53,6 +57,9 @@ export type ExpenseListItem = {
   isCapitalExpense: boolean
   accountName: string | null
   receiptUrl: string | null
+  isRecurring: boolean
+  recurrenceRule: string | null
+  parentExpenseId: string | null
 }
 
 export type ExpenseDetail = {
@@ -298,6 +305,7 @@ export async function createExpense(input: CreateExpenseInput): Promise<ExpenseA
       includesVat: includesVat,
       isRecurring,
       recurrenceRule,
+      parentExpenseId: input.parentExpenseId ?? null,
       notes: input.notes ?? null,
       createdBy: userId,
     })
@@ -348,6 +356,7 @@ export async function createExpense(input: CreateExpenseInput): Promise<ExpenseA
       includesVat: includesVat,
       isRecurring,
       recurrenceRule,
+      parentExpenseId: input.parentExpenseId ?? null,
       notes: input.notes ?? null,
       journalEntryId,
       createdBy: userId,
@@ -629,6 +638,9 @@ export async function listExpenses(filters?: ExpenseListFilters): Promise<Expens
       isCapitalExpense: expenses.isCapitalExpense,
       accountName: accounts.name,
       receiptUrl: expenses.receiptUrl,
+      isRecurring: expenses.isRecurring,
+      recurrenceRule: expenses.recurrenceRule,
+      parentExpenseId: expenses.parentExpenseId,
     })
     .from(expenses)
     .leftJoin(accounts, eq(expenses.accountId, accounts.id))
@@ -739,17 +751,17 @@ export async function getExpenseSummary(dateFrom: string, dateTo: string): Promi
  *     with a journal entry.
  */
 export async function processRecurringExpenses(): Promise<{
-  processed: number
-  errors: string[]
+  posted: number
+  skipped: number
 }> {
   const session = await getServerSession()
   const { businessId } = session.user
 
   const today = new Date().toISOString().split('T')[0]
-  let processed = 0
-  const errors: string[] = []
+  let posted = 0
+  let skipped = 0
 
-  // Find all recurring expense templates
+  // Find all recurring expense templates (isRecurring=true, parentExpenseId=null means root template)
   const templates = await db
     .select()
     .from(expenses)
@@ -762,84 +774,159 @@ export async function processRecurringExpenses(): Promise<{
     )
     .orderBy(desc(expenses.expenseDate))
 
-  // Deduplicate by recurring chain (category + description + amount + paymentMethod)
-  const seen = new Set<string>()
-  const uniqueTemplates = templates.filter((t) => {
-    const key = `${t.category}|${t.description}|${t.amount}|${t.paymentMethod}`
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
-
-  for (const template of uniqueTemplates) {
+  for (const template of templates) {
     try {
       const frequency = template.recurrenceRule as RecurrenceFrequency | null
-      if (!frequency) continue
+      if (!frequency) {
+        skipped++
+        continue
+      }
 
-      // Find the most recent expense in the chain
-      const [latest] = await db
-        .select({ expenseDate: expenses.expenseDate })
+      const nextDateStr = getNextDueDate(template.expenseDate, frequency)
+
+      if (nextDateStr > today) {
+        skipped++
+        continue
+      }
+
+      // Idempotency check: has a child already been posted for this period?
+      const [existingChild] = await db
+        .select({ id: expenses.id })
         .from(expenses)
         .where(
           and(
             eq(expenses.businessId, businessId),
-            eq(expenses.category, template.category!),
-            eq(expenses.description, template.description),
-            eq(expenses.amount, template.amount),
-            eq(expenses.paymentMethod, template.paymentMethod),
+            eq(expenses.parentExpenseId, template.id),
+            eq(expenses.expenseDate, nextDateStr),
           ),
         )
-        .orderBy(desc(expenses.expenseDate))
         .limit(1)
 
-      if (!latest) continue
-
-      const lastDate = new Date(latest.expenseDate + 'T00:00:00Z')
-      let nextDate: Date
-
-      switch (frequency) {
-        case 'weekly':
-          nextDate = new Date(lastDate.getTime() + 7 * 24 * 60 * 60 * 1000)
-          break
-        case 'biweekly':
-          nextDate = new Date(lastDate.getTime() + 14 * 24 * 60 * 60 * 1000)
-          break
-        case 'monthly': {
-          nextDate = new Date(lastDate)
-          nextDate.setUTCMonth(nextDate.getUTCMonth() + 1)
-          break
-        }
+      if (existingChild) {
+        skipped++
+        continue
       }
 
-      const nextDateStr = nextDate.toISOString().split('T')[0]
-      if (nextDateStr > today) continue
-
-      // Create the new expense instance (non-recurring, just a generated copy)
+      const pm = template.paymentMethod as PaymentMethod
+      // Auto-post the child expense (non-recurring copy)
       const result = await createExpense({
         expenseDate: nextDateStr,
-        category: template.category!,
+        category: template.category ?? 'Miscellaneous',
         amount: Number(template.amount),
-        paymentMethod: template.paymentMethod as PaymentMethod,
+        paymentMethod: pm,
         description: template.description,
         includesVat: template.includesVat,
         isCapitalExpense: template.isCapitalExpense,
         supplierId: template.supplierId ?? undefined,
-        notes: `Auto-generated from recurring expense (${frequency})`,
+        notes: `[Auto] ${template.notes ?? template.description}`,
+        isRecurring: false,
+        parentExpenseId: template.id,
+        // Provide synthetic references so validation passes for auto-posted entries
+        ...(pm === 'bank' ? { bankReference: 'Auto-recurring' } : {}),
+        ...(pm.startsWith('momo_') ? { momoReference: 'Auto-recurring' } : {}),
       })
 
       if (result.success) {
-        processed++
+        posted++
       } else {
-        errors.push(`Failed to post recurring "${template.description}": ${result.error}`)
+        skipped++
       }
-    } catch (err) {
-      errors.push(
-        `Error processing "${template.description}": ${err instanceof Error ? err.message : 'Unknown'}`,
-      )
+    } catch {
+      skipped++
     }
   }
 
-  return { processed, errors }
+  return { posted, skipped }
+}
+
+// ─── CSV Import ─────────────────────────────────────────────────────────────
+
+/**
+ * Import a batch of expenses from CSV rows.
+ * All-or-nothing: runs in a single DB transaction — if any row fails, all roll back.
+ * Caller must ensure errors.length === 0 before calling (validation is client-side).
+ */
+export async function importExpensesFromCsv(
+  rows: CsvExpenseRow[],
+): Promise<{ imported: number }> {
+  const user = await requireRole(['owner', 'manager', 'accountant'])
+  const { businessId, id: userId } = user
+
+  if (rows.length === 0) return { imported: 0 }
+
+  // Resolve all account IDs we'll need (read-only, outside transaction)
+  const categoryCodes = rows
+    .map((r) => {
+      const cat = EXPENSE_CATEGORIES.find((c) => c.label === r.category)
+      return cat?.accountCode ?? '6009'
+    })
+  const paymentMethodsUsed = [...new Set(rows.map((r) => r.paymentMethod))] as PaymentMethod[]
+  const paymentCodes = paymentMethodsUsed.map((m) => PAYMENT_ACCOUNT_CODES[m])
+  const allCodes = [...new Set([...categoryCodes, ...paymentCodes])]
+  const accountMap = await resolveAccountIds(businessId, allCodes)
+
+  await db.transaction(async (tx) => {
+    for (const row of rows) {
+      const cat = EXPENSE_CATEGORIES.find((c) => c.label === row.category)
+      const expenseCode = cat?.accountCode ?? '6009'
+      const paymentCode = PAYMENT_ACCOUNT_CODES[row.paymentMethod as PaymentMethod]
+
+      const expenseAccountId = accountMap[expenseCode]
+      const paymentAccountId = accountMap[paymentCode]
+
+      if (!expenseAccountId || !paymentAccountId) {
+        throw new Error(`Account not found for category "${row.category}" or payment method "${row.paymentMethod}"`)
+      }
+
+      const expenseId = crypto.randomUUID()
+      const journalLines = buildExpenseJournalLines(
+        expenseAccountId,
+        paymentAccountId,
+        row.amount,
+        false,   // isCapitalExpense — CSV import does not support capital expenses
+        false,   // includesVat — CSV import does not reverse-calculate VAT
+        row.amount,
+        0,
+        undefined,
+        undefined,
+        row.description,
+      )
+
+      const journalInput: PostJournalEntryInput = {
+        businessId,
+        entryDate: row.date,
+        reference: `IMP-${expenseId.slice(0, 8).toUpperCase()}`,
+        description: `CSV Import: ${row.description}`,
+        sourceType: 'expense',
+        sourceId: expenseId,
+        createdBy: userId,
+        lines: journalLines,
+      }
+
+      const journalEntryId = await postJournalEntry(tx as DrizzleTransaction, journalInput)
+
+      await tx.insert(expenses).values({
+        id: expenseId,
+        businessId,
+        expenseDate: row.date,
+        category: row.category,
+        accountId: expenseAccountId,
+        amount: row.amount.toFixed(2),
+        paymentMethod: row.paymentMethod,
+        description: row.description,
+        approvalStatus: 'approved',
+        approvedBy: userId,
+        approvedAt: new Date(),
+        isCapitalExpense: false,
+        includesVat: false,
+        isRecurring: false,
+        journalEntryId,
+        createdBy: userId,
+      })
+    }
+  })
+
+  return { imported: rows.length }
 }
 
 // ─── Preview Expense VAT ────────────────────────────────────────────────────

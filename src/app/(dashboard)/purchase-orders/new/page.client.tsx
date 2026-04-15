@@ -320,7 +320,7 @@ export default function NewPurchaseOrderForm({
             <div>
               <Label className="mb-1">Exchange Rate (USD → GHS)</Label>
               <Input
-                type="number"
+                type="text"
                 min="0"
                 step="0.0001"
                 placeholder="e.g. 15.40"
@@ -433,7 +433,7 @@ export default function NewPurchaseOrderForm({
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <Input
-                      type="number"
+                      type="text"
                       min="0.01"
                       step="0.01"
                       placeholder="Qty"
@@ -448,7 +448,7 @@ export default function NewPurchaseOrderForm({
                   </div>
                   <div className="flex-1">
                     <Input
-                      type="number"
+                      type="text"
                       min="0"
                       step="0.01"
                       placeholder={`Unit Cost (${currency})`}

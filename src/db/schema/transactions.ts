@@ -7,6 +7,7 @@ import {
   numeric,
   timestamp,
   integer,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { businesses, users } from './core'
 import { journalEntries } from './journal'
@@ -116,6 +117,7 @@ export const expenses = pgTable('expenses', {
   receiptUrl: text('receipt_url'),
   isRecurring: boolean('is_recurring').default(false).notNull(),
   recurrenceRule: text('recurrence_rule'),
+  parentExpenseId: uuid('parent_expense_id').references((): AnyPgColumn => expenses.id),
   approvalStatus: text('approval_status').default('approved').notNull(),
   // pending_approval | approved | rejected
   approvedBy: uuid('approved_by').references(() => users.id),
@@ -128,4 +130,16 @@ export const expenses = pgTable('expenses', {
   aiGenerated: boolean('ai_generated').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const expenseBudgets = pgTable('expense_budgets', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  businessId:     uuid('business_id').notNull().references(() => businesses.id),
+  accountId:      uuid('account_id').notNull().references(() => accounts.id),
+  category:       text('category').notNull(),
+  monthlyBudget:  numeric('monthly_budget', { precision: 15, scale: 2 }).notNull(),
+  alertThreshold: numeric('alert_threshold', { precision: 5, scale: 2 }).default('0.80'),
+  isActive:       boolean('is_active').default(true),
+  createdAt:      timestamp('created_at').defaultNow().notNull(),
+  updatedAt:      timestamp('updated_at').defaultNow().notNull(),
 })

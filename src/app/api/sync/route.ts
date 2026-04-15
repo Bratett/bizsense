@@ -8,6 +8,7 @@ import {
   expenses,
   customers,
   inventoryTransactions,
+  syncConflicts,
 } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
 import { atomicTransactionWrite } from '@/lib/atomic'
@@ -46,7 +47,13 @@ type SyncResult =
 
 // ─── Table routing ────────────────────────────────────────────────────────────
 
-type SupportedTable = 'orders' | 'order_lines' | 'expenses' | 'customers' | 'inventory_transactions'
+type SupportedTable =
+  | 'orders'
+  | 'order_lines'
+  | 'expenses'
+  | 'customers'
+  | 'inventory_transactions'
+  | 'sync_conflicts'
 
 const SUPPORTED_TABLES = new Set<string>([
   'orders',
@@ -54,6 +61,7 @@ const SUPPORTED_TABLES = new Set<string>([
   'expenses',
   'customers',
   'inventory_transactions',
+  'sync_conflicts',
 ])
 
 function isSupportedTable(name: string): name is SupportedTable {
@@ -235,6 +243,27 @@ async function processPlainUpsert(
         .insert(expenses)
         .values(val)
         .onConflictDoUpdate({ target: expenses.id, set: { ...val, id: undefined } })
+      break
+    }
+
+    case 'sync_conflicts': {
+      const val = {
+        id: item.recordId,
+        businessId,
+        tableName: String(payload.tableName ?? ''),
+        recordId: String(payload.recordId ?? ''),
+        localValue: (payload.localValue ?? {}) as Record<string, unknown>,
+        serverValue: (payload.serverValue ?? {}) as Record<string, unknown>,
+        conflictedAt: payload.conflictedAt ? new Date(String(payload.conflictedAt)) : new Date(),
+        reviewedAt: payload.reviewedAt ? new Date(String(payload.reviewedAt)) : null,
+        reviewedBy: payload.reviewedBy != null ? String(payload.reviewedBy) : null,
+        resolution: payload.resolution != null ? String(payload.resolution) : null,
+        notes: payload.notes != null ? String(payload.notes) : null,
+      }
+      await db
+        .insert(syncConflicts)
+        .values(val)
+        .onConflictDoUpdate({ target: syncConflicts.id, set: { ...val, id: undefined } })
       break
     }
   }

@@ -125,7 +125,7 @@ export default function NewSupplierForm() {
           <Input
             id="creditTermsDays"
             name="creditTermsDays"
-            type="number"
+            type="text"
             inputMode="numeric"
             min={0}
             step="1"

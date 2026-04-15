@@ -36,6 +36,7 @@ interface DisplayProduct {
   sellingPrice: number | string | null
   reorderLevel: number
   trackInventory: boolean
+  imageUrl?: string | null
 }
 
 function stockStatus(product: DisplayProduct) {
@@ -105,6 +106,7 @@ export default function ProductList({
           sellingPrice: p.sellingPrice,
           reorderLevel: p.reorderLevel,
           trackInventory: p.trackInventory,
+          imageUrl: p.imageUrl,
         }))
 
   const filtered = allProducts.filter((p) => {
@@ -243,9 +245,20 @@ export default function ProductList({
                   href={`/inventory/${product.id}`}
                   className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
                 >
-                  {/* Stock dot */}
+                  {/* Product image or stock dot */}
                   <div className="flex-shrink-0">
-                    <StatusDot color={status.color} />
+                    {product.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="h-10 w-10 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                        <StatusDot color={status.color} />
+                      </div>
+                    )}
                   </div>
 
                   {/* Name + SKU + category */}

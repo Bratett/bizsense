@@ -200,8 +200,51 @@ async function runDrainLoop(): Promise<void> {
       },
     )
 
+    // Post-sync: trigger clean number assignment for document tables that had
+    // at least one successful sync in this batch. Fire-and-forget — non-critical.
+    const successfulTables = new Set(
+      results
+        .filter((r) => r.success)
+        .flatMap((r) => {
+          const t = requestItems.find((i) => i.syncQueueId === r.syncQueueId)?.tableName
+          return t ? [t] : []
+        }),
+    )
+
+    if (successfulTables.has('orders')) {
+      void triggerAssignNumbers('/api/orders/assign-numbers', async (assigned) => {
+        for (const item of assigned) {
+          if (item.orderId) await localDb.orders.update(item.orderId, { orderNumber: item.orderNumber })
+        }
+      })
+    }
+    if (successfulTables.has('purchase_orders')) {
+      // POs and GRNs are not in Dexie — fire the route so the server updates,
+      // but there's nothing to patch locally.
+      void triggerAssignNumbers('/api/purchase-orders/assign-numbers', async () => {})
+    }
+    if (successfulTables.has('goods_received_notes')) {
+      void triggerAssignNumbers('/api/grn/assign-numbers', async () => {})
+    }
+
     // If the batch had failures, stop to avoid re-queuing storms
     const hasFailures = results.some((r) => !r.success)
     if (hasFailures) break
+  }
+}
+
+// ─── Helper: call a batch assign-numbers route and apply returned numbers ─────
+
+async function triggerAssignNumbers(
+  url: string,
+  updateFn: (assigned: Array<Record<string, string>>) => Promise<void>,
+): Promise<void> {
+  try {
+    const res = await fetch(url, { method: 'POST', credentials: 'include' })
+    if (!res.ok) return
+    const { assigned } = (await res.json()) as { assigned: Array<Record<string, string>> }
+    if (assigned.length > 0) await updateFn(assigned)
+  } catch {
+    // Non-critical — orders still work with device-prefix numbers
   }
 }

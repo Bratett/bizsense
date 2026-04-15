@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { MoneyInput } from '@/components/ui/money-input'
 import { Switch } from '@/components/ui/switch'
 import { PageHeader } from '@/components/ui/page-header'
@@ -184,7 +185,14 @@ export default function NewExpenseForm({
           if (result.fieldErrors) setFieldErrors(result.fieldErrors)
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+        if (!navigator.onLine) {
+          setError(
+            'You are offline. This action requires a network connection. ' +
+              'It has been saved locally and will sync when you reconnect.',
+          )
+        } else {
+          setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
+        }
       }
     })
   }
@@ -211,11 +219,7 @@ export default function NewExpenseForm({
       )}
 
       {/* Error banner */}
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      <ErrorMessage message={error} className="mb-4" />
 
       <div className="space-y-4">
         {/* Date */}
@@ -503,23 +507,32 @@ export default function NewExpenseForm({
             </div>
 
             {isRecurring && (
-              <div className="mt-3 flex gap-2">
-                {(['weekly', 'biweekly', 'monthly'] as const).map((freq) => (
-                  <button
-                    key={freq}
-                    type="button"
-                    onClick={() => setRecurrenceFrequency(freq)}
-                    className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                      recurrenceFrequency === freq
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-input bg-card text-muted-foreground hover:border-muted-foreground/30'
-                    }`}
-                  >
-                    {freq === 'biweekly'
-                      ? 'Bi-weekly'
-                      : freq.charAt(0).toUpperCase() + freq.slice(1)}
-                  </button>
-                ))}
+              <div className="mt-3 space-y-2">
+                <div className="flex gap-2">
+                  {(['monthly', 'weekly', 'quarterly'] as const).map((freq) => (
+                    <button
+                      key={freq}
+                      type="button"
+                      onClick={() => setRecurrenceFrequency(freq)}
+                      className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                        recurrenceFrequency === freq
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-input bg-card text-muted-foreground hover:border-muted-foreground/30'
+                      }`}
+                    >
+                      {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  BizSense will automatically re-post this expense every{' '}
+                  {recurrenceFrequency === 'monthly'
+                    ? 'month'
+                    : recurrenceFrequency === 'weekly'
+                      ? 'week'
+                      : 'quarter'}
+                  . You can stop it anytime by editing the expense and turning off recurrence.
+                </p>
               </div>
             )}
           </div>
@@ -528,7 +541,7 @@ export default function NewExpenseForm({
         {/* Submit */}
         <Button
           size="lg"
-          className="w-full py-3 text-base"
+          className="w-full min-h-[44px] py-3 text-base"
           onClick={handleSubmit}
           disabled={isPending || !canSubmit}
         >

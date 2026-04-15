@@ -78,8 +78,12 @@ export async function middleware(request: NextRequest) {
 
   // ── 4. Authenticated but no business → /signup ─────────────────────────────
   // Edge case: auth user exists but business was never created (pre-Sprint 2 users)
+  // Exception: /invite/* routes are allowed — the user arrives here directly after
+  // clicking a Supabase invite link and needs to complete the acceptance flow.
   if (user && !user.user_metadata?.businessId && (isDashboardRoute || isOnboardingRoute)) {
-    return redirectTo('/signup')
+    if (!pathname.startsWith('/invite')) {
+      return redirectTo('/signup')
+    }
   }
 
   // ── 5. Onboarding not complete → /onboarding ──────────────────────────────

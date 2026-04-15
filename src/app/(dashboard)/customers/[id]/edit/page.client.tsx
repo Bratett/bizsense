@@ -159,7 +159,7 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
           <Input
             id="creditLimit"
             name="creditLimit"
-            type="number"
+            type="text"
             inputMode="decimal"
             min={0}
             step="0.01"

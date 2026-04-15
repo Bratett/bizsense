@@ -108,9 +108,14 @@ describe('startSyncProcessor', () => {
     const { startSyncProcessor } = await import('@/lib/offline/syncProcessor')
     await startSyncProcessor('biz-001')
 
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    // The sync processor also fires post-sync assign-numbers calls; check the
+    // /api/sync call specifically rather than the total fetch count.
+    const syncCalls = (mockFetch.mock.calls as [string, RequestInit][]).filter(
+      ([url]) => url === '/api/sync',
+    )
+    expect(syncCalls).toHaveLength(1)
 
-    const [url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+    const [url, options] = syncCalls[0]
     expect(url).toBe('/api/sync')
     expect(options.method).toBe('POST')
     expect((options.headers as Record<string, string>)['Content-Type']).toBe('application/json')

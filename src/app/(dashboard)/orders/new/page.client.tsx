@@ -492,7 +492,7 @@ export default function NewOrderForm({
                   <div className="flex-1 space-y-1">
                     <Label className="text-xs text-muted-foreground">Qty</Label>
                     <Input
-                      type="number"
+                      type="text"
                       inputMode="decimal"
                       min="0.01"
                       step="any"
@@ -504,7 +504,7 @@ export default function NewOrderForm({
                   <div className="flex-1 space-y-1">
                     <Label className="text-xs text-muted-foreground">Price</Label>
                     <Input
-                      type="number"
+                      type="text"
                       inputMode="decimal"
                       min="0"
                       step="0.01"
@@ -545,7 +545,7 @@ export default function NewOrderForm({
                   Exchange Rate &mdash; 1 USD = GHS
                 </Label>
                 <Input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
                   min="0"
                   step="0.0001"
@@ -642,7 +642,7 @@ export default function NewOrderForm({
                   </button>
                 </div>
                 <Input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
                   min="0"
                   step="0.01"

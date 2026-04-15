@@ -5,6 +5,7 @@ import { requestPersistentStorage } from '@/lib/offline/storagePersist'
 import { bootstrapLocalData } from '@/lib/offline/bootstrap'
 import { startSyncProcessor } from '@/lib/offline/syncProcessor'
 import { startRealtimeSubscription } from '@/lib/offline/realtime'
+import { processRecurringExpenses } from '@/actions/expenses'
 
 interface AppInitialiserProps {
   businessId: string // from server-side session — passed as prop
@@ -29,6 +30,25 @@ export function AppInitialiser({ businessId }: AppInitialiserProps) {
       // ── Step 2: Bootstrap data from Supabase if needed ──────────────────
       // bootstrapLocalData checks if the DB is empty or stale and fetches
       await bootstrapLocalData(businessId)
+
+      // ── Step 2b: Process any due recurring expenses (online only) ────────
+      if (navigator.onLine) {
+        try {
+          const { posted } = await processRecurringExpenses()
+          if (posted > 0) {
+            window.dispatchEvent(
+              new CustomEvent('recurring-expenses-posted', { detail: { posted } }),
+            )
+          }
+        } catch {
+          // Non-blocking — failure here must never prevent app boot
+        }
+      }
+
+      // ── Step 2c: Pre-warm PDF worker to eliminate cold-start delay ───────
+      // Dynamic import triggers Next.js to fetch the worker chunk in the
+      // background — first invoice/payslip print will find it already loaded.
+      void import('@/lib/pdf/invoice.worker')
 
       // ── Step 3: Start background sync processor ─────────────────────────
       // Runs immediately once, then every 30 seconds

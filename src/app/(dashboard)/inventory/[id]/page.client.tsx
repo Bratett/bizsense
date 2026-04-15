@@ -108,6 +108,18 @@ export default function ProductDetailView({
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
+      {/* Product image (if set) */}
+      {product.imageUrl && (
+        <a href={product.imageUrl} target="_blank" rel="noopener noreferrer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full max-h-60 rounded-xl object-cover"
+          />
+        </a>
+      )}
+
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>

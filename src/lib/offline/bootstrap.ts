@@ -161,6 +161,8 @@ export async function bulkUpsertWithConflictResolution<
   const existingMap = new Map(existing.map((r) => [r.id, r]))
 
   const toWrite: T[] = []
+  const conflicts: import('@/db/local/dexie').DexieSyncConflict[] = []
+  const conflictSyncItems: Array<{ id: string; payload: Record<string, unknown> }> = []
 
   for (const incomingRecord of incoming) {
     const local = existingMap.get(incomingRecord.id)
@@ -180,11 +182,53 @@ export async function bulkUpsertWithConflictResolution<
     const localTime = local.updatedAt ? new Date(local.updatedAt).getTime() : 0
 
     if (serverTime >= localTime) {
-      // Server is same age or newer — server wins
+      // Server wins — log if values actually differ
+      if (JSON.stringify(incomingRecord) !== JSON.stringify(local)) {
+        const businessId = (incomingRecord as Record<string, unknown>).businessId as
+          | string
+          | undefined
+        if (businessId) {
+          const conflict: import('@/db/local/dexie').DexieSyncConflict = {
+            id: crypto.randomUUID(),
+            businessId,
+            tableName: table.name,
+            recordId: incomingRecord.id,
+            localValue: local as Record<string, unknown>,
+            serverValue: incomingRecord as Record<string, unknown>,
+            conflictedAt: new Date().toISOString(),
+            reviewedAt: null,
+            resolution: null,
+          }
+          conflicts.push(conflict)
+          conflictSyncItems.push({ id: conflict.id, payload: conflict as unknown as Record<string, unknown> })
+        }
+      }
       toWrite.push({ ...incomingRecord, syncStatus: 'synced' } as T)
     }
     // else: local is newer — keep local (it will sync to server on next push)
   }
 
   if (toWrite.length) await table.bulkPut(toWrite)
+
+  // Log conflicts after the main write — fire-and-forget, non-critical
+  if (conflicts.length > 0) {
+    // Dynamic import to avoid circular dependency with localDb at module level
+    import('@/db/local/dexie')
+      .then(({ localDb }) => localDb.syncConflicts.bulkAdd(conflicts))
+      .catch(() => {
+        /* non-critical */
+      })
+
+    import('@/lib/offline/offlineWrite')
+      .then(({ enqueueSync }) => {
+        for (const item of conflictSyncItems) {
+          enqueueSync('sync_conflicts', item.id, item.payload).catch(() => {
+            /* non-critical */
+          })
+        }
+      })
+      .catch(() => {
+        /* non-critical */
+      })
+  }
 }

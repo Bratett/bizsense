@@ -143,6 +143,7 @@ export interface DexieProduct {
   trackInventory: boolean
   reorderLevel: number
   isActive: boolean
+  imageUrl: string | null
   updatedAt: string
 }
 
@@ -252,6 +253,18 @@ export interface DexieBusinessSettings {
   updatedAt: string
 }
 
+export interface DexieSyncConflict {
+  id: string
+  businessId: string
+  tableName: string
+  recordId: string
+  localValue: Record<string, unknown>
+  serverValue: Record<string, unknown>
+  conflictedAt: string // ISO string
+  reviewedAt: string | null
+  resolution: string | null
+}
+
 // ── Dexie database class ────────────────────────────────────────────────────
 
 class BizSenseLocalDb extends Dexie {
@@ -273,6 +286,7 @@ class BizSenseLocalDb extends Dexie {
   syncQueue!: Table<DexieSyncQueueItem>
   meta!: Table<DexieMeta>
   hubtelPaymentLinks!: Table<DexieHubtelPaymentLink>
+  syncConflicts!: Table<DexieSyncConflict>
 
   constructor() {
     super('bizsense')
@@ -313,6 +327,20 @@ class BizSenseLocalDb extends Dexie {
     // Mirrors server-side hubtel_payment_links for offline status checks.
     this.version(4).stores({
       hubtelPaymentLinks: 'id, businessId, orderId, clientReference, status',
+    })
+
+    // Version 5: add syncConflicts table for Sprint 12 conflict audit trail.
+    // Populated by bulkUpsertWithConflictResolution when server wins and values differ.
+    this.version(5).stores({
+      syncConflicts: 'id, businessId, tableName, recordId, conflictedAt',
+    })
+
+    // Version 6: compound index [productId+transactionDate] on inventoryTransactions.
+    // Enables efficient FIFO cost computation — avoids a full table scan when computing
+    // cost of goods sold for a single product across a date range.
+    this.version(6).stores({
+      inventoryTransactions:
+        'id, businessId, productId, transactionDate, [productId+transactionDate]',
     })
   }
 }

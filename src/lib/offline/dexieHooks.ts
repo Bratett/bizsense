@@ -263,6 +263,13 @@ export async function queryDashboardMetrics(businessId: string): Promise<Dashboa
   }
 }
 
-export function useDashboardMetrics(businessId: string) {
-  return useLiveQuery(() => queryDashboardMetrics(businessId), [businessId])
+export function useDashboardMetrics(
+  businessId: string,
+  initialData?: DashboardMetrics,
+) {
+  return useLiveQuery(
+    () => queryDashboardMetrics(businessId),
+    [businessId],
+    initialData,
+  )
 }

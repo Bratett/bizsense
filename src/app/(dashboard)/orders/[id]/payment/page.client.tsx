@@ -193,7 +193,7 @@ export default function PaymentFormClient({ order }: { order: OrderDetail }) {
             </Button>
           </div>
           <Input
-            type="number"
+            type="text"
             inputMode="decimal"
             min="0.01"
             step="0.01"

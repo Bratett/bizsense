@@ -186,7 +186,7 @@ export default function CustomerForm({ businessId }: { businessId: string }) {
           <Label htmlFor="creditLimit">Credit Limit (GHS)</Label>
           <Input
             id="creditLimit"
-            type="number"
+            type="text"
             inputMode="decimal"
             min={0}
             step="0.01"

@@ -33,3 +33,33 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
+
+export const syncConflicts = pgTable('sync_conflicts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
+  tableName: text('table_name').notNull(),
+  recordId: text('record_id').notNull(),
+  localValue: jsonb('local_value').notNull(),
+  serverValue: jsonb('server_value').notNull(),
+  conflictedAt: timestamp('conflicted_at').defaultNow(),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewedBy: uuid('reviewed_by').references(() => users.id),
+  resolution: text('resolution'), // 'server_kept' | 'manually_corrected'
+  notes: text('notes'),
+})
+
+export const userInvitations = pgTable('user_invitations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
+  email: text('email').notNull(),
+  role: text('role').notNull(), // manager | cashier | accountant
+  token: text('token').notNull().unique(),
+  invitedBy: uuid('invited_by').references(() => users.id),
+  expiresAt: timestamp('expires_at').notNull(),
+  acceptedAt: timestamp('accepted_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+})

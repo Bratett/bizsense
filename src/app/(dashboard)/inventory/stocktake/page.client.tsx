@@ -285,7 +285,7 @@ export default function StocktakeView({
                         <div className="flex-1">
                           <Label className="text-xs">Actual count</Label>
                           <Input
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             step="any"
                             min="0"
