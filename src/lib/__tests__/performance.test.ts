@@ -11,7 +11,7 @@
  *   getAccountBalances result processing    < 200 ms (500 rows)
  */
 
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { computeFifoCogs, type FifoTransactionInput } from '../inventory/fifo'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

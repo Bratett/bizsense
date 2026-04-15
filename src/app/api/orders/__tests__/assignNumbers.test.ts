@@ -65,9 +65,7 @@ function makeTxMock(
     // Second select: max existing clean number
     return {
       from: vi.fn(() => ({
-        where: vi.fn(() =>
-          Promise.resolve([{ maxNum: maxCleanNumber }]),
-        ),
+        where: vi.fn(() => Promise.resolve([{ maxNum: maxCleanNumber }])),
       })),
     }
   })
@@ -99,7 +97,9 @@ describe('POST /api/orders/assign-numbers', () => {
     })
 
     const response = await POST()
-    const body = await response.json() as { assigned: Array<{ orderId: string; orderNumber: string }> }
+    const body = (await response.json()) as {
+      assigned: Array<{ orderId: string; orderNumber: string }>
+    }
 
     // The route should call db.transaction
     expect(db.transaction).toHaveBeenCalledOnce()
@@ -121,7 +121,9 @@ describe('POST /api/orders/assign-numbers', () => {
 
     const response = await POST()
     expect(db.transaction).toHaveBeenCalledOnce()
-    const body = await response.json() as { assigned: Array<{ orderId: string; orderNumber: string }> }
+    const body = (await response.json()) as {
+      assigned: Array<{ orderId: string; orderNumber: string }>
+    }
     expect(body).toHaveProperty('assigned')
   })
 
@@ -135,7 +137,9 @@ describe('POST /api/orders/assign-numbers', () => {
     })
 
     const response = await POST()
-    const body = await response.json() as { assigned: Array<{ orderId: string; orderNumber: string }> }
+    const body = (await response.json()) as {
+      assigned: Array<{ orderId: string; orderNumber: string }>
+    }
 
     expect(body.assigned).toHaveLength(0)
   })

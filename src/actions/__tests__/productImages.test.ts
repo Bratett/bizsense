@@ -119,9 +119,7 @@ describe('uploadProductImage', () => {
     // The update chain's set() was called
     expect(db.update).toHaveBeenCalled()
     const setMock = vi.mocked(updateChain.set as ReturnType<typeof vi.fn>)
-    expect(setMock).toHaveBeenCalledWith(
-      expect.objectContaining({ imageUrl: PUBLIC_URL }),
-    )
+    expect(setMock).toHaveBeenCalledWith(expect.objectContaining({ imageUrl: PUBLIC_URL }))
   })
 
   it('Test 3 — throws ForbiddenError when product belongs to a different business', async () => {

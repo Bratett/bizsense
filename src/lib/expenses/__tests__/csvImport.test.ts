@@ -69,9 +69,9 @@ describe('parseAndValidateExpenseCsv', () => {
   // ── Test 14: mixed valid/invalid rows ──────────────────────────────────────
   it('mix of valid and invalid rows: errors.length > 0, valid rows still returned', () => {
     const csv = buildCsv([
-      '01/04/2026,Rent,1200,bank,April rent',         // valid
-      '02/04/2026,Utilities,-50,cash,Bad amount',     // error: negative amount
-      '03/04/2026,Transport & Fuel,80,cash,Fuel',     // valid
+      '01/04/2026,Rent,1200,bank,April rent', // valid
+      '02/04/2026,Utilities,-50,cash,Bad amount', // error: negative amount
+      '03/04/2026,Transport & Fuel,80,cash,Fuel', // valid
     ])
     const { valid, errors } = parseAndValidateExpenseCsv(csv)
     expect(errors.length).toBeGreaterThan(0)

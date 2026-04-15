@@ -846,20 +846,17 @@ export async function processRecurringExpenses(): Promise<{
  * All-or-nothing: runs in a single DB transaction — if any row fails, all roll back.
  * Caller must ensure errors.length === 0 before calling (validation is client-side).
  */
-export async function importExpensesFromCsv(
-  rows: CsvExpenseRow[],
-): Promise<{ imported: number }> {
+export async function importExpensesFromCsv(rows: CsvExpenseRow[]): Promise<{ imported: number }> {
   const user = await requireRole(['owner', 'manager', 'accountant'])
   const { businessId, id: userId } = user
 
   if (rows.length === 0) return { imported: 0 }
 
   // Resolve all account IDs we'll need (read-only, outside transaction)
-  const categoryCodes = rows
-    .map((r) => {
-      const cat = EXPENSE_CATEGORIES.find((c) => c.label === r.category)
-      return cat?.accountCode ?? '6009'
-    })
+  const categoryCodes = rows.map((r) => {
+    const cat = EXPENSE_CATEGORIES.find((c) => c.label === r.category)
+    return cat?.accountCode ?? '6009'
+  })
   const paymentMethodsUsed = [...new Set(rows.map((r) => r.paymentMethod))] as PaymentMethod[]
   const paymentCodes = paymentMethodsUsed.map((m) => PAYMENT_ACCOUNT_CODES[m])
   const allCodes = [...new Set([...categoryCodes, ...paymentCodes])]
@@ -875,7 +872,9 @@ export async function importExpensesFromCsv(
       const paymentAccountId = accountMap[paymentCode]
 
       if (!expenseAccountId || !paymentAccountId) {
-        throw new Error(`Account not found for category "${row.category}" or payment method "${row.paymentMethod}"`)
+        throw new Error(
+          `Account not found for category "${row.category}" or payment method "${row.paymentMethod}"`,
+        )
       }
 
       const expenseId = crypto.randomUUID()
@@ -883,8 +882,8 @@ export async function importExpensesFromCsv(
         expenseAccountId,
         paymentAccountId,
         row.amount,
-        false,   // isCapitalExpense — CSV import does not support capital expenses
-        false,   // includesVat — CSV import does not reverse-calculate VAT
+        false, // isCapitalExpense — CSV import does not support capital expenses
+        false, // includesVat — CSV import does not reverse-calculate VAT
         row.amount,
         0,
         undefined,

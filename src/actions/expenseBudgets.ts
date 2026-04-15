@@ -42,7 +42,9 @@ export async function upsertExpenseBudget(input: UpsertBudgetInput): Promise<voi
   const existing = await db
     .select({ id: expenseBudgets.id })
     .from(expenseBudgets)
-    .where(and(eq(expenseBudgets.businessId, businessId), eq(expenseBudgets.accountId, input.accountId)))
+    .where(
+      and(eq(expenseBudgets.businessId, businessId), eq(expenseBudgets.accountId, input.accountId)),
+    )
     .limit(1)
 
   const threshold = (input.alertThreshold ?? 0.8).toFixed(2)
@@ -56,7 +58,12 @@ export async function upsertExpenseBudget(input: UpsertBudgetInput): Promise<voi
         alertThreshold: threshold,
         updatedAt: new Date(),
       })
-      .where(and(eq(expenseBudgets.businessId, businessId), eq(expenseBudgets.accountId, input.accountId)))
+      .where(
+        and(
+          eq(expenseBudgets.businessId, businessId),
+          eq(expenseBudgets.accountId, input.accountId),
+        ),
+      )
   } else {
     await db.insert(expenseBudgets).values({
       businessId,

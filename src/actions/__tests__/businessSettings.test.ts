@@ -154,9 +154,7 @@ describe('updateInventorySettings', () => {
     await updateInventorySettings({ allowNegativeStock: true })
 
     expect(db.insert).toHaveBeenCalled()
-    const onConflictMock = vi.mocked(
-      insertChain.onConflictDoUpdate as ReturnType<typeof vi.fn>,
-    )
+    const onConflictMock = vi.mocked(insertChain.onConflictDoUpdate as ReturnType<typeof vi.fn>)
     expect(onConflictMock).toHaveBeenCalled()
     const conflictArgs = onConflictMock.mock.calls[0]?.[0] as {
       set: { allowNegativeStock: boolean }
@@ -205,7 +203,7 @@ describe('createCashOrder — stock validation with allowNegativeStock', () => {
     //   2. Per-product lookup inside the COGS loop (returns PRODUCT_ROW)
     vi.mocked(db.select)
       .mockReturnValueOnce(makeChain(ACCOUNT_ROWS) as never) // accounts
-      .mockReturnValue(makeChain([PRODUCT_ROW]) as never)   // products (fallback)
+      .mockReturnValue(makeChain([PRODUCT_ROW]) as never) // products (fallback)
 
     // getProductTransactions returns transactions showing only 5 units available
     vi.mocked(getProductTransactions).mockResolvedValue([

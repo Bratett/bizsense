@@ -19,7 +19,9 @@ vi.mock('@/lib/atomic', () => ({
 }))
 
 vi.mock('@/lib/expenses/vatReverse', () => ({
-  reverseCalculateVat: vi.fn().mockResolvedValue({ netAmount: 100, vatAmount: 0, effectiveRate: 0 }),
+  reverseCalculateVat: vi
+    .fn()
+    .mockResolvedValue({ netAmount: 100, vatAmount: 0, effectiveRate: 0 }),
 }))
 
 vi.mock('@/lib/tax', () => ({
@@ -69,10 +71,10 @@ const BASE_TEMPLATE = {
   businessId: BUSINESS_ID,
   expenseDate: '2026-03-01', // monthly → next due 2026-04-01, which is before 2026-04-15
   recurrenceRule: 'monthly',
-  category: 'rent',       // category stored as key ('rent'), not label ('Rent')
+  category: 'rent', // category stored as key ('rent'), not label ('Rent')
   accountId: ACCOUNT_ID,
   amount: '1200.00',
-  paymentMethod: 'cash',  // cash avoids bankReference/momoReference validation
+  paymentMethod: 'cash', // cash avoids bankReference/momoReference validation
   description: 'Monthly office rent',
   notes: null,
   supplierId: null,

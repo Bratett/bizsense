@@ -133,13 +133,17 @@ export const expenses = pgTable('expenses', {
 })
 
 export const expenseBudgets = pgTable('expense_budgets', {
-  id:             uuid('id').primaryKey().defaultRandom(),
-  businessId:     uuid('business_id').notNull().references(() => businesses.id),
-  accountId:      uuid('account_id').notNull().references(() => accounts.id),
-  category:       text('category').notNull(),
-  monthlyBudget:  numeric('monthly_budget', { precision: 15, scale: 2 }).notNull(),
+  id: uuid('id').primaryKey().defaultRandom(),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
+  accountId: uuid('account_id')
+    .notNull()
+    .references(() => accounts.id),
+  category: text('category').notNull(),
+  monthlyBudget: numeric('monthly_budget', { precision: 15, scale: 2 }).notNull(),
   alertThreshold: numeric('alert_threshold', { precision: 5, scale: 2 }).default('0.80'),
-  isActive:       boolean('is_active').default(true),
-  createdAt:      timestamp('created_at').defaultNow().notNull(),
-  updatedAt:      timestamp('updated_at').defaultNow().notNull(),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

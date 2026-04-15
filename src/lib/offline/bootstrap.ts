@@ -200,7 +200,10 @@ export async function bulkUpsertWithConflictResolution<
             resolution: null,
           }
           conflicts.push(conflict)
-          conflictSyncItems.push({ id: conflict.id, payload: conflict as unknown as Record<string, unknown> })
+          conflictSyncItems.push({
+            id: conflict.id,
+            payload: conflict as unknown as Record<string, unknown>,
+          })
         }
       }
       toWrite.push({ ...incomingRecord, syncStatus: 'synced' } as T)

@@ -1,12 +1,6 @@
 'use client'
 
-export default function DashboardError({
-  error,
-  reset,
-}: {
-  error: Error
-  reset: () => void
-}) {
+export default function DashboardError({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
       <div className="text-4xl mb-4">😕</div>

@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { Plus, Pencil, X, Check, Trash2, AlertTriangle } from 'lucide-react'
 import { updatePayeBands, type PayeBandInput } from '@/actions/payroll'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 import type { PayeBandRecord } from '../page.client'
 
 // ─── Local band state (includes local-only rows not yet saved) ────────────────

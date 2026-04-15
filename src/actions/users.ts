@@ -106,10 +106,7 @@ export async function updateUserRole(userId: string, newRole: string): Promise<v
     throw new Error("Cannot change owner's role")
   }
 
-  await db
-    .update(users)
-    .set({ role: newRole, updatedAt: new Date() })
-    .where(eq(users.id, userId))
+  await db.update(users).set({ role: newRole, updatedAt: new Date() }).where(eq(users.id, userId))
 }
 
 // ─── Deactivate User ──────────────────────────────────────────────────────────
@@ -131,10 +128,7 @@ export async function deactivateUser(userId: string): Promise<void> {
 
   if (!target) throw new Error('User not found')
 
-  await db
-    .update(users)
-    .set({ isActive: false, updatedAt: new Date() })
-    .where(eq(users.id, userId))
+  await db.update(users).set({ isActive: false, updatedAt: new Date() }).where(eq(users.id, userId))
 }
 
 // ─── Accept Invitation ────────────────────────────────────────────────────────
@@ -197,10 +191,7 @@ export async function acceptInvitation(token: string): Promise<{ businessId: str
   })
 
   // Mark invitation as accepted
-  await db
-    .update(userInvitations)
-    .set({ acceptedAt: now })
-    .where(eq(userInvitations.id, invite.id))
+  await db.update(userInvitations).set({ acceptedAt: now }).where(eq(userInvitations.id, invite.id))
 
   return { businessId: invite.businessId }
 }

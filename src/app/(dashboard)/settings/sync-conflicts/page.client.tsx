@@ -3,10 +3,13 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { markConflictReviewed, markAllConflictsReviewed, type SyncConflictRecord } from '@/actions/syncConflicts'
+import {
+  markConflictReviewed,
+  markAllConflictsReviewed,
+  type SyncConflictRecord,
+} from '@/actions/syncConflicts'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate } from '@/lib/format'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -191,9 +194,7 @@ export default function SyncConflictsClient({
       {conflicts.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center">
           <p className="text-sm font-medium text-gray-700">No conflicts detected</p>
-          <p className="mt-1 text-xs text-gray-400">
-            Your data is in sync across all devices.
-          </p>
+          <p className="mt-1 text-xs text-gray-400">Your data is in sync across all devices.</p>
         </div>
       ) : (
         <div className="space-y-3">

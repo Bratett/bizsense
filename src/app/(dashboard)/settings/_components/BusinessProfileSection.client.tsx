@@ -9,7 +9,6 @@ import {
   type SettingsActionResult,
   type LogoActionResult,
 } from '@/actions/settings'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,7 +49,10 @@ const initialLogoState: LogoActionResult | null = null
 
 export default function BusinessProfileSection({ business, userRole }: Props) {
   const [state, formAction, isPending] = useActionState(updateBusinessProfile, initialState)
-  const [logoState, logoFormAction, logoPending] = useActionState(updateBusinessLogo, initialLogoState)
+  const [logoState, logoFormAction, logoPending] = useActionState(
+    updateBusinessLogo,
+    initialLogoState,
+  )
   const [vatRegistered, setVatRegistered] = useState(business.vatRegistered)
   const [fyMonth, setFyMonth] = useState(business.financialYearStart ?? '1')
   const [previewUrl, setPreviewUrl] = useState<string | null>(business.logoUrl)

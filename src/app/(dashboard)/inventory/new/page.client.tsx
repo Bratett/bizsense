@@ -271,11 +271,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
         {/* Product Image */}
         <div className="space-y-1.5 md:col-span-2">
           <Label>Product Image (optional)</Label>
-          <ProductImageUpload
-            ref={imageUploadRef}
-            productId=""
-            currentImageUrl={null}
-          />
+          <ProductImageUpload ref={imageUploadRef} productId="" currentImageUrl={null} />
         </div>
 
         {/* Submit */}

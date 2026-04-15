@@ -143,9 +143,27 @@ describe('updatePayeBands', () => {
 
     // Simulate DB returning only new bands (effectiveTo = null)
     const newBandRows = [
-      { id: 'band-new-001', lowerBound: '0', upperBound: '4380', rate: '0.000000', effectiveFrom: today },
-      { id: 'band-new-002', lowerBound: '4380', upperBound: '5100', rate: '0.050000', effectiveFrom: today },
-      { id: 'band-new-003', lowerBound: '5100', upperBound: null, rate: '0.175000', effectiveFrom: today },
+      {
+        id: 'band-new-001',
+        lowerBound: '0',
+        upperBound: '4380',
+        rate: '0.000000',
+        effectiveFrom: today,
+      },
+      {
+        id: 'band-new-002',
+        lowerBound: '4380',
+        upperBound: '5100',
+        rate: '0.050000',
+        effectiveFrom: today,
+      },
+      {
+        id: 'band-new-003',
+        lowerBound: '5100',
+        upperBound: null,
+        rate: '0.175000',
+        effectiveFrom: today,
+      },
     ]
 
     vi.mocked(db.select).mockReturnValueOnce(makeChain(newBandRows) as never)

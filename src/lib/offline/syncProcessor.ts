@@ -214,7 +214,8 @@ async function runDrainLoop(): Promise<void> {
     if (successfulTables.has('orders')) {
       void triggerAssignNumbers('/api/orders/assign-numbers', async (assigned) => {
         for (const item of assigned) {
-          if (item.orderId) await localDb.orders.update(item.orderId, { orderNumber: item.orderNumber })
+          if (item.orderId)
+            await localDb.orders.update(item.orderId, { orderNumber: item.orderNumber })
         }
       })
     }

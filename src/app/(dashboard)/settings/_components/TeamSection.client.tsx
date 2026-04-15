@@ -84,8 +84,14 @@ export default function TeamSection({
     reactivateTeamMember,
     initialState,
   )
-  const [cancelState, cancelFormAction, cancelPending] = useActionState(cancelInvitation, initialState)
-  const [resendState, resendFormAction, resendPending] = useActionState(resendInvitation, initialState)
+  const [cancelState, cancelFormAction, cancelPending] = useActionState(
+    cancelInvitation,
+    initialState,
+  )
+  const [resendState, resendFormAction, resendPending] = useActionState(
+    resendInvitation,
+    initialState,
+  )
 
   useEffect(() => {
     if (inviteState.success) {
@@ -223,9 +229,7 @@ export default function TeamSection({
       )}
 
       {/* Role update errors */}
-      {!roleState.success && (
-        <ErrorMessage message={roleState.error ?? null} className="mb-4" />
-      )}
+      {!roleState.success && <ErrorMessage message={roleState.error ?? null} className="mb-4" />}
 
       {/* Active members */}
       <div className="space-y-2">
@@ -401,7 +405,10 @@ export default function TeamSection({
                       <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">
                         {inv.createdAt
                           ? formatDate(
-                              (inv.createdAt instanceof Date ? inv.createdAt : new Date(inv.createdAt as string))
+                              (inv.createdAt instanceof Date
+                                ? inv.createdAt
+                                : new Date(inv.createdAt as string)
+                              )
                                 .toISOString()
                                 .split('T')[0],
                             )
@@ -409,10 +416,7 @@ export default function TeamSection({
                       </td>
                       <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">
                         {formatDate(
-                          (inv.expiresAt instanceof Date
-                            ? inv.expiresAt
-                            : new Date(inv.expiresAt)
-                          )
+                          (inv.expiresAt instanceof Date ? inv.expiresAt : new Date(inv.expiresAt))
                             .toISOString()
                             .split('T')[0],
                         )}

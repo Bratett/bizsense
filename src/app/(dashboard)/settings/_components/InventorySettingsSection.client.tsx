@@ -83,7 +83,9 @@ export default function InventorySettingsSection({ businessSettings, userRole }:
           </Button>
         </div>
       ) : (
-        <p className="mt-3 text-xs text-gray-400">Only the business owner can change this setting.</p>
+        <p className="mt-3 text-xs text-gray-400">
+          Only the business owner can change this setting.
+        </p>
       )}
     </div>
   )

@@ -131,13 +131,7 @@ export default async function InvitePage({ params }: Props) {
 
 // ─── Error card ───────────────────────────────────────────────────────────────
 
-function InviteError({
-  message,
-  cta,
-}: {
-  message: string
-  cta?: { label: string; href: string }
-}) {
+function InviteError({ message, cta }: { message: string; cta?: { label: string; href: string } }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm text-center">

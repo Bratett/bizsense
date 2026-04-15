@@ -20,10 +20,7 @@ import dynamic from 'next/dynamic'
 const DashboardChart = dynamic(() => import('./DashboardChart.client'), {
   ssr: false,
   loading: () => (
-    <div
-      className="h-64 bg-gray-100 rounded-xl animate-pulse"
-      aria-label="Loading chart"
-    />
+    <div className="h-64 bg-gray-100 rounded-xl animate-pulse" aria-label="Loading chart" />
   ),
 })
 import ActivityFeed from './ActivityFeed.client'
@@ -247,23 +244,32 @@ export default async function DashboardPage() {
             </div>
 
             {/* ─── Budget Alerts ───────────────────────────────────── */}
-            {budgetStatuses && budgetStatuses.filter((b) => b.isNearLimit || b.isOverBudget).length > 0 && (
-              <Link href="/expenses/budgets" className="block">
-                <Card size="sm" className="space-y-1.5 px-4 py-3 transition-colors hover:bg-muted/50">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Budget Alerts</p>
-                  {budgetStatuses
-                    .filter((b) => b.isOverBudget || b.isNearLimit)
-                    .map((b) => (
-                      <p key={b.id} className={`text-sm ${b.isOverBudget ? 'text-red-700' : 'text-amber-700'}`}>
-                        {b.isOverBudget ? '🔴' : '⚠'} {b.category}: {formatGhs(b.spentThisMonth)}
-                        {b.isOverBudget
-                          ? ` — OVER BUDGET by ${formatGhs(b.spentThisMonth - b.monthlyBudget)}`
-                          : ` of ${formatGhs(b.monthlyBudget)} budget used (${b.percentUsed}%)`}
-                      </p>
-                    ))}
-                </Card>
-              </Link>
-            )}
+            {budgetStatuses &&
+              budgetStatuses.filter((b) => b.isNearLimit || b.isOverBudget).length > 0 && (
+                <Link href="/expenses/budgets" className="block">
+                  <Card
+                    size="sm"
+                    className="space-y-1.5 px-4 py-3 transition-colors hover:bg-muted/50"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Budget Alerts
+                    </p>
+                    {budgetStatuses
+                      .filter((b) => b.isOverBudget || b.isNearLimit)
+                      .map((b) => (
+                        <p
+                          key={b.id}
+                          className={`text-sm ${b.isOverBudget ? 'text-red-700' : 'text-amber-700'}`}
+                        >
+                          {b.isOverBudget ? '🔴' : '⚠'} {b.category}: {formatGhs(b.spentThisMonth)}
+                          {b.isOverBudget
+                            ? ` — OVER BUDGET by ${formatGhs(b.spentThisMonth - b.monthlyBudget)}`
+                            : ` of ${formatGhs(b.monthlyBudget)} budget used (${b.percentUsed}%)`}
+                        </p>
+                      ))}
+                  </Card>
+                </Link>
+              )}
 
             {/* ─── Alerts Panel ───────────────────────────────────── */}
             <div className="space-y-2">

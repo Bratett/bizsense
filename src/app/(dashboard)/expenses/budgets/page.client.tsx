@@ -30,8 +30,7 @@ function buildMonthOptions(): { value: string; label: string }[] {
 
 function ProgressBar({ percent }: { percent: number }) {
   const capped = Math.min(percent, 100)
-  const colour =
-    percent > 100 ? 'bg-red-500' : percent >= 70 ? 'bg-amber-400' : 'bg-green-500'
+  const colour = percent > 100 ? 'bg-red-500' : percent >= 70 ? 'bg-amber-400' : 'bg-green-500'
 
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
@@ -46,7 +45,12 @@ function ProgressBar({ percent }: { percent: number }) {
 interface BudgetFormProps {
   expenseAccounts: ExpenseAccount[]
   initial?: BudgetStatus | null
-  onSave: (input: { accountId: string; category: string; monthlyBudget: number; alertThreshold: number }) => void
+  onSave: (input: {
+    accountId: string
+    category: string
+    monthlyBudget: number
+    alertThreshold: number
+  }) => void
   onCancel: () => void
   isSaving: boolean
 }
@@ -116,7 +120,9 @@ function BudgetForm({ expenseAccounts, initial, onSave, onCancel, isSaving }: Bu
 
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-gray-600">Monthly Limit (GHS)</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600">
+              Monthly Limit (GHS)
+            </label>
             <input
               type="text"
               inputMode="decimal"
@@ -188,7 +194,12 @@ export default function BudgetsPageClient({
     })
   }
 
-  function handleSave(input: { accountId: string; category: string; monthlyBudget: number; alertThreshold: number }) {
+  function handleSave(input: {
+    accountId: string
+    category: string
+    monthlyBudget: number
+    alertThreshold: number
+  }) {
     startTransition(async () => {
       try {
         await upsertExpenseBudget(input)
@@ -234,7 +245,14 @@ export default function BudgetsPageClient({
           <p className="text-sm text-gray-500">Set monthly spending limits per category</p>
         </div>
         {canEdit && (
-          <Button size="sm" className="gap-1" onClick={() => { setShowAddForm(true); setEditingBudget(null) }}>
+          <Button
+            size="sm"
+            className="gap-1"
+            onClick={() => {
+              setShowAddForm(true)
+              setEditingBudget(null)
+            }}
+          >
             <Plus className="h-4 w-4" /> Add Budget
           </Button>
         )}
@@ -279,15 +297,11 @@ export default function BudgetsPageClient({
         <div className="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center">
           <p className="text-sm font-medium text-gray-700">No budgets set</p>
           <p className="mt-1 text-xs text-gray-500">
-            Set monthly spending limits for categories like Rent, Fuel, and Marketing.
-            BizSense will alert you when you&apos;re approaching your limit.
+            Set monthly spending limits for categories like Rent, Fuel, and Marketing. BizSense will
+            alert you when you&apos;re approaching your limit.
           </p>
           {canEdit && (
-            <Button
-              size="sm"
-              className="mt-4 gap-1"
-              onClick={() => setShowAddForm(true)}
-            >
+            <Button size="sm" className="mt-4 gap-1" onClick={() => setShowAddForm(true)}>
               <Plus className="h-4 w-4" /> Add Budget
             </Button>
           )}
@@ -317,7 +331,10 @@ export default function BudgetsPageClient({
                       <>
                         <button
                           type="button"
-                          onClick={() => { setEditingBudget(s); setShowAddForm(false) }}
+                          onClick={() => {
+                            setEditingBudget(s)
+                            setShowAddForm(false)
+                          }}
                           className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                           aria-label={`Edit ${s.category} budget`}
                         >
@@ -338,10 +355,12 @@ export default function BudgetsPageClient({
 
                 <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
                   <span>
-                    Spent: <span className="font-medium text-gray-800">{formatGhs(s.spentThisMonth)}</span>
+                    Spent:{' '}
+                    <span className="font-medium text-gray-800">{formatGhs(s.spentThisMonth)}</span>
                   </span>
                   <span>
-                    Budget: <span className="font-medium text-gray-800">{formatGhs(s.monthlyBudget)}</span>
+                    Budget:{' '}
+                    <span className="font-medium text-gray-800">{formatGhs(s.monthlyBudget)}</span>
                   </span>
                   <span>
                     {s.isOverBudget ? (
@@ -349,16 +368,27 @@ export default function BudgetsPageClient({
                         OVER by {formatGhs(overBudgetBy)}
                       </span>
                     ) : (
-                      <>Left: <span className="font-medium text-gray-800">{formatGhs(s.remainingBudget)}</span></>
+                      <>
+                        Left:{' '}
+                        <span className="font-medium text-gray-800">
+                          {formatGhs(s.remainingBudget)}
+                        </span>
+                      </>
                     )}
                   </span>
                 </div>
 
                 <ProgressBar percent={s.percentUsed} />
 
-                <p className={`mt-1 text-right text-xs font-medium ${
-                  s.isOverBudget ? 'text-red-600' : s.isNearLimit ? 'text-amber-600' : 'text-gray-500'
-                }`}>
+                <p
+                  className={`mt-1 text-right text-xs font-medium ${
+                    s.isOverBudget
+                      ? 'text-red-600'
+                      : s.isNearLimit
+                        ? 'text-amber-600'
+                        : 'text-gray-500'
+                  }`}
+                >
                   {s.percentUsed}% used
                 </p>
               </div>

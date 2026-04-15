@@ -19,7 +19,9 @@ vi.mock('@/lib/supabase/admin', () => ({
   supabaseAdmin: {
     auth: {
       admin: {
-        inviteUserByEmail: vi.fn(() => Promise.resolve({ data: { user: { id: 'supabase-uid' } }, error: null })),
+        inviteUserByEmail: vi.fn(() =>
+          Promise.resolve({ data: { user: { id: 'supabase-uid' } }, error: null }),
+        ),
         updateUserById: vi.fn(() => Promise.resolve({ data: {}, error: null })),
       },
     },
@@ -32,12 +34,7 @@ vi.mock('@/lib/supabase/server', () => ({
 
 import { requireRole } from '@/lib/auth/requireRole'
 import { db } from '@/db'
-import {
-  inviteUser,
-  cancelInvitation,
-  updateUserRole,
-  deactivateUser,
-} from '../users'
+import { inviteUser, cancelInvitation, updateUserRole, deactivateUser } from '../users'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -155,9 +152,7 @@ describe('inviteUser', () => {
     mockOwnerSession()
 
     // Existing pending invitation found
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([{ id: INVITE_ID }]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([{ id: INVITE_ID }]) as never)
 
     await expect(inviteUser('existing@example.com', 'manager')).rejects.toThrow(
       'A pending invitation already exists for this email',
@@ -201,7 +196,7 @@ describe('cancelInvitation', () => {
 // ─── Test 5: updateUserRole cannot change owner's role ───────────────────────
 
 describe('updateUserRole', () => {
-  it('Test 5 — cannot change owner\'s role', async () => {
+  it("Test 5 — cannot change owner's role", async () => {
     mockOwnerSession()
 
     // Target user is found with role = 'owner'
@@ -222,8 +217,6 @@ describe('deactivateUser', () => {
     mockOwnerSession()
 
     // Try to deactivate self (same userId as session)
-    await expect(deactivateUser(USER_ID)).rejects.toThrow(
-      'Cannot deactivate your own account',
-    )
+    await expect(deactivateUser(USER_ID)).rejects.toThrow('Cannot deactivate your own account')
   })
 })

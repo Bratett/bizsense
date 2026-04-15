@@ -49,7 +49,7 @@ const LOCAL_RECORD = {
 const SERVER_RECORD_NEWER_DIFFERENT = {
   id: 'rec-001',
   businessId: BUSINESS_ID,
-  name: 'Widget A — Updated',            // value differs from local
+  name: 'Widget A — Updated', // value differs from local
   updatedAt: '2026-04-10T12:00:00.000Z', // newer than local
   syncStatus: 'synced',
 }
@@ -114,8 +114,6 @@ describe('bulkUpsertWithConflictResolution — conflict logging', () => {
     expect(bulkAddSpy).not.toHaveBeenCalled()
     expect(enqueueSyncSpy).not.toHaveBeenCalled()
     // The local record is not overwritten
-    expect(
-      (table as never as { bulkPut: ReturnType<typeof vi.fn> }).bulkPut,
-    ).not.toHaveBeenCalled()
+    expect((table as never as { bulkPut: ReturnType<typeof vi.fn> }).bulkPut).not.toHaveBeenCalled()
   })
 })

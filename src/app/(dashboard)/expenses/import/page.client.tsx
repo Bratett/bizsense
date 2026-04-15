@@ -75,7 +75,9 @@ export default function ExpenseCsvImport({ userRole }: { userRole: UserRole }) {
     startTransition(async () => {
       try {
         const result = await importExpensesFromCsv(validRows)
-        toast.success(`Imported ${result.imported} expense${result.imported === 1 ? '' : 's'} successfully.`)
+        toast.success(
+          `Imported ${result.imported} expense${result.imported === 1 ? '' : 's'} successfully.`,
+        )
         router.push('/expenses')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Import failed. Please try again.')
@@ -167,8 +169,10 @@ export default function ExpenseCsvImport({ userRole }: { userRole: UserRole }) {
             <div className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>
-                <strong>{errors.length} error{errors.length === 1 ? '' : 's'}</strong> must be
-                fixed before importing.
+                <strong>
+                  {errors.length} error{errors.length === 1 ? '' : 's'}
+                </strong>{' '}
+                must be fixed before importing.
               </span>
             </div>
           )}
@@ -176,8 +180,10 @@ export default function ExpenseCsvImport({ userRole }: { userRole: UserRole }) {
             <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700">
               <AlertTriangle className="h-4 w-4 flex-shrink-0" />
               <span>
-                <strong>{warnings.length} warning{warnings.length === 1 ? '' : 's'}</strong> —
-                these rows will still import.
+                <strong>
+                  {warnings.length} warning{warnings.length === 1 ? '' : 's'}
+                </strong>{' '}
+                — these rows will still import.
               </span>
             </div>
           )}
@@ -185,8 +191,10 @@ export default function ExpenseCsvImport({ userRole }: { userRole: UserRole }) {
             <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
               <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
               <span>
-                <strong>{validRows.length} row{validRows.length === 1 ? '' : 's'}</strong> ready to
-                import.
+                <strong>
+                  {validRows.length} row{validRows.length === 1 ? '' : 's'}
+                </strong>{' '}
+                ready to import.
               </span>
             </div>
           )}
@@ -263,7 +271,9 @@ export default function ExpenseCsvImport({ userRole }: { userRole: UserRole }) {
       {/* Error rows — shown separately when they exist */}
       {errors.length > 0 && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="mb-2 text-sm font-medium text-red-700">Rows with errors (fix and re-upload):</p>
+          <p className="mb-2 text-sm font-medium text-red-700">
+            Rows with errors (fix and re-upload):
+          </p>
           <ul className="space-y-1 text-xs text-red-600">
             {errors.map((e, i) => (
               <li key={i}>

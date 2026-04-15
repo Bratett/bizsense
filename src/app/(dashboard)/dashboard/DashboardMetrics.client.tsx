@@ -58,9 +58,7 @@ export function DashboardMetrics({
   // Build SSR-shaped initial data so useLiveQuery returns non-undefined
   // on the very first render — eliminates skeleton flash entirely.
   const ssrInitial =
-    ssrCashBalance !== null &&
-    ssrReceivables !== null &&
-    ssrReceivablesCount !== null
+    ssrCashBalance !== null && ssrReceivables !== null && ssrReceivablesCount !== null
       ? {
           todaySales: ssrTodaySales,
           todaySalesCount: ssrTodaySalesCount,
