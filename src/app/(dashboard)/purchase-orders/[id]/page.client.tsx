@@ -14,6 +14,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { purchaseOrderTemplate } from '@/lib/whatsapp/templates'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -50,7 +51,13 @@ const STATUS_LABEL: Record<string, string> = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) {
+export default function PurchaseOrderDetail({
+  po,
+  businessName,
+}: {
+  po: PoWithLinesAndGrns
+  businessName: string
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [toast, setToast] = useState<string | null>(null)
@@ -60,7 +67,18 @@ export default function PurchaseOrderDetail({ po }: { po: PoWithLinesAndGrns }) 
     setTimeout(() => setToast(null), 4000)
   }
 
-  const poWhatsAppMessage = `Hi ${po.supplierName}, please find our Purchase Order ${po.poNumber} below:\n\n${po.lines.map((l, i) => `${i + 1}. ${l.description ?? ''} x${l.quantity} @ GHS ${l.unitCost}`).join('\n')}\n\nTotal: ${formatGhs(po.totalAmount)}${po.expectedDate ? `\nExpected by: ${po.expectedDate}` : ''}`
+  const poWhatsAppMessage = purchaseOrderTemplate({
+    supplierName: po.supplierName,
+    businessName,
+    poNumber: po.poNumber,
+    lines: po.lines.map((l) => ({
+      description: l.description ?? '',
+      quantity: Number(l.quantity),
+      unitCost: Number(l.unitCost),
+    })),
+    totalAmount: Number(po.totalAmount),
+    expectedDate: po.expectedDate ?? undefined,
+  })
 
   function handleSend() {
     startTransition(async () => {

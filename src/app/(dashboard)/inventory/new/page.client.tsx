@@ -114,9 +114,9 @@ export default function NewProductForm({ categories }: { categories: string[] })
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0">
         {/* Name */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="name">Product Name *</Label>
           <Input
             id="name"
@@ -178,8 +178,19 @@ export default function NewProductForm({ categories }: { categories: string[] })
           </datalist>
         </div>
 
+        {/* Selling Price USD — pairs with Unit on desktop */}
+        <MoneyInput
+          id="sellingPriceUsd"
+          label="Selling Price (USD)"
+          currency="USD"
+          value={sellingPriceUsd}
+          onChange={setSellingPriceUsd}
+          placeholder="Optional"
+          error={fieldErrors.sellingPriceUsd}
+        />
+
         {/* Cost Price + Selling Price row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:col-span-2">
           <MoneyInput
             id="costPrice"
             label="Cost Price (GHS) *"
@@ -200,19 +211,8 @@ export default function NewProductForm({ categories }: { categories: string[] })
           />
         </div>
 
-        {/* Selling Price USD */}
-        <MoneyInput
-          id="sellingPriceUsd"
-          label="Selling Price (USD)"
-          currency="USD"
-          value={sellingPriceUsd}
-          onChange={setSellingPriceUsd}
-          placeholder="Optional"
-          error={fieldErrors.sellingPriceUsd}
-        />
-
         {/* Track Inventory toggle */}
-        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
           <div>
             <p className="text-sm font-medium text-gray-900">Track Inventory</p>
             <p className="text-xs text-gray-500">Monitor stock levels for this product</p>
@@ -221,7 +221,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
         </div>
 
         {!trackInventory && (
-          <Alert>
+          <Alert className="md:col-span-2">
             <AlertDescription>
               Stock levels will not be tracked for this product. Use this for services or products
               you don&apos;t physically stock.
@@ -231,7 +231,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
 
         {/* Reorder Level -- only shown if tracking */}
         {trackInventory && (
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="reorderLevel">Reorder Level</Label>
             <p className="text-xs text-muted-foreground">
               Alert me when stock falls below this quantity
@@ -251,7 +251,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
         )}
 
         {/* Description */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
@@ -263,7 +263,7 @@ export default function NewProductForm({ categories }: { categories: string[] })
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="w-full">
+        <Button type="submit" disabled={isPending} className="w-full md:col-span-2">
           {isPending ? 'Saving...' : 'Save Product'}
         </Button>
       </form>

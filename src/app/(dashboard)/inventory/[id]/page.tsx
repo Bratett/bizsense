@@ -12,9 +12,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-lg">
-        <ProductDetailView product={product} userRole={session.user.role} />
-      </div>
+      <ProductDetailView product={product} userRole={session.user.role} />
     </main>
   )
 }

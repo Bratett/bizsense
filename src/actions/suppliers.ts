@@ -1,6 +1,6 @@
 'use server'
 
-import { and, eq, ne, or, ilike, asc, sql, inArray } from 'drizzle-orm'
+import { and, desc, eq, ne, or, ilike, asc, sql, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import { suppliers, purchaseOrders, goodsReceivedNotes, supplierPayments } from '@/db/schema'
 import { requireRole } from '@/lib/auth/requireRole'
@@ -40,6 +40,23 @@ export type SupplierWithBalance = {
   createdAt: Date
   updatedAt: Date
   outstandingPayable: number
+}
+
+export type SupplierStats = {
+  totalPurchaseOrders: number
+  posThisMonth: number
+  totalPaid: number
+  lifetimeSpend: number
+}
+
+export type SupplierTransaction = {
+  id: string
+  type: 'purchase_order' | 'payment'
+  reference: string
+  date: string
+  amount: number
+  status: 'draft' | 'sent' | 'partial' | 'received' | 'cancelled' | 'completed'
+  poId?: string
 }
 
 type SupplierListFilters = {
@@ -358,5 +375,126 @@ export async function getSupplierById(id: string): Promise<SupplierWithBalance> 
   return {
     ...supplier,
     outstandingPayable,
+  }
+}
+
+// ─── Get Supplier Stats ───────────────────────────────────────────────────────
+
+export async function getSupplierStats(supplierId: string): Promise<SupplierStats> {
+  const user = await requireRole(['owner', 'manager', 'accountant'])
+  const businessId = user.businessId
+
+  const now = new Date()
+  const startOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+
+  const [[poResult], [payResult]] = await Promise.all([
+    db
+      .select({
+        totalPos: sql<string>`COUNT(*)`,
+        posThisMonth: sql<string>`COUNT(*) FILTER (WHERE ${purchaseOrders.orderDate} >= ${startOfMonth}::date)`,
+        lifetimeSpend: sql<string>`COALESCE(SUM(CAST(${purchaseOrders.totalAmount} AS numeric)), 0)`,
+      })
+      .from(purchaseOrders)
+      .where(
+        and(eq(purchaseOrders.supplierId, supplierId), eq(purchaseOrders.businessId, businessId)),
+      ),
+    db
+      .select({
+        totalPaid: sql<string>`COALESCE(SUM(CAST(${supplierPayments.amount} AS numeric)), 0)`,
+      })
+      .from(supplierPayments)
+      .where(
+        and(
+          eq(supplierPayments.supplierId, supplierId),
+          eq(supplierPayments.businessId, businessId),
+        ),
+      ),
+  ])
+
+  return {
+    totalPurchaseOrders: Number(poResult?.totalPos ?? '0'),
+    posThisMonth: Number(poResult?.posThisMonth ?? '0'),
+    totalPaid: Number(payResult?.totalPaid ?? '0'),
+    lifetimeSpend: Number(poResult?.lifetimeSpend ?? '0'),
+  }
+}
+
+// ─── Get Supplier Recent Transactions ────────────────────────────────────────
+
+export async function getSupplierRecentTransactions(
+  supplierId: string,
+): Promise<SupplierTransaction[]> {
+  const user = await requireRole(['owner', 'manager', 'accountant'])
+  const businessId = user.businessId
+
+  const [poRows, paymentRows] = await Promise.all([
+    db
+      .select({
+        id: purchaseOrders.id,
+        poNumber: purchaseOrders.poNumber,
+        orderDate: purchaseOrders.orderDate,
+        status: purchaseOrders.status,
+        totalAmount: purchaseOrders.totalAmount,
+      })
+      .from(purchaseOrders)
+      .where(
+        and(eq(purchaseOrders.supplierId, supplierId), eq(purchaseOrders.businessId, businessId)),
+      )
+      .orderBy(desc(purchaseOrders.orderDate))
+      .limit(10),
+    db
+      .select({
+        id: supplierPayments.id,
+        amount: supplierPayments.amount,
+        paymentDate: supplierPayments.paymentDate,
+        paymentMethod: supplierPayments.paymentMethod,
+        momoReference: supplierPayments.momoReference,
+        bankReference: supplierPayments.bankReference,
+      })
+      .from(supplierPayments)
+      .where(
+        and(
+          eq(supplierPayments.supplierId, supplierId),
+          eq(supplierPayments.businessId, businessId),
+        ),
+      )
+      .orderBy(desc(supplierPayments.paymentDate))
+      .limit(10),
+  ])
+
+  const pos: SupplierTransaction[] = poRows.map((p) => ({
+    id: p.id,
+    type: 'purchase_order',
+    reference: p.poNumber,
+    date: p.orderDate ?? '',
+    amount: Number(p.totalAmount ?? '0'),
+    status: mapPoStatus(p.status),
+    poId: p.id,
+  }))
+
+  const payments: SupplierTransaction[] = paymentRows.map((p) => ({
+    id: p.id,
+    type: 'payment',
+    reference: p.momoReference ?? p.bankReference ?? p.paymentMethod,
+    date: p.paymentDate,
+    amount: Number(p.amount),
+    status: 'completed',
+  }))
+
+  return [...pos, ...payments].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10)
+}
+
+function mapPoStatus(status: string): SupplierTransaction['status'] {
+  switch (status) {
+    case 'sent':
+      return 'sent'
+    case 'partially_received':
+      return 'partial'
+    case 'received':
+      return 'received'
+    case 'cancelled':
+      return 'cancelled'
+    default:
+      return 'draft'
   }
 }

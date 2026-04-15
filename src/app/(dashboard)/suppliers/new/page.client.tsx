@@ -36,9 +36,9 @@ export default function NewSupplierForm() {
         </Alert>
       )}
 
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0">
         {/* Name */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="name">
             Name <span className="text-destructive">*</span>
           </Label>
@@ -115,7 +115,7 @@ export default function NewSupplierForm() {
         </div>
 
         {/* Credit Terms */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="creditTermsDays">
             Credit Terms (days) <span className="text-destructive">*</span>
           </Label>
@@ -138,7 +138,7 @@ export default function NewSupplierForm() {
         </div>
 
         {/* Notes */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="notes">Notes</Label>
           <textarea
             id="notes"
@@ -150,7 +150,7 @@ export default function NewSupplierForm() {
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="w-full">
+        <Button type="submit" disabled={isPending} className="w-full md:col-span-2">
           {isPending ? 'Saving...' : 'Save Supplier'}
         </Button>
       </form>

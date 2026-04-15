@@ -1,4 +1,7 @@
 import Link from 'next/link'
+import { eq } from 'drizzle-orm'
+import { db } from '@/db'
+import { businesses } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
 import { getArAging } from '@/lib/reports/arAging'
 import { getSingleAccountBalance } from '@/lib/reports/engine'
@@ -18,9 +21,14 @@ export default async function ArAgingPage({ searchParams }: PageProps) {
   const params = await searchParams
   const asOfDate = params.date ?? new Date().toISOString().slice(0, 10)
 
-  const [report, arLedgerBalance] = await Promise.all([
+  const [report, arLedgerBalance, biz] = await Promise.all([
     getArAging(businessId, asOfDate),
     getSingleAccountBalance(businessId, '1100', { type: 'asOf', date: asOfDate }),
+    db
+      .select({ name: businesses.name, phone: businesses.phone })
+      .from(businesses)
+      .where(eq(businesses.id, businessId))
+      .then((rows) => rows[0]),
   ])
 
   const { isReconciled, diff } = computeReconciliationStatus(
@@ -56,6 +64,8 @@ export default async function ArAgingPage({ searchParams }: PageProps) {
           arLedgerBalance={arLedgerBalance}
           isReconciled={isReconciled}
           reconciliationDiff={diff}
+          businessName={biz?.name ?? ''}
+          businessPhone={biz?.phone ?? null}
         />
       </div>
     </main>

@@ -17,6 +17,7 @@ import {
 import type { PaymentListItem } from '@/actions/payments'
 import InvoiceButton from '@/components/InvoiceButton.client'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { invoiceTemplate } from '@/lib/whatsapp/templates'
 
 import { formatGhs, formatDate, avatarColor, initials } from '@/lib/format'
 
@@ -76,9 +77,13 @@ const PAYMENT_METHOD_ICONS: Record<string, string> = {
 export default function SaleDetail({
   order,
   payments,
+  businessName,
+  businessPhone,
 }: {
   order: OrderDetail
   payments: PaymentListItem[]
+  businessName: string
+  businessPhone: string | null
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -406,11 +411,21 @@ export default function SaleDetail({
                   orderNumber={order.orderNumber}
                   totalAmount={order.totalAmount}
                   customerPhone={order.customer?.phone}
+                  customerName={order.customer?.name}
+                  businessName={businessName}
+                  businessPhone={businessPhone}
                 />
                 {order.customer?.phone && (
                   <WhatsAppButton
                     phone={order.customer.phone}
-                    message={`Hi ${order.customer.name}, here is your invoice ${order.orderNumber} for ${formatGhs(order.totalAmount)}. Thank you for your business!`}
+                    message={invoiceTemplate({
+                      businessName,
+                      customerName: order.customer.name,
+                      orderNumber: order.orderNumber,
+                      totalAmount: Number(order.totalAmount ?? 0),
+                      dueDate: order.orderDate,
+                      businessPhone: businessPhone ?? undefined,
+                    })}
                     label="Share via WhatsApp"
                     className="w-full"
                   />

@@ -1,4 +1,4 @@
-import { and, desc, eq, sql, inArray, gte, lte } from 'drizzle-orm'
+import { and, desc, eq, gt, sql, inArray, gte, lte } from 'drizzle-orm'
 import { db } from '@/db'
 import {
   accounts,
@@ -10,6 +10,7 @@ import {
   inventoryTransactions,
   goodsReceivedNotes,
   supplierPayments,
+  hubtelPaymentLinks,
 } from '@/db/schema'
 import { format, subDays } from 'date-fns'
 
@@ -377,5 +378,38 @@ export async function getDashboardLowStock(businessId: string): Promise<Dashboar
   return {
     count: items.length,
     items: items.slice(0, 5),
+  }
+}
+
+// ─── getDashboardPendingMomoLinks ─────────────────────────────────────────────
+
+export type PendingMomoLinks = { count: number; total: number }
+
+/**
+ * Count and sum active (non-expired) pending Hubtel MoMo payment links.
+ * Used to surface the MoMo payment links alert card on the dashboard.
+ */
+export async function getDashboardPendingMomoLinks(
+  businessId: string,
+): Promise<PendingMomoLinks> {
+  const now = new Date()
+
+  const result = await db
+    .select({
+      count: sql<number>`COUNT(*)::int`,
+      total: sql<string>`COALESCE(SUM(${hubtelPaymentLinks.amount}), '0')`,
+    })
+    .from(hubtelPaymentLinks)
+    .where(
+      and(
+        eq(hubtelPaymentLinks.businessId, businessId),
+        eq(hubtelPaymentLinks.status, 'pending'),
+        gt(hubtelPaymentLinks.expiresAt, now),
+      ),
+    )
+
+  return {
+    count: result[0]?.count ?? 0,
+    total: Math.round(Number(result[0]?.total ?? 0) * 100) / 100,
   }
 }

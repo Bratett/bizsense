@@ -367,7 +367,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderActionR
       const transactions = await getProductTransactions(line.productId!, businessId)
       const fifoResult = computeFifoCogs(transactions, line.quantity)
 
-      if (fifoResult.insufficientStock && !getAllowNegativeStock(businessId)) {
+      if (fifoResult.insufficientStock && !(await getAllowNegativeStock(businessId))) {
         const available = Math.round((line.quantity - fifoResult.shortfall) * 100) / 100
         return {
           success: false,

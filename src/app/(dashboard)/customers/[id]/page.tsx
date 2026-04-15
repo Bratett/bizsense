@@ -1,5 +1,13 @@
+import { notFound } from 'next/navigation'
+import { eq } from 'drizzle-orm'
+import { db } from '@/db'
+import { businesses } from '@/db/schema'
 import { getServerSession } from '@/lib/session'
-import { getCustomerById } from '@/actions/customers'
+import {
+  getCustomerById,
+  getCustomerStats,
+  getCustomerRecentTransactions,
+} from '@/actions/customers'
 import CustomerDetail from './page.client'
 
 interface PageProps {
@@ -7,8 +15,28 @@ interface PageProps {
 }
 
 export default async function CustomerDetailPage({ params }: PageProps) {
-  await getServerSession()
+  const session = await getServerSession()
   const { id } = await params
-  const customer = await getCustomerById(id)
-  return <CustomerDetail customer={customer} />
+  const [customer, stats, transactions, biz] = await Promise.all([
+    getCustomerById(id),
+    getCustomerStats(id),
+    getCustomerRecentTransactions(id),
+    db
+      .select({ name: businesses.name, phone: businesses.phone })
+      .from(businesses)
+      .where(eq(businesses.id, session.user.businessId))
+      .then((rows) => rows[0]),
+  ])
+  if (!customer) notFound()
+  return (
+    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <CustomerDetail
+        customer={customer}
+        stats={stats}
+        transactions={transactions}
+        businessName={biz?.name ?? ''}
+        businessPhone={biz?.phone ?? null}
+      />
+    </main>
+  )
 }

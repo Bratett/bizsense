@@ -3,6 +3,7 @@ import { and, eq, gte } from 'drizzle-orm'
 import { db } from '@/db'
 import {
   businesses,
+  businessSettings,
   accounts,
   taxComponents,
   customers,
@@ -35,8 +36,11 @@ export async function GET(req: NextRequest) {
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 86400_000).toISOString().slice(0, 10) // YYYY-MM-DD string for date column comparison
 
-  const [
+  // Run all queries in a single transaction so they share one connection.
+  // Promise.all across 13 separate queries exhausts PgBouncer's session-mode pool.
+  const {
     businessData,
+    businessSettingsData,
     accountsData,
     taxData,
     customersData,
@@ -49,120 +53,158 @@ export async function GET(req: NextRequest) {
     fxData,
     journalEntriesData,
     journalLinesData,
-  ] = await Promise.all([
-    // Business: filtered by id (businesses table has no businessId column)
-    db.select().from(businesses).where(eq(businesses.id, businessId)),
+  } = await db.transaction(async (tx) => {
+    const sinceDate = since ? new Date(since) : null
 
-    // Accounts: always return full set — small, critical for offline VAT calculation
-    db.select().from(accounts).where(eq(accounts.businessId, businessId)),
+    const [
+      businessData,
+      businessSettingsData,
+      accountsData,
+      taxData,
+      customersData,
+      ordersData,
+      orderLinesRaw,
+      expensesData,
+      productsData,
+      inventoryData,
+      suppliersData,
+      fxData,
+      journalEntriesData,
+      journalLinesRaw,
+    ] = await Promise.all([
+      // Business: filtered by id (businesses table has no businessId column)
+      tx.select().from(businesses).where(eq(businesses.id, businessId)),
 
-    // Tax components: always return full set — required for offline Ghana cascading VAT
-    db.select().from(taxComponents).where(eq(taxComponents.businessId, businessId)),
+      // Business settings: always return full row — one row per business, no since filter
+      tx.select().from(businessSettings).where(eq(businessSettings.businessId, businessId)),
 
-    // Customers: with since filter
-    db
-      .select()
-      .from(customers)
-      .where(
-        and(
-          eq(customers.businessId, businessId),
-          since ? gte(customers.updatedAt, new Date(since)) : undefined,
+      // Accounts: always return full set — small, critical for offline VAT calculation
+      tx.select().from(accounts).where(eq(accounts.businessId, businessId)),
+
+      // Tax components: always return full set — required for offline Ghana cascading VAT
+      tx.select().from(taxComponents).where(eq(taxComponents.businessId, businessId)),
+
+      // Customers: with since filter
+      tx
+        .select()
+        .from(customers)
+        .where(
+          and(
+            eq(customers.businessId, businessId),
+            sinceDate ? gte(customers.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // Orders: with since filter
-    db
-      .select()
-      .from(orders)
-      .where(
-        and(
-          eq(orders.businessId, businessId),
-          since ? gte(orders.updatedAt, new Date(since)) : undefined,
+      // Orders: with since filter
+      tx
+        .select()
+        .from(orders)
+        .where(
+          and(
+            eq(orders.businessId, businessId),
+            sinceDate ? gte(orders.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // Order lines: inner join to enforce businessId scope (lines have no businessId)
-    db
-      .select()
-      .from(orderLines)
-      .innerJoin(orders, eq(orders.id, orderLines.orderId))
-      .where(eq(orders.businessId, businessId))
-      .then((rows) => rows.map((r) => r.order_lines)),
+      // Order lines: inner join to enforce businessId scope (lines have no businessId)
+      tx
+        .select()
+        .from(orderLines)
+        .innerJoin(orders, eq(orders.id, orderLines.orderId))
+        .where(eq(orders.businessId, businessId)),
 
-    // Expenses: with since filter
-    db
-      .select()
-      .from(expenses)
-      .where(
-        and(
-          eq(expenses.businessId, businessId),
-          since ? gte(expenses.updatedAt, new Date(since)) : undefined,
+      // Expenses: with since filter
+      tx
+        .select()
+        .from(expenses)
+        .where(
+          and(
+            eq(expenses.businessId, businessId),
+            sinceDate ? gte(expenses.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // Products: with since filter
-    db
-      .select()
-      .from(products)
-      .where(
-        and(
-          eq(products.businessId, businessId),
-          since ? gte(products.updatedAt, new Date(since)) : undefined,
+      // Products: with since filter
+      tx
+        .select()
+        .from(products)
+        .where(
+          and(
+            eq(products.businessId, businessId),
+            sinceDate ? gte(products.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // Inventory transactions: with since filter
-    db
-      .select()
-      .from(inventoryTransactions)
-      .where(
-        and(
-          eq(inventoryTransactions.businessId, businessId),
-          since ? gte(inventoryTransactions.updatedAt, new Date(since)) : undefined,
+      // Inventory transactions: with since filter
+      tx
+        .select()
+        .from(inventoryTransactions)
+        .where(
+          and(
+            eq(inventoryTransactions.businessId, businessId),
+            sinceDate ? gte(inventoryTransactions.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // Suppliers: with since filter
-    db
-      .select()
-      .from(suppliers)
-      .where(
-        and(
-          eq(suppliers.businessId, businessId),
-          since ? gte(suppliers.updatedAt, new Date(since)) : undefined,
+      // Suppliers: with since filter
+      tx
+        .select()
+        .from(suppliers)
+        .where(
+          and(
+            eq(suppliers.businessId, businessId),
+            sinceDate ? gte(suppliers.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // FX rates: always return last 90 days — reference data, no since filter
-    db
-      .select()
-      .from(fxRates)
-      .where(and(eq(fxRates.businessId, businessId), gte(fxRates.rateDate, ninetyDaysAgo))),
+      // FX rates: always return last 90 days — reference data, no since filter
+      tx
+        .select()
+        .from(fxRates)
+        .where(and(eq(fxRates.businessId, businessId), gte(fxRates.rateDate, ninetyDaysAgo))),
 
-    // Journal entries: with since filter
-    db
-      .select()
-      .from(journalEntries)
-      .where(
-        and(
-          eq(journalEntries.businessId, businessId),
-          since ? gte(journalEntries.updatedAt, new Date(since)) : undefined,
+      // Journal entries: with since filter
+      tx
+        .select()
+        .from(journalEntries)
+        .where(
+          and(
+            eq(journalEntries.businessId, businessId),
+            sinceDate ? gte(journalEntries.updatedAt, sinceDate) : undefined,
+          ),
         ),
-      ),
 
-    // Journal lines: inner join to enforce businessId scope (lines have no businessId)
-    db
-      .select()
-      .from(journalLines)
-      .innerJoin(journalEntries, eq(journalEntries.id, journalLines.journalEntryId))
-      .where(eq(journalEntries.businessId, businessId))
-      .then((rows) => rows.map((r) => r.journal_lines)),
-  ])
+      // Journal lines: inner join to enforce businessId scope (lines have no businessId)
+      tx
+        .select()
+        .from(journalLines)
+        .innerJoin(journalEntries, eq(journalEntries.id, journalLines.journalEntryId))
+        .where(eq(journalEntries.businessId, businessId)),
+    ])
+
+    return {
+      businessData,
+      businessSettingsData,
+      accountsData,
+      taxData,
+      customersData,
+      ordersData,
+      orderLinesData: orderLinesRaw.map((r) => r.order_lines),
+      expensesData,
+      productsData,
+      inventoryData,
+      suppliersData,
+      fxData,
+      journalEntriesData,
+      journalLinesData: journalLinesRaw.map((r) => r.journal_lines),
+    }
+  })
 
   return Response.json({
     pulledAt: new Date().toISOString(),
     data: {
       businesses: businessData,
+      businessSettings: businessSettingsData,
       accounts: accountsData,
       taxComponents: taxData,
       customers: customersData,

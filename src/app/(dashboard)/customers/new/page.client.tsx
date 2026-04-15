@@ -98,9 +98,9 @@ export default function CustomerForm({ businessId }: { businessId: string }) {
         </Alert>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0">
         {/* Name */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="name">
             Name <span className="text-destructive">*</span>
           </Label>
@@ -182,7 +182,7 @@ export default function CustomerForm({ businessId }: { businessId: string }) {
         </div>
 
         {/* Credit Limit */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="creditLimit">Credit Limit (GHS)</Label>
           <Input
             id="creditLimit"
@@ -205,7 +205,7 @@ export default function CustomerForm({ businessId }: { businessId: string }) {
         </div>
 
         {/* Notes */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="notes">Notes</Label>
           <textarea
             id="notes"
@@ -222,7 +222,7 @@ export default function CustomerForm({ businessId }: { businessId: string }) {
           type="button"
           disabled={isPending}
           onClick={handleSubmit}
-          className="h-11 w-full text-base font-semibold"
+          className="h-11 w-full text-base font-semibold md:col-span-2"
         >
           {isPending ? 'Saving...' : 'Save Customer'}
         </Button>

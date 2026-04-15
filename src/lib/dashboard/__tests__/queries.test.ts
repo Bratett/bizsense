@@ -16,6 +16,7 @@ import {
   getDashboardPendingApprovals,
   getDashboardActivity,
   getDashboardChartData,
+  getDashboardPendingMomoLinks,
 } from '../queries'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -264,5 +265,42 @@ describe('getDashboardActivity', () => {
     expect(result).toHaveLength(0)
     // db.select was called twice (orders + expenses)
     expect(db.select).toHaveBeenCalledTimes(2)
+  })
+})
+
+// ─── getDashboardPendingMomoLinks ───────────────────────────────────────────
+
+describe('getDashboardPendingMomoLinks', () => {
+  it('Test 9 — returns count 0 and total 0 when no pending links exist', async () => {
+    const chain = makeChain([{ count: 0, total: '0' }])
+    vi.mocked(db.select).mockReturnValue(chain as never)
+
+    const result = await getDashboardPendingMomoLinks(BUSINESS_ID)
+
+    expect(result.count).toBe(0)
+    expect(result.total).toBe(0)
+  })
+
+  it('Test 10 — two pending non-expired links: count 2, totalAmount equals sum', async () => {
+    // The query filters status=pending AND expiresAt > now; we mock the aggregate result
+    const chain = makeChain([{ count: 2, total: '850.00' }])
+    vi.mocked(db.select).mockReturnValue(chain as never)
+
+    const result = await getDashboardPendingMomoLinks(BUSINESS_ID)
+
+    expect(result.count).toBe(2)
+    expect(result.total).toBe(850)
+  })
+
+  it('Test 11 — expired links excluded: query returns empty because gt(expiresAt, now) filters them', async () => {
+    // The SQL gt(expiresAt, now) condition in the query excludes expired links.
+    // If all links are expired, the DB returns count=0 total='0'.
+    const chain = makeChain([{ count: 0, total: '0' }])
+    vi.mocked(db.select).mockReturnValue(chain as never)
+
+    const result = await getDashboardPendingMomoLinks(BUSINESS_ID)
+
+    expect(result.count).toBe(0)
+    expect(result.total).toBe(0)
   })
 })

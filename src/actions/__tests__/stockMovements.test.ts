@@ -36,7 +36,7 @@ vi.mock('@/lib/inventory/queries', () => ({
 }))
 
 vi.mock('@/lib/inventory/settings', () => ({
-  getAllowNegativeStock: vi.fn(() => false),
+  getAllowNegativeStock: vi.fn(() => Promise.resolve(false)),
 }))
 
 import { getServerSession } from '@/lib/session'
@@ -465,7 +465,7 @@ describe('createCashOrder with COGS', () => {
 
     // FIFO: only 2 in stock, trying to sell 3
     vi.mocked(getProductTransactions).mockResolvedValue(openingStockTx(2, 50))
-    vi.mocked(getAllowNegativeStock).mockReturnValue(false)
+    vi.mocked(getAllowNegativeStock).mockResolvedValue(false)
 
     mockAtomicWrite()
 
@@ -644,7 +644,7 @@ describe('adjustStock', () => {
 
     // Only 5 in stock, trying to remove 10
     vi.mocked(getProductTransactions).mockResolvedValue(openingStockTx(5, 50))
-    vi.mocked(getAllowNegativeStock).mockReturnValue(false)
+    vi.mocked(getAllowNegativeStock).mockResolvedValue(false)
 
     const result = await adjustStock({
       productId: PRODUCT_ID,

@@ -230,7 +230,7 @@ export async function adjustStock(input: AdjustStockInput): Promise<InventoryAct
     const transactions = await getProductTransactions(input.productId, businessId)
     const fifoResult = computeFifoCogs(transactions, input.quantity)
 
-    if (fifoResult.insufficientStock && !getAllowNegativeStock(businessId)) {
+    if (fifoResult.insufficientStock && !(await getAllowNegativeStock(businessId))) {
       const available = Math.round((input.quantity - fifoResult.shortfall) * 100) / 100
       return {
         success: false,

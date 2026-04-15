@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import PwaInit from '@/components/PwaInit.client'
@@ -13,10 +13,26 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
 })
 
+// themeColor and viewport must be in a separate export in Next.js 15+
+export const viewport: Viewport = {
+  themeColor: '#00704A',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
+
 export const metadata: Metadata = {
   title: 'BizSense Ghana',
   description: 'Offline-first business management for Ghanaian SMEs',
   manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'BizSense',
+    statusBarStyle: 'black-translucent',
+  },
+  icons: {
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export default function RootLayout({
