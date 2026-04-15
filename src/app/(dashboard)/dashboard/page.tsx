@@ -16,13 +16,7 @@ import {
 import { getExpenseBudgetStatus } from '@/actions/expenseBudgets'
 import { getUnreviewedSyncConflictsCount } from '@/actions/syncConflicts'
 import FirstTimeOverlay from './FirstTimeOverlay.client'
-import dynamic from 'next/dynamic'
-const DashboardChart = dynamic(() => import('./DashboardChart.client'), {
-  ssr: false,
-  loading: () => (
-    <div className="h-64 bg-gray-100 rounded-xl animate-pulse" aria-label="Loading chart" />
-  ),
-})
+import DashboardChartLoader from './DashboardChartLoader.client'
 import ActivityFeed from './ActivityFeed.client'
 import { DashboardMetrics } from './DashboardMetrics.client'
 import SyncIndicator from '@/components/SyncIndicator.client'
@@ -573,7 +567,7 @@ export default async function DashboardPage() {
           {/* Right column: activity feed + chart */}
           <div className="md:w-[400px] space-y-6">
             {/* ─── Revenue vs Expenses Chart ──────────────────────── */}
-            {showFinancials && chartData && <DashboardChart data={chartData} />}
+            {showFinancials && chartData && <DashboardChartLoader data={chartData} />}
 
             {/* ─── Activity Feed ──────────────────────────────────── */}
             <ActivityFeed items={activity} />
