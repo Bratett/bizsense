@@ -130,7 +130,11 @@ export default function InvoiceButton({
       } else {
         // No customer phone — open generic WhatsApp share
         const encoded = encodeURIComponent(message)
-        window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer')
+        window.open(
+          `https://api.whatsapp.com/send?text=${encoded}`,
+          '_blank',
+          'noopener,noreferrer',
+        )
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to share invoice'

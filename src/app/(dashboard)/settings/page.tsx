@@ -21,16 +21,8 @@ export default async function SettingsPage() {
         .from(taxComponents)
         .where(eq(taxComponents.businessId, businessId))
         .orderBy(taxComponents.calculationOrder),
-      db
-        .select()
-        .from(accounts)
-        .where(eq(accounts.businessId, businessId))
-        .orderBy(accounts.code),
-      db
-        .select()
-        .from(users)
-        .where(eq(users.businessId, businessId))
-        .orderBy(users.createdAt),
+      db.select().from(accounts).where(eq(accounts.businessId, businessId)).orderBy(accounts.code),
+      db.select().from(users).where(eq(users.businessId, businessId)).orderBy(users.createdAt),
       db
         .select()
         .from(businessSettings)
@@ -43,10 +35,7 @@ export default async function SettingsPage() {
   // getOrCreate: seed default settings row on first visit
   let currentSettings = existingSettings
   if (!currentSettings) {
-    ;[currentSettings] = await db
-      .insert(businessSettings)
-      .values({ businessId })
-      .returning()
+    ;[currentSettings] = await db.insert(businessSettings).values({ businessId }).returning()
   }
 
   return (

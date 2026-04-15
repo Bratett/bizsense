@@ -57,8 +57,7 @@ export async function generatePaymentLink(orderId: string): Promise<{
     throw new Error('This invoice is already fully paid.')
   }
 
-  const outstanding =
-    Math.round((Number(order.totalAmount) - Number(order.amountPaid)) * 100) / 100
+  const outstanding = Math.round((Number(order.totalAmount) - Number(order.amountPaid)) * 100) / 100
 
   if (outstanding <= 0) throw new Error('No outstanding balance on this invoice.')
 
@@ -146,9 +145,7 @@ export async function getPaymentLinkStatus(linkId: string): Promise<{
       momoReference: hubtelPaymentLinks.momoReference,
     })
     .from(hubtelPaymentLinks)
-    .where(
-      and(eq(hubtelPaymentLinks.id, linkId), eq(hubtelPaymentLinks.businessId, businessId)),
-    )
+    .where(and(eq(hubtelPaymentLinks.id, linkId), eq(hubtelPaymentLinks.businessId, businessId)))
 
   if (!link) throw new Error('Payment link not found')
 

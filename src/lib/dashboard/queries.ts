@@ -389,9 +389,7 @@ export type PendingMomoLinks = { count: number; total: number }
  * Count and sum active (non-expired) pending Hubtel MoMo payment links.
  * Used to surface the MoMo payment links alert card on the dashboard.
  */
-export async function getDashboardPendingMomoLinks(
-  businessId: string,
-): Promise<PendingMomoLinks> {
+export async function getDashboardPendingMomoLinks(businessId: string): Promise<PendingMomoLinks> {
   const now = new Date()
 
   const result = await db

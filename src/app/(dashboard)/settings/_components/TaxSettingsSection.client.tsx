@@ -3,11 +3,7 @@
 import { useActionState, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Plus, Pencil, X, Check } from 'lucide-react'
-import {
-  updateTaxComponent,
-  addTaxComponent,
-  type SettingsActionResult,
-} from '@/actions/settings'
+import { updateTaxComponent, addTaxComponent, type SettingsActionResult } from '@/actions/settings'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -68,8 +64,8 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Tax Settings</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Ghana GRA levy rates. These rates are used to calculate VAT on all transactions.
-            Rates must be verified with GRA before adjustment.
+            Ghana GRA levy rates. These rates are used to calculate VAT on all transactions. Rates
+            must be verified with GRA before adjustment.
           </p>
         </div>
         {canEdit && (
@@ -96,7 +92,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
           )}
           <form action={addFormAction} className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="space-y-1">
-              <Label htmlFor="add-code" className="text-xs">Code</Label>
+              <Label htmlFor="add-code" className="text-xs">
+                Code
+              </Label>
               <Input
                 id="add-code"
                 name="code"
@@ -109,7 +107,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
               )}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="add-name" className="text-xs">Name</Label>
+              <Label htmlFor="add-name" className="text-xs">
+                Name
+              </Label>
               <Input
                 id="add-name"
                 name="name"
@@ -119,7 +119,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="add-rate" className="text-xs">Rate (%)</Label>
+              <Label htmlFor="add-rate" className="text-xs">
+                Rate (%)
+              </Label>
               <Input
                 id="add-rate"
                 name="rate"
@@ -133,7 +135,9 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="add-order" className="text-xs">Calc. Order</Label>
+              <Label htmlFor="add-order" className="text-xs">
+                Calc. Order
+              </Label>
               <Input
                 id="add-order"
                 name="calculationOrder"
@@ -151,12 +155,7 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
               <Button type="submit" size="sm" disabled={addPending}>
                 {addPending ? 'Adding…' : 'Add Component'}
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAddForm(false)}
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowAddForm(false)}>
                 Cancel
               </Button>
             </div>
@@ -318,9 +317,7 @@ export default function TaxSettingsSection({ taxComponents, userRole }: Props) {
       </div>
 
       {!canEdit && (
-        <p className="mt-3 text-xs text-gray-400">
-          Only the business owner can edit tax rates.
-        </p>
+        <p className="mt-3 text-xs text-gray-400">Only the business owner can edit tax rates.</p>
       )}
     </div>
   )

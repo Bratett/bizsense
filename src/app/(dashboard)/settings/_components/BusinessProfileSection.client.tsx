@@ -18,8 +18,18 @@ import { cn } from '@/lib/utils'
 import type { BusinessRecord } from '../page.client'
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const initialState: SettingsActionResult = { success: false, error: '' }
@@ -72,9 +82,7 @@ export default function BusinessProfileSection({ business, userRole }: Props) {
               defaultValue={business.name}
               className={cn('h-11 px-4 text-base', fieldErrors?.name && 'border-destructive')}
             />
-            {fieldErrors?.name && (
-              <p className="text-xs text-destructive">{fieldErrors.name}</p>
-            )}
+            {fieldErrors?.name && <p className="text-xs text-destructive">{fieldErrors.name}</p>}
           </div>
 
           {/* Industry */}
@@ -119,9 +127,7 @@ export default function BusinessProfileSection({ business, userRole }: Props) {
               placeholder="info@yourbusiness.com"
               className={cn('h-11 px-4 text-base', fieldErrors?.email && 'border-destructive')}
             />
-            {fieldErrors?.email && (
-              <p className="text-xs text-destructive">{fieldErrors.email}</p>
-            )}
+            {fieldErrors?.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
           </div>
 
           {/* Address */}

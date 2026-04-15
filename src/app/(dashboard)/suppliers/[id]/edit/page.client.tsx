@@ -67,7 +67,10 @@ export default function EditSupplierForm({ supplier }: { supplier: SupplierWithB
         </Alert>
       )}
 
-      <form action={formAction} className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0">
+      <form
+        action={formAction}
+        className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0"
+      >
         {/* Hidden ID */}
         <input type="hidden" name="id" value={supplier.id} />
 

@@ -182,10 +182,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   // ── 8. Compute payment amounts ───────────────────────────────────────────────
   const paymentAmount = Number(payload.Data?.Amount ?? link.amount)
-  const newAmountPaid =
-    Math.round((Number(order.amountPaid) + paymentAmount) * 100) / 100
-  const newPaymentStatus =
-    newAmountPaid >= Number(order.totalAmount) - 0.001 ? 'paid' : 'partial'
+  const newAmountPaid = Math.round((Number(order.amountPaid) + paymentAmount) * 100) / 100
+  const newPaymentStatus = newAmountPaid >= Number(order.totalAmount) - 0.001 ? 'paid' : 'partial'
 
   // ── 9. Map Hubtel network code to our payment method ────────────────────────
   const network = (payload.Data?.Network ?? '').toUpperCase()

@@ -106,16 +106,18 @@ const NAV_GROUPS: NavGroup[] = [
   {
     group: 'Business',
     sections: [
-      { id: 'profile', label: 'Business Profile', allowedRoles: ['owner', 'manager', 'accountant'] },
+      {
+        id: 'profile',
+        label: 'Business Profile',
+        allowedRoles: ['owner', 'manager', 'accountant'],
+      },
       { id: 'coa', label: 'Chart of Accounts', allowedRoles: ['owner', 'manager', 'accountant'] },
       { id: 'tax', label: 'Tax Settings', allowedRoles: ['owner', 'manager', 'accountant'] },
     ],
   },
   {
     group: 'Team',
-    sections: [
-      { id: 'team', label: 'Users & Roles', allowedRoles: ['owner', 'manager'] },
-    ],
+    sections: [{ id: 'team', label: 'Users & Roles', allowedRoles: ['owner', 'manager'] }],
   },
   {
     group: 'Integrations',
@@ -214,7 +216,9 @@ export default function SettingsPageClient({
                   active
                     ? 'bg-green-50 text-green-700'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                  section.id === 'signout' && !active && 'text-red-600 hover:bg-red-50 hover:text-red-700',
+                  section.id === 'signout' &&
+                    !active &&
+                    'text-red-600 hover:bg-red-50 hover:text-red-700',
                 )}
               >
                 {section.label}
@@ -239,13 +243,9 @@ export default function SettingsPageClient({
       case 'tax':
         return <TaxSettingsSection taxComponents={taxComponents} userRole={userRole} />
       case 'team':
-        return (
-          <TeamSection teamMembers={teamMembers} userRole={userRole} currentUserId={userId} />
-        )
+        return <TeamSection teamMembers={teamMembers} userRole={userRole} currentUserId={userId} />
       case 'integrations':
-        return (
-          <IntegrationsSection businessSettings={businessSettings} userRole={userRole} />
-        )
+        return <IntegrationsSection businessSettings={businessSettings} userRole={userRole} />
       case 'export':
         return <DataExportSection businessId={business.id} showSyncStatus={false} />
       case 'sync':

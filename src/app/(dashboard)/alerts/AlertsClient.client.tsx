@@ -81,9 +81,7 @@ export default function AlertsClient({ lowStock, overdue }: Props) {
         </CardHeader>
         <CardContent>
           {overdue.invoiceCount === 0 ? (
-            <p className="text-sm text-green-700">
-              ✓ No invoices are more than 30 days overdue.
-            </p>
+            <p className="text-sm text-green-700">✓ No invoices are more than 30 days overdue.</p>
           ) : overdue.canSend ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">

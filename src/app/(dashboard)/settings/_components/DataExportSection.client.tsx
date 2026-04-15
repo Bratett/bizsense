@@ -24,7 +24,9 @@ function formatDate(isoString: string | undefined | null) {
 // ─── CSV helpers ──────────────────────────────────────────────────────────────
 
 function downloadCsv(filename: string, rows: string[][]) {
-  const content = rows.map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
+  const content = rows
+    .map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+    .join('\n')
   const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -41,12 +43,10 @@ function SyncStatusPanel({ businessId }: { businessId: string }) {
   const [syncError, setSyncError] = useState<string | null>(null)
 
   const lastPull = useLiveQuery(() => localDb.meta.get('lastPullAt'))
-  const pendingCount = useLiveQuery(
-    () => localDb.syncQueue.where('status').equals('pending').count(),
+  const pendingCount = useLiveQuery(() =>
+    localDb.syncQueue.where('status').equals('pending').count(),
   )
-  const failedCount = useLiveQuery(
-    () => localDb.syncQueue.where('status').equals('failed').count(),
-  )
+  const failedCount = useLiveQuery(() => localDb.syncQueue.where('status').equals('failed').count())
 
   async function handleSync() {
     setSyncing(true)
@@ -78,13 +78,13 @@ function SyncStatusPanel({ businessId }: { businessId: string }) {
           </div>
           <div className="rounded-lg bg-gray-50 px-4 py-3">
             <p className="text-xs font-medium text-gray-500">Pending Changes</p>
-            <p className="mt-0.5 text-sm font-semibold text-gray-900">
-              {pendingCount ?? 0}
-            </p>
+            <p className="mt-0.5 text-sm font-semibold text-gray-900">{pendingCount ?? 0}</p>
           </div>
           <div className="rounded-lg bg-gray-50 px-4 py-3">
             <p className="text-xs font-medium text-gray-500">Failed</p>
-            <p className={`mt-0.5 text-sm font-semibold ${(failedCount ?? 0) > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+            <p
+              className={`mt-0.5 text-sm font-semibold ${(failedCount ?? 0) > 0 ? 'text-red-600' : 'text-gray-900'}`}
+            >
               {failedCount ?? 0}
             </p>
           </div>
@@ -132,7 +132,15 @@ function ExportPanel({ businessId }: { businessId: string }) {
         .equals(businessId)
         .filter((c) => c.isActive)
         .toArray()
-      const headers = ['ID', 'Name', 'Phone', 'Email', 'Location', 'Credit Limit (GHS)', 'Payment Terms (days)']
+      const headers = [
+        'ID',
+        'Name',
+        'Phone',
+        'Email',
+        'Location',
+        'Credit Limit (GHS)',
+        'Payment Terms (days)',
+      ]
       const data = rows.map((c) => [
         c.id,
         c.name,
@@ -156,7 +164,17 @@ function ExportPanel({ businessId }: { businessId: string }) {
         .equals(businessId)
         .filter((p) => p.isActive)
         .toArray()
-      const headers = ['ID', 'SKU', 'Name', 'Category', 'Unit', 'Cost Price (GHS)', 'Selling Price (GHS)', 'Selling Price (USD)', 'Reorder Level']
+      const headers = [
+        'ID',
+        'SKU',
+        'Name',
+        'Category',
+        'Unit',
+        'Cost Price (GHS)',
+        'Selling Price (GHS)',
+        'Selling Price (USD)',
+        'Reorder Level',
+      ]
       const data = rows.map((p) => [
         p.id,
         p.sku ?? '',
@@ -182,7 +200,14 @@ function ExportPanel({ businessId }: { businessId: string }) {
       const customers = await localDb.customers.where('id').anyOf(customerIds).toArray()
       const customerMap = new Map(customers.map((c) => [c.id, c.name]))
 
-      const headers = ['Order No.', 'Date', 'Customer', 'Total (GHS)', 'Payment Status', 'Amount Paid (GHS)']
+      const headers = [
+        'Order No.',
+        'Date',
+        'Customer',
+        'Total (GHS)',
+        'Payment Status',
+        'Amount Paid (GHS)',
+      ]
       const data = orders.map((o) => [
         o.orderNumber ?? o.localOrderNumber ?? '',
         o.orderDate,
@@ -201,7 +226,15 @@ function ExportPanel({ businessId }: { businessId: string }) {
     setExporting('expenses')
     try {
       const rows = await localDb.expenses.where('businessId').equals(businessId).toArray()
-      const headers = ['ID', 'Date', 'Category', 'Description', 'Amount (GHS)', 'Payment Method', 'Status']
+      const headers = [
+        'ID',
+        'Date',
+        'Category',
+        'Description',
+        'Amount (GHS)',
+        'Payment Method',
+        'Status',
+      ]
       const data = rows.map((e) => [
         e.id,
         e.expenseDate,

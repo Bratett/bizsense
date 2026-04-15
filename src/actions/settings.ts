@@ -2,13 +2,7 @@
 
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
-import {
-  businesses,
-  businessSettings,
-  taxComponents,
-  accounts,
-  users,
-} from '@/db/schema'
+import { businesses, businessSettings, taxComponents, accounts, users } from '@/db/schema'
 import { requireRole } from '@/lib/auth/requireRole'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -90,16 +84,11 @@ export async function updateBusinessSettings(
     (formData.get('defaultPaymentTermsDays') as string) ?? '0',
     10,
   )
-  const defaultCreditLimitRaw = parseFloat(
-    (formData.get('defaultCreditLimit') as string) ?? '0',
-  )
-  const invoiceFooterText =
-    (formData.get('invoiceFooterText') as string | null)?.trim() || null
+  const defaultCreditLimitRaw = parseFloat((formData.get('defaultCreditLimit') as string) ?? '0')
+  const invoiceFooterText = (formData.get('invoiceFooterText') as string | null)?.trim() || null
   const momoMtnNumber = (formData.get('momoMtnNumber') as string | null)?.trim() || null
-  const momoTelecelNumber =
-    (formData.get('momoTelecelNumber') as string | null)?.trim() || null
-  const momoAirtelNumber =
-    (formData.get('momoAirtelNumber') as string | null)?.trim() || null
+  const momoTelecelNumber = (formData.get('momoTelecelNumber') as string | null)?.trim() || null
+  const momoAirtelNumber = (formData.get('momoAirtelNumber') as string | null)?.trim() || null
   const whatsappBusinessNumber =
     (formData.get('whatsappBusinessNumber') as string | null)?.trim() || null
   const whatsappNotifyInvoice = formData.get('whatsappNotifyInvoice') === 'on'
@@ -196,10 +185,7 @@ export async function updateTaxComponent(
     updateValues.rate = (ratePercent / 100).toFixed(4)
   }
 
-  await db
-    .update(taxComponents)
-    .set(updateValues)
-    .where(eq(taxComponents.id, id))
+  await db.update(taxComponents).set(updateValues).where(eq(taxComponents.id, id))
 
   return { success: true }
 }
@@ -266,8 +252,7 @@ export async function inviteTeamMember(
   const fieldErrors: Record<string, string> = {}
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     fieldErrors.email = 'Enter a valid email address'
-  if (!['manager', 'cashier', 'accountant'].includes(role))
-    fieldErrors.role = 'Select a valid role'
+  if (!['manager', 'cashier', 'accountant'].includes(role)) fieldErrors.role = 'Select a valid role'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { success: false, error: 'Please fix the errors below', fieldErrors }
@@ -280,7 +265,11 @@ export async function inviteTeamMember(
     })
     if (error) {
       if (error.message.toLowerCase().includes('already registered')) {
-        return { success: false, error: 'This email is already registered', fieldErrors: { email: 'Already registered' } }
+        return {
+          success: false,
+          error: 'This email is already registered',
+          fieldErrors: { email: 'Already registered' },
+        }
       }
       return { success: false, error: error.message }
     }
@@ -407,7 +396,11 @@ export async function addAccount(
   if (!name) fieldErrors.name = 'Account name is required'
   if (!VALID_ACCOUNT_TYPES.includes(type as (typeof VALID_ACCOUNT_TYPES)[number]))
     fieldErrors.type = 'Select a valid account type'
-  if (!VALID_CASH_FLOW_ACTIVITIES.includes(cashFlowActivity as (typeof VALID_CASH_FLOW_ACTIVITIES)[number]))
+  if (
+    !VALID_CASH_FLOW_ACTIVITIES.includes(
+      cashFlowActivity as (typeof VALID_CASH_FLOW_ACTIVITIES)[number],
+    )
+  )
     fieldErrors.cashFlowActivity = 'Select a valid cash flow activity'
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -453,10 +446,8 @@ export async function changePassword(
   const confirmPassword = (formData.get('confirmPassword') as string | null) ?? ''
 
   const fieldErrors: Record<string, string> = {}
-  if (newPassword.length < 8)
-    fieldErrors.newPassword = 'Password must be at least 8 characters'
-  if (newPassword !== confirmPassword)
-    fieldErrors.confirmPassword = 'Passwords do not match'
+  if (newPassword.length < 8) fieldErrors.newPassword = 'Password must be at least 8 characters'
+  if (newPassword !== confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { success: false, error: 'Please fix the errors below', fieldErrors }

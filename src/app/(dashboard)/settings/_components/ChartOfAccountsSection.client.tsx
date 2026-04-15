@@ -21,14 +21,7 @@ import type { AccountRecord } from '../page.client'
 
 const initialState: SettingsActionResult = { success: false, error: '' }
 
-const ACCOUNT_TYPE_ORDER = [
-  'asset',
-  'liability',
-  'equity',
-  'revenue',
-  'expense',
-  'cogs',
-] as const
+const ACCOUNT_TYPE_ORDER = ['asset', 'liability', 'equity', 'revenue', 'expense', 'cogs'] as const
 
 const TYPE_LABELS: Record<string, string> = {
   asset: 'Assets',
@@ -79,8 +72,8 @@ export default function ChartOfAccountsSection({ accounts, userRole }: Props) {
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Chart of Accounts</h2>
           <p className="mt-1 text-sm text-gray-500">
-            The default accounts are seeded from Ghana&apos;s standard chart of accounts.
-            System accounts cannot be deleted.
+            The default accounts are seeded from Ghana&apos;s standard chart of accounts. System
+            accounts cannot be deleted.
           </p>
         </div>
         {canEdit && (
@@ -117,9 +110,7 @@ export default function ChartOfAccountsSection({ accounts, userRole }: Props) {
                 className={cn('h-9 text-sm', fieldErrors?.code && 'border-destructive')}
                 disabled={isPending}
               />
-              {fieldErrors?.code && (
-                <p className="text-xs text-destructive">{fieldErrors.code}</p>
-              )}
+              {fieldErrors?.code && <p className="text-xs text-destructive">{fieldErrors.code}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="acc-name" className="text-xs">
@@ -149,12 +140,12 @@ export default function ChartOfAccountsSection({ accounts, userRole }: Props) {
                   ))}
                 </SelectContent>
               </Select>
-              {fieldErrors?.type && (
-                <p className="text-xs text-destructive">{fieldErrors.type}</p>
-              )}
+              {fieldErrors?.type && <p className="text-xs text-destructive">{fieldErrors.type}</p>}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="acc-cf" className="text-xs">Cash Flow</Label>
+              <Label htmlFor="acc-cf" className="text-xs">
+                Cash Flow
+              </Label>
               <Select name="cashFlowActivity" defaultValue="operating" disabled={isPending}>
                 <SelectTrigger id="acc-cf" className="h-9 text-sm">
                   <SelectValue />
@@ -168,7 +159,9 @@ export default function ChartOfAccountsSection({ accounts, userRole }: Props) {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="acc-subtype" className="text-xs">Subtype</Label>
+              <Label htmlFor="acc-subtype" className="text-xs">
+                Subtype
+              </Label>
               <Input
                 id="acc-subtype"
                 name="subtype"
@@ -181,12 +174,7 @@ export default function ChartOfAccountsSection({ accounts, userRole }: Props) {
               <Button type="submit" size="sm" disabled={isPending}>
                 {isPending ? 'Adding…' : 'Add Account'}
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAddForm(false)}
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowAddForm(false)}>
                 Cancel
               </Button>
             </div>

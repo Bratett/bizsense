@@ -12,16 +12,20 @@ import { paymentsReceived } from './transactions'
 
 export const hubtelPaymentLinks = pgTable('hubtel_payment_links', {
   id: uuid('id').primaryKey().defaultRandom(),
-  businessId: uuid('business_id').notNull().references(() => businesses.id),
-  orderId: uuid('order_id').notNull().references(() => orders.id),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id),
 
   // Our generated reference — the lookup key on webhook arrival.
   // Format: BSG-{businessId[0..8]}-{orderId[0..8]}-{timestamp_base36}
   // Must be globally unique (Hubtel requires unique ClientReference per merchant).
   clientReference: text('client_reference').notNull().unique(),
 
-  hubtelCheckoutId: text('hubtel_checkout_id'),   // returned by Hubtel on creation
-  checkoutUrl: text('checkout_url'),              // the URL sent to customer
+  hubtelCheckoutId: text('hubtel_checkout_id'), // returned by Hubtel on creation
+  checkoutUrl: text('checkout_url'), // the URL sent to customer
 
   amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
   currency: text('currency').default('GHS').notNull(),
@@ -32,11 +36,11 @@ export const hubtelPaymentLinks = pgTable('hubtel_payment_links', {
   // pending | paid | expired | cancelled
   status: text('status').notNull().default('pending'),
 
-  expiresAt: timestamp('expires_at'),       // 24 hours from creation
+  expiresAt: timestamp('expires_at'), // 24 hours from creation
   paidAt: timestamp('paid_at'),
 
-  momoNetwork: text('momo_network'),        // MTN | VODAFONE | AIRTELTIGO (raw from Hubtel)
-  momoReference: text('momo_reference'),   // Hubtel's transaction reference
+  momoNetwork: text('momo_network'), // MTN | VODAFONE | AIRTELTIGO (raw from Hubtel)
+  momoReference: text('momo_reference'), // Hubtel's transaction reference
 
   // Set when the webhook auto-records the payment_received row
   resultPaymentReceived: uuid('result_payment_received').references(() => paymentsReceived.id),
@@ -64,7 +68,7 @@ export const hubtelWebhookEvents = pgTable('hubtel_webhook_events', {
   // Unique constraint enforces exactly-once processing.
   clientReference: text('client_reference').notNull().unique(),
 
-  rawPayload: text('raw_payload').notNull(),  // full JSON body from Hubtel
+  rawPayload: text('raw_payload').notNull(), // full JSON body from Hubtel
   status: text('status').notNull().default('received'), // received | processed | failed
   processedAt: timestamp('processed_at'),
   error: text('error'),
@@ -81,7 +85,9 @@ export const hubtelWebhookEvents = pgTable('hubtel_webhook_events', {
 
 export const momoReconciliationSnapshots = pgTable('momo_reconciliation_snapshots', {
   id: uuid('id').primaryKey().defaultRandom(),
-  businessId: uuid('business_id').notNull().references(() => businesses.id),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
   snapshotDate: text('snapshot_date').notNull(), // ISO "YYYY-MM-DD"
   lines: text('lines').notNull(), // JSON: {accountCode, bookBalance, actualBalance, variance}[]
   totalBookBalance: numeric('total_book_balance', { precision: 15, scale: 2 }).notNull(),

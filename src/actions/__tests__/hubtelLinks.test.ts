@@ -62,11 +62,24 @@ function makeInsertChain(returning: unknown[] = []) {
 
 function mockSession() {
   vi.mocked(getServerSession).mockResolvedValue({
-    user: { businessId: BUSINESS_ID, id: 'user-001', email: 'test@test.com', role: 'owner', fullName: 'Test User' },
+    user: {
+      businessId: BUSINESS_ID,
+      id: 'user-001',
+      email: 'test@test.com',
+      role: 'owner',
+      fullName: 'Test User',
+    },
   })
 }
 
-function mockOrderLookup(overrides?: Partial<{ paymentStatus: string; status: string; totalAmount: string; amountPaid: string }>) {
+function mockOrderLookup(
+  overrides?: Partial<{
+    paymentStatus: string
+    status: string
+    totalAmount: string
+    amountPaid: string
+  }>,
+) {
   vi.mocked(db.select).mockReturnValueOnce(
     makeChain([
       {
@@ -89,7 +102,6 @@ beforeEach(() => {
 })
 
 describe('generatePaymentLink', () => {
-
   // ── Test 10: creates record with correct clientReference format ───────────────
 
   it('Test 10 — creates hubtelPaymentLinks record with correct clientReference format', async () => {
@@ -182,11 +194,9 @@ describe('generatePaymentLink', () => {
     await expect(generatePaymentLink(ORDER_ID)).rejects.toThrow(/Hubtel API error/)
     expect(db.insert).not.toHaveBeenCalled()
   })
-
 })
 
 describe('getPaymentLinkStatus', () => {
-
   // ── Test 14: returns correct status (tenant-scoped) ───────────────────────────
 
   it('Test 14 — returns correct status for matching businessId', async () => {
@@ -216,11 +226,8 @@ describe('getPaymentLinkStatus', () => {
     mockSession()
 
     // DB returns empty because WHERE businessId = session.businessId filtered out the row
-    vi.mocked(db.select).mockReturnValueOnce(
-      makeChain([]) as never,
-    )
+    vi.mocked(db.select).mockReturnValueOnce(makeChain([]) as never)
 
     await expect(getPaymentLinkStatus(LINK_ID)).rejects.toThrow(/not found/i)
   })
-
 })

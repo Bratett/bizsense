@@ -92,11 +92,7 @@ export default function IntegrationsSection({ businessSettings, userRole }: Prop
           name="allowNegativeStock"
           value={businessSettings.allowNegativeStock ? 'on' : ''}
         />
-        <input
-          type="hidden"
-          name="lowStockThreshold"
-          value={businessSettings.lowStockThreshold}
-        />
+        <input type="hidden" name="lowStockThreshold" value={businessSettings.lowStockThreshold} />
         <input
           type="hidden"
           name="defaultPaymentTermsDays"
@@ -117,12 +113,13 @@ export default function IntegrationsSection({ businessSettings, userRole }: Prop
         <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-5">
           <h3 className="mb-1 text-sm font-semibold text-gray-800">Mobile Money Accounts</h3>
           <p className="mb-4 text-xs text-gray-500">
-            Enter the MoMo numbers customers should send payments to. These are printed on
-            invoices.
+            Enter the MoMo numbers customers should send payments to. These are printed on invoices.
           </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="mtn" className="text-xs font-medium">MTN MoMo</Label>
+              <Label htmlFor="mtn" className="text-xs font-medium">
+                MTN MoMo
+              </Label>
               <Input
                 id="mtn"
                 name="momoMtnNumber"
@@ -135,7 +132,9 @@ export default function IntegrationsSection({ businessSettings, userRole }: Prop
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="telecel" className="text-xs font-medium">Telecel Cash</Label>
+              <Label htmlFor="telecel" className="text-xs font-medium">
+                Telecel Cash
+              </Label>
               <Input
                 id="telecel"
                 name="momoTelecelNumber"
@@ -148,7 +147,9 @@ export default function IntegrationsSection({ businessSettings, userRole }: Prop
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="airtel" className="text-xs font-medium">Airtel Money</Label>
+              <Label htmlFor="airtel" className="text-xs font-medium">
+                Airtel Money
+              </Label>
               <Input
                 id="airtel"
                 name="momoAirtelNumber"
@@ -167,8 +168,8 @@ export default function IntegrationsSection({ businessSettings, userRole }: Prop
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
           <h3 className="mb-1 text-sm font-semibold text-gray-800">WhatsApp Notifications</h3>
           <p className="mb-4 text-xs text-gray-500">
-            Automated messages sent via WhatsApp. Requires WhatsApp Business API
-            configuration (Phase 2 feature — toggles saved for when integration is live).
+            Automated messages sent via WhatsApp. Requires WhatsApp Business API configuration
+            (Phase 2 feature — toggles saved for when integration is live).
           </p>
 
           {/* Business WhatsApp number */}
@@ -207,9 +208,7 @@ export default function IntegrationsSection({ businessSettings, userRole }: Prop
                 </div>
                 <Switch
                   checked={notify[key]}
-                  onCheckedChange={(checked) =>
-                    setNotify((prev) => ({ ...prev, [key]: checked }))
-                  }
+                  onCheckedChange={(checked) => setNotify((prev) => ({ ...prev, [key]: checked }))}
                   disabled={isPending || !canEdit}
                   aria-label={label}
                 />

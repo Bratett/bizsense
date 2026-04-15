@@ -24,22 +24,42 @@ import { PageHeader } from '@/components/ui/page-header'
 import { Pencil, Trash2, ListOrdered, TrendingUp, Package, ArrowUpDown } from 'lucide-react'
 
 const TYPE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  opening:    { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Opening'    },
-  purchase:   { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Purchase'   },
-  sale:       { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Sale'       },
+  opening: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Opening' },
+  purchase: { bg: 'bg-green-100', text: 'text-green-700', label: 'Purchase' },
+  sale: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Sale' },
   adjustment: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Adjustment' },
-  return_in:  { bg: 'bg-teal-100',   text: 'text-teal-700',   label: 'Return In'  },
-  return_out: { bg: 'bg-red-100',    text: 'text-red-700',    label: 'Return Out' },
+  return_in: { bg: 'bg-teal-100', text: 'text-teal-700', label: 'Return In' },
+  return_out: { bg: 'bg-red-100', text: 'text-red-700', label: 'Return Out' },
 }
 
 function stockStatusInfo(product: ProductDetail) {
   if (!product.trackInventory)
-    return { dot: 'bg-gray-400',   label: 'Not tracked',   textColor: 'text-gray-600',  badge: 'bg-gray-100 text-gray-600'   }
+    return {
+      dot: 'bg-gray-400',
+      label: 'Not tracked',
+      textColor: 'text-gray-600',
+      badge: 'bg-gray-100 text-gray-600',
+    }
   if (product.currentStock <= 0)
-    return { dot: 'bg-red-500',    label: 'Out of Stock',  textColor: 'text-red-600',   badge: 'bg-red-100 text-red-700'     }
+    return {
+      dot: 'bg-red-500',
+      label: 'Out of Stock',
+      textColor: 'text-red-600',
+      badge: 'bg-red-100 text-red-700',
+    }
   if (product.reorderLevel > 0 && product.currentStock <= product.reorderLevel)
-    return { dot: 'bg-amber-500',  label: 'Low Stock',     textColor: 'text-amber-600', badge: 'bg-amber-100 text-amber-700' }
-  return   { dot: 'bg-green-500',  label: 'Optimal Level', textColor: 'text-green-600', badge: 'bg-green-100 text-green-700' }
+    return {
+      dot: 'bg-amber-500',
+      label: 'Low Stock',
+      textColor: 'text-amber-600',
+      badge: 'bg-amber-100 text-amber-700',
+    }
+  return {
+    dot: 'bg-green-500',
+    label: 'Optimal Level',
+    textColor: 'text-green-600',
+    badge: 'bg-green-100 text-green-700',
+  }
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -58,17 +78,17 @@ export default function ProductDetailView({
 
   const status = stockStatusInfo(product)
   const canDeactivate = userRole === 'owner' || userRole === 'manager'
-  const canAdjust     = userRole === 'owner' || userRole === 'manager'
+  const canAdjust = userRole === 'owner' || userRole === 'manager'
 
-  const costPrice      = parseFloat(product.costPrice    ?? '0')
-  const sellingPrice   = parseFloat(product.sellingPrice ?? '0')
-  const grossMargin    = sellingPrice - costPrice
+  const costPrice = parseFloat(product.costPrice ?? '0')
+  const sellingPrice = parseFloat(product.sellingPrice ?? '0')
+  const grossMargin = sellingPrice - costPrice
   const grossMarginPct = sellingPrice > 0 ? (grossMargin / sellingPrice) * 100 : 0
 
-  const reorder        = product.reorderLevel > 0 ? product.reorderLevel : 0
-  const maxBar         = Math.max(product.currentStock * 1.5, reorder * 3, 1)
-  const stockBarPct    = Math.min((product.currentStock / maxBar) * 100, 100)
-  const reorderPct     = Math.min((reorder / maxBar) * 100, 100)
+  const reorder = product.reorderLevel > 0 ? product.reorderLevel : 0
+  const maxBar = Math.max(product.currentStock * 1.5, reorder * 3, 1)
+  const stockBarPct = Math.min((product.currentStock / maxBar) * 100, 100)
+  const reorderPct = Math.min((reorder / maxBar) * 100, 100)
 
   const handleDeactivate = () => {
     setError(null)
@@ -88,7 +108,6 @@ export default function ProductDetailView({
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -123,9 +142,7 @@ export default function ProductDetailView({
         }
       />
 
-      {!product.isActive && (
-        <Badge variant="destructive">Deactivated</Badge>
-      )}
+      {!product.isActive && <Badge variant="destructive">Deactivated</Badge>}
 
       {error && (
         <Alert variant="destructive">
@@ -135,10 +152,8 @@ export default function ProductDetailView({
 
       {/* ── Main two-column grid ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-
         {/* ── Left column (3/5) ── */}
         <div className="space-y-5 lg:col-span-3">
-
           {/* Card A — Product Details */}
           <Card>
             <CardHeader className="border-b pb-4">
@@ -216,7 +231,9 @@ export default function ProductDetailView({
                     <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                     Stock Level
                   </CardTitle>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}
+                  >
                     {status.label}
                   </span>
                 </div>
@@ -246,7 +263,11 @@ export default function ProductDetailView({
 
                 {/* Stats below bar */}
                 <div className="mt-2.5 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{reorder > 0 ? `Reorder point: ${reorder} ${product.unit ?? 'units'}` : 'No reorder point set'}</span>
+                  <span>
+                    {reorder > 0
+                      ? `Reorder point: ${reorder} ${product.unit ?? 'units'}`
+                      : 'No reorder point set'}
+                  </span>
                   {product.stockValue > 0 && (
                     <span className="font-medium text-foreground">
                       Value: {formatGhs(product.stockValue)}
@@ -409,7 +430,7 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
     text: 'text-gray-700',
     label: movement.transactionType,
   }
-  const qty        = parseFloat(movement.quantity)
+  const qty = parseFloat(movement.quantity)
   const isPositive = qty > 0
 
   return (
@@ -417,7 +438,9 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
       {/* Left: type badge + date */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ${style.bg} ${style.text}`}>
+          <span
+            className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ${style.bg} ${style.text}`}
+          >
             {style.label}
           </span>
           <span className="truncate text-xs text-muted-foreground">
@@ -431,8 +454,11 @@ function MovementRow({ movement, unit }: { movement: InventoryMovement; unit: st
 
       {/* Right: qty + cost */}
       <div className="shrink-0 text-right">
-        <p className={`text-sm font-bold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}>
-          {isPositive ? '+' : ''}{qty} {unit ?? 'units'}
+        <p
+          className={`text-sm font-bold tabular-nums ${isPositive ? 'text-green-700' : 'text-red-600'}`}
+        >
+          {isPositive ? '+' : ''}
+          {qty} {unit ?? 'units'}
         </p>
         <p className="text-[11px] tabular-nums text-muted-foreground">
           {formatGhs(movement.unitCost)}/unit

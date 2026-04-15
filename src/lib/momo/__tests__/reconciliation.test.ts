@@ -55,7 +55,11 @@ describe('getMoMoBookBalances', () => {
     expect(result[0]).toMatchObject({ accountCode: '1001', bookBalance: 500, network: 'Bank' })
     expect(result[1]).toMatchObject({ accountCode: '1002', bookBalance: 1200, network: 'MTN' })
     expect(result[2]).toMatchObject({ accountCode: '1003', bookBalance: 300, network: 'Telecel' })
-    expect(result[3]).toMatchObject({ accountCode: '1004', bookBalance: 750, network: 'AirtelTigo' })
+    expect(result[3]).toMatchObject({
+      accountCode: '1004',
+      bookBalance: 750,
+      network: 'AirtelTigo',
+    })
     expect(result[4]).toMatchObject({ accountCode: '1005', bookBalance: 4500, network: 'Bank' })
   })
 

@@ -66,7 +66,10 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
         </Alert>
       )}
 
-      <form action={formAction} className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0">
+      <form
+        action={formAction}
+        className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0"
+      >
         {/* Hidden ID */}
         <input type="hidden" name="id" value={customer.id} />
 
@@ -185,7 +188,11 @@ export default function EditCustomerForm({ customer }: { customer: CustomerWithB
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isPending} className="h-11 w-full text-base font-semibold md:col-span-2">
+        <Button
+          type="submit"
+          disabled={isPending}
+          className="h-11 w-full text-base font-semibold md:col-span-2"
+        >
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>
       </form>

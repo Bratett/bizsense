@@ -15,6 +15,7 @@ function makeSuccessResponse(overrides: Record<string, unknown> = {}) {
         pulledAt: new Date().toISOString(),
         data: {
           businesses: [],
+          businessSettings: [],
           accounts: [],
           taxComponents: [],
           customers: [],
@@ -57,6 +58,7 @@ async function clearAllTables() {
   await Promise.all([
     localDb.meta.clear(),
     localDb.businesses.clear(),
+    localDb.businessSettings.clear(),
     localDb.accounts.clear(),
     localDb.taxComponents.clear(),
     localDb.customers.clear(),

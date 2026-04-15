@@ -14,7 +14,9 @@ export const businessSettings = pgTable(
   'business_settings',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    businessId: uuid('business_id').notNull().references(() => businesses.id),
+    businessId: uuid('business_id')
+      .notNull()
+      .references(() => businesses.id),
     // Inventory behaviour
     allowNegativeStock: boolean('allow_negative_stock').default(false).notNull(),
     lowStockThreshold: integer('low_stock_threshold').default(5).notNull(),

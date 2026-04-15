@@ -60,8 +60,7 @@ export function MoMoReconcileClient({ accounts }: Props) {
   // Guidance state
   const hasSurplus = rows.some((r) => r.status === 'surplus')
   const hasDeficit = rows.some((r) => r.status === 'deficit')
-  const allMatch =
-    enteredRows.length === accounts.length && rows.every((r) => r.status === 'match')
+  const allMatch = enteredRows.length === accounts.length && rows.every((r) => r.status === 'match')
 
   // At least one actual balance entered to enable "Save Snapshot"
   const canSave = enteredRows.length > 0
@@ -100,9 +99,14 @@ export function MoMoReconcileClient({ accounts }: Props) {
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         <p className="mb-1 font-semibold">How to use this:</p>
         <ol className="list-decimal space-y-0.5 pl-4">
-          <li>Check your balance for each MoMo wallet on your phone (dial *170# for MTN, *134# for Telecel, *185# for AirtelTigo).</li>
+          <li>
+            Check your balance for each MoMo wallet on your phone (dial *170# for MTN, *134# for
+            Telecel, *185# for AirtelTigo).
+          </li>
           <li>Enter the actual balance you see in the field below.</li>
-          <li>BizSense will show any difference between what&apos;s in your wallet and your books.</li>
+          <li>
+            BizSense will show any difference between what&apos;s in your wallet and your books.
+          </li>
           <li>If there&apos;s a difference, record the missing transaction in BizSense.</li>
         </ol>
       </div>
@@ -162,9 +166,7 @@ export function MoMoReconcileClient({ accounts }: Props) {
                 {/* Variance badge */}
                 <div className="md:w-32 text-right">
                   <p className="text-[10px] uppercase tracking-wide text-gray-400">Variance</p>
-                  {status === 'pending' && (
-                    <span className="text-sm text-gray-400">—</span>
-                  )}
+                  {status === 'pending' && <span className="text-sm text-gray-400">—</span>}
                   {status === 'match' && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                       ✓ Balanced

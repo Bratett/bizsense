@@ -148,10 +148,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                 type="email"
                 inputMode="email"
                 placeholder="colleague@example.com"
-                className={cn(
-                  'h-9 text-sm',
-                  inviteFieldErrors?.email && 'border-destructive',
-                )}
+                className={cn('h-9 text-sm', inviteFieldErrors?.email && 'border-destructive')}
                 disabled={invitePending}
               />
               {inviteFieldErrors?.email && (
@@ -159,7 +156,9 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
               )}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="invite-name" className="text-xs">Full Name</Label>
+              <Label htmlFor="invite-name" className="text-xs">
+                Full Name
+              </Label>
               <Input
                 id="invite-name"
                 name="fullName"
@@ -227,9 +226,7 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                 <div>
                   <p className="text-sm font-medium text-gray-900">
                     {member.fullName ?? member.phone ?? 'Unknown'}
-                    {isSelf && (
-                      <span className="ml-2 text-xs text-gray-400">(you)</span>
-                    )}
+                    {isSelf && <span className="ml-2 text-xs text-gray-400">(you)</span>}
                   </p>
                   {member.phone && member.fullName && (
                     <p className="text-xs text-gray-500">{member.phone}</p>
@@ -253,7 +250,13 @@ export default function TeamSection({ teamMembers, userRole, currentUserId }: Pr
                         <SelectItem value="cashier">Cashier</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button type="submit" size="sm" variant="outline" disabled={rolePending} className="h-8 text-xs">
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant="outline"
+                      disabled={rolePending}
+                      className="h-8 text-xs"
+                    >
                       Update
                     </Button>
                   </form>

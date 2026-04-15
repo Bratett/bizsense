@@ -102,11 +102,7 @@ function ChangePasswordPanel() {
           )}
         </div>
 
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="h-11 w-full text-base font-semibold"
-        >
+        <Button type="submit" disabled={isPending} className="h-11 w-full text-base font-semibold">
           {isPending ? 'Updating…' : 'Update Password'}
         </Button>
       </form>
@@ -153,8 +149,7 @@ function SignOutPanel() {
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Sign Out</h2>
           <p className="text-sm text-gray-500">
-            Sign out of your BizSense account on this device. Any unsynced changes will be
-            lost.
+            Sign out of your BizSense account on this device. Any unsynced changes will be lost.
           </p>
         </div>
       </div>

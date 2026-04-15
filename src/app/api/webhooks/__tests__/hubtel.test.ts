@@ -93,7 +93,14 @@ function makeRequest(body: object, signature = 'valid-sig'): Request {
 }
 
 /** Standard successful Hubtel webhook payload */
-function makeSuccessPayload(overrides?: Partial<{ Network: string; Amount: number; TransactionId: string; ClientReference: string }>) {
+function makeSuccessPayload(
+  overrides?: Partial<{
+    Network: string
+    Amount: number
+    TransactionId: string
+    ClientReference: string
+  }>,
+) {
   return {
     ResponseCode: '0000',
     Status: 'Success',
@@ -122,7 +129,9 @@ function makeLinkRow(overrides?: Partial<{ businessId: string; amount: string }>
 }
 
 /** Standard order row */
-function makeOrderRow(overrides?: Partial<{ totalAmount: string; amountPaid: string; paymentStatus: string }>) {
+function makeOrderRow(
+  overrides?: Partial<{ totalAmount: string; amountPaid: string; paymentStatus: string }>,
+) {
   return {
     id: ORDER_ID,
     orderNumber: 'ORD-0001',
@@ -195,7 +204,6 @@ beforeEach(() => {
 })
 
 describe('Hubtel webhook POST handler', () => {
-
   // ── Test 1: Valid sig + success payload → payment created, journal balanced ──
 
   it('Test 1 — valid sig + success: atomicTransactionWrite called with balanced journal', async () => {
@@ -203,9 +211,12 @@ describe('Hubtel webhook POST handler', () => {
     mockDbInsertSuccess()
     mockDbUpdateSuccess()
     mockDbSelectSequence([
-      [makeLinkRow()],                             // hubtelPaymentLinks lookup
-      [makeOrderRow()],                            // orders lookup
-      [{ id: ACCOUNT_IDS['1002'], code: '1002' }, { id: ACCOUNT_IDS['1100'], code: '1100' }], // accounts
+      [makeLinkRow()], // hubtelPaymentLinks lookup
+      [makeOrderRow()], // orders lookup
+      [
+        { id: ACCOUNT_IDS['1002'], code: '1002' },
+        { id: ACCOUNT_IDS['1100'], code: '1100' },
+      ], // accounts
     ])
     mockAtomicWrite()
 
@@ -216,7 +227,9 @@ describe('Hubtel webhook POST handler', () => {
     expect(atomicTransactionWrite).toHaveBeenCalledTimes(1)
 
     // Journal entry must balance: SUM(debits) = SUM(credits)
-    const journal = capturedJournalInput as { lines: Array<{ debitAmount: number; creditAmount: number }> }
+    const journal = capturedJournalInput as {
+      lines: Array<{ debitAmount: number; creditAmount: number }>
+    }
     const totalDebits = journal.lines.reduce((s, l) => s + l.debitAmount, 0)
     const totalCredits = journal.lines.reduce((s, l) => s + l.creditAmount, 0)
     expect(totalDebits).toBeCloseTo(totalCredits, 2)
@@ -242,7 +255,10 @@ describe('Hubtel webhook POST handler', () => {
     mockDbSelectSequence([
       [makeLinkRow()],
       [makeOrderRow({ totalAmount: '100.00', amountPaid: '0.00' })],
-      [{ id: ACCOUNT_IDS['1002'], code: '1002' }, { id: ACCOUNT_IDS['1100'], code: '1100' }],
+      [
+        { id: ACCOUNT_IDS['1002'], code: '1002' },
+        { id: ACCOUNT_IDS['1100'], code: '1100' },
+      ],
     ])
     mockAtomicWrite()
 
@@ -250,7 +266,9 @@ describe('Hubtel webhook POST handler', () => {
     await POST(req)
 
     // Find the order update inside capturedTxUpdates
-    const orderUpdate = capturedTxUpdates.find((u) => u.set && typeof u.set === 'object' && 'amountPaid' in (u.set as object))
+    const orderUpdate = capturedTxUpdates.find(
+      (u) => u.set && typeof u.set === 'object' && 'amountPaid' in (u.set as object),
+    )
     expect(orderUpdate).toBeDefined()
     const updateSet = orderUpdate!.set as { amountPaid: string; paymentStatus: string }
     expect(updateSet.amountPaid).toBe('100.00')
@@ -280,7 +298,9 @@ describe('Hubtel webhook POST handler', () => {
       code: '23505',
     })
     vi.mocked(db.insert).mockReturnValueOnce({
-      values: vi.fn(() => { throw uniqueError }),
+      values: vi.fn(() => {
+        throw uniqueError
+      }),
     } as never)
 
     const req = makeRequest(makeSuccessPayload())
@@ -310,7 +330,9 @@ describe('Hubtel webhook POST handler', () => {
     // update was called to mark event failed
     expect(db.update).toHaveBeenCalled()
     const setCalls = vi.mocked(updateChain.set as ReturnType<typeof vi.fn>).mock.calls
-    const failedCall = setCalls.find((args) => (args[0] as { status?: string })?.status === 'failed')
+    const failedCall = setCalls.find(
+      (args) => (args[0] as { status?: string })?.status === 'failed',
+    )
     expect(failedCall).toBeDefined()
   })
 
@@ -323,7 +345,10 @@ describe('Hubtel webhook POST handler', () => {
     mockDbSelectSequence([
       [makeLinkRow()],
       [makeOrderRow({ totalAmount: '500.00', amountPaid: '100.00' })],
-      [{ id: ACCOUNT_IDS['1002'], code: '1002' }, { id: ACCOUNT_IDS['1100'], code: '1100' }],
+      [
+        { id: ACCOUNT_IDS['1002'], code: '1002' },
+        { id: ACCOUNT_IDS['1100'], code: '1100' },
+      ],
     ])
     mockAtomicWrite()
 
@@ -346,7 +371,10 @@ describe('Hubtel webhook POST handler', () => {
     mockDbSelectSequence([
       [makeLinkRow()],
       [makeOrderRow({ totalAmount: '500.00', amountPaid: '300.00' })],
-      [{ id: ACCOUNT_IDS['1002'], code: '1002' }, { id: ACCOUNT_IDS['1100'], code: '1100' }],
+      [
+        { id: ACCOUNT_IDS['1002'], code: '1002' },
+        { id: ACCOUNT_IDS['1100'], code: '1100' },
+      ],
     ])
     mockAtomicWrite()
 
@@ -372,7 +400,10 @@ describe('Hubtel webhook POST handler', () => {
     mockDbSelectSequence([
       [makeLinkRow()],
       [makeOrderRow()],
-      [{ id: ACCOUNT_IDS['1002'], code: '1002' }, { id: ACCOUNT_IDS['1100'], code: '1100' }],
+      [
+        { id: ACCOUNT_IDS['1002'], code: '1002' },
+        { id: ACCOUNT_IDS['1100'], code: '1100' },
+      ],
     ])
 
     vi.mocked(atomicTransactionWrite).mockRejectedValueOnce(new Error('DB connection lost'))
@@ -384,7 +415,9 @@ describe('Hubtel webhook POST handler', () => {
     // Event should be marked failed
     expect(db.update).toHaveBeenCalled()
     const setCalls = vi.mocked(updateChain.set as ReturnType<typeof vi.fn>).mock.calls
-    const failedCall = setCalls.find((args) => (args[0] as { status?: string })?.status === 'failed')
+    const failedCall = setCalls.find(
+      (args) => (args[0] as { status?: string })?.status === 'failed',
+    )
     expect(failedCall).toBeDefined()
   })
 
@@ -402,17 +435,20 @@ describe('Hubtel webhook POST handler', () => {
     mockDbSelectSequence([
       [makeLinkRow({ businessId: REAL_BUSINESS_ID })],
       [makeOrderRow()],
-      [{ id: ACCOUNT_IDS['1002'], code: '1002' }, { id: ACCOUNT_IDS['1100'], code: '1100' }],
+      [
+        { id: ACCOUNT_IDS['1002'], code: '1002' },
+        { id: ACCOUNT_IDS['1100'], code: '1100' },
+      ],
     ])
     mockAtomicWrite()
 
     // Payload includes a fraudulent businessId field — must be ignored
     const payloadWithFraudulentField = {
       ...makeSuccessPayload(),
-      businessId: FAKE_BUSINESS_ID,         // attacker-supplied — must never be used
+      businessId: FAKE_BUSINESS_ID, // attacker-supplied — must never be used
       Data: {
         ...makeSuccessPayload().Data,
-        businessId: FAKE_BUSINESS_ID,       // also in Data — must never be used
+        businessId: FAKE_BUSINESS_ID, // also in Data — must never be used
       },
     }
 
@@ -424,5 +460,4 @@ describe('Hubtel webhook POST handler', () => {
     expect(journal.businessId).toBe(REAL_BUSINESS_ID)
     expect(journal.businessId).not.toBe(FAKE_BUSINESS_ID)
   })
-
 })

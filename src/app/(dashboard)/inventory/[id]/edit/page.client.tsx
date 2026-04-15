@@ -104,7 +104,10 @@ export default function EditProductForm({
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-4 md:space-y-0"
+      >
         {/* Name */}
         <div className="space-y-1.5 md:col-span-2">
           <Label htmlFor="name">Product Name *</Label>

@@ -19,5 +19,12 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
       .then((rows) => rows[0]),
   ])
 
-  return <SaleDetail order={order} payments={payments} businessName={biz?.name ?? ''} businessPhone={biz?.phone ?? null} />
+  return (
+    <SaleDetail
+      order={order}
+      payments={payments}
+      businessName={biz?.name ?? ''}
+      businessPhone={biz?.phone ?? null}
+    />
+  )
 }

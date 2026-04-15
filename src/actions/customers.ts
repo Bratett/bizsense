@@ -365,9 +365,7 @@ export async function getCustomerRecentTransactions(
   const session = await getServerSession()
   const businessId = session.user.businessId
 
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   const [orderRows, paymentRows] = await Promise.all([
     db
@@ -393,7 +391,10 @@ export async function getCustomerRecentTransactions(
       })
       .from(paymentsReceived)
       .where(
-        and(eq(paymentsReceived.customerId, customerId), eq(paymentsReceived.businessId, businessId)),
+        and(
+          eq(paymentsReceived.customerId, customerId),
+          eq(paymentsReceived.businessId, businessId),
+        ),
       )
       .orderBy(desc(paymentsReceived.paymentDate))
       .limit(10),

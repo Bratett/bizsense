@@ -126,10 +126,7 @@ export async function createHubtelCheckout(
  * @param signature The value of the x-hubtel-signature header (or null)
  * @returns true if signature is valid, false otherwise
  */
-export function verifyHubtelWebhookSignature(
-  rawBody: string,
-  signature: string | null,
-): boolean {
+export function verifyHubtelWebhookSignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.HUBTEL_WEBHOOK_SECRET
 
   if (!secret) {
