@@ -27,9 +27,7 @@ vi.mock('@/db', () => {
   return {
     db: {
       select: vi.fn(() => makeChain()),
-      transaction: vi.fn((fn: (tx: ReturnType<typeof makeTx>) => Promise<unknown>) =>
-        fn(makeTx()),
-      ),
+      transaction: vi.fn((fn: (tx: ReturnType<typeof makeTx>) => Promise<unknown>) => fn(makeTx())),
     },
   }
 })
