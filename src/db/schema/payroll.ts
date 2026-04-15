@@ -2,6 +2,19 @@ import { pgTable, uuid, text, boolean, numeric, date, timestamp } from 'drizzle-
 import { businesses, users } from './core'
 import { journalEntries } from './journal'
 
+export const payeBands = pgTable('paye_bands', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  businessId: uuid('business_id')
+    .notNull()
+    .references(() => businesses.id),
+  lowerBound: numeric('lower_bound', { precision: 15, scale: 2 }).notNull(),
+  upperBound: numeric('upper_bound', { precision: 15, scale: 2 }), // null = no ceiling
+  rate: numeric('rate', { precision: 7, scale: 6 }).notNull(), // e.g. 0.175000
+  effectiveFrom: date('effective_from').notNull(),
+  effectiveTo: date('effective_to'), // null = currently active
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 export const staff = pgTable('staff', {
   id: uuid('id').primaryKey().defaultRandom(),
   businessId: uuid('business_id')
@@ -37,6 +50,7 @@ export const payrollRuns = pgTable('payroll_runs', {
   totalNet: numeric('total_net', { precision: 15, scale: 2 }),
   journalEntryId: uuid('journal_entry_id').references(() => journalEntries.id),
   approvedBy: uuid('approved_by').references(() => users.id),
+  createdBy: uuid('created_by').references(() => users.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -57,6 +71,9 @@ export const payrollLines = pgTable('payroll_lines', {
   netSalary: numeric('net_salary', { precision: 15, scale: 2 }).notNull(),
   paymentMethod: text('payment_method'),
   paymentReference: text('payment_reference'),
+  isPaid: boolean('is_paid').default(false).notNull(),
+  paidAt: timestamp('paid_at'),
+  paymentJournalEntryId: uuid('payment_journal_entry_id').references(() => journalEntries.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

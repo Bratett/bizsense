@@ -354,11 +354,6 @@ export default function VatReportClient({
             </Table>
           )}
 
-          {/* Amber banner — always shown */}
-          <div className="border-t border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Input VAT from supplier purchases is not yet included in this report. Only VAT from
-            recorded expenses is shown. Speak to your accountant for a complete VAT return.
-          </div>
         </CardContent>
       </Card>
 

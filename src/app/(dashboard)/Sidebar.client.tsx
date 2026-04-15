@@ -21,6 +21,7 @@ const MAIN_NAV: NavItem[] = [
 const FINANCE_NAV: NavItem[] = [
   { label: 'General Ledger', href: '/ledger', match: (p) => p.startsWith('/ledger') },
   { label: 'Reports', href: '/reports', match: (p) => p.startsWith('/reports') },
+  { label: 'Tax & Compliance', href: '/tax/income', match: (p) => p.startsWith('/tax') },
   { label: 'MoMo Reconciliation', href: '/momo/reconcile', match: (p) => p.startsWith('/momo') },
   { label: 'Alerts', href: '/alerts', match: (p) => p.startsWith('/alerts') },
 ]
@@ -28,7 +29,9 @@ const FINANCE_NAV: NavItem[] = [
 const OPERATIONS_NAV: NavItem[] = [
   { label: 'Inventory', href: '/inventory', match: (p) => p.startsWith('/inventory') },
   { label: 'Suppliers', href: '/suppliers', match: (p) => p.startsWith('/suppliers') },
+  { label: 'Staff', href: '/staff', match: (p) => p.startsWith('/staff') },
   { label: 'Payroll', href: '/payroll', match: (p) => p.startsWith('/payroll') },
+  { label: 'Assets', href: '/assets', match: (p) => p.startsWith('/assets') },
 ]
 
 const SETTINGS_NAV: NavItem[] = [

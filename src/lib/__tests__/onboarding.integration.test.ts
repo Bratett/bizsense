@@ -47,6 +47,10 @@ vi.mock('@/lib/seeds/seedTaxComponents', () => ({
   ],
 }))
 
+vi.mock('@/lib/seeds/seedPayeBands', () => ({
+  seedPayeBands: vi.fn(),
+}))
+
 vi.mock('@/lib/ledger', async () => {
   const actual = await vi.importActual<typeof import('@/lib/ledger')>('@/lib/ledger')
   return {

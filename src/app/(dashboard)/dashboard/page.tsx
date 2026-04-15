@@ -11,6 +11,7 @@ import {
   getDashboardChartData,
   getDashboardLowStock,
   getDashboardPendingMomoLinks,
+  getDashboardUnrunDepreciation,
 } from '@/lib/dashboard/queries'
 import FirstTimeOverlay from './FirstTimeOverlay.client'
 import DashboardChart from './DashboardChart.client'
@@ -129,6 +130,7 @@ export default async function DashboardPage() {
 
   const showFinancials = ['owner', 'manager', 'accountant'].includes(role)
   const showApprovals = ['owner', 'manager'].includes(role)
+  const showDepreciationAlert = ['owner', 'accountant'].includes(role)
 
   // Fetch all dashboard data in parallel.
   // The 4 metric cards (todaySales, cashBalance, receivables, lowStock) are
@@ -146,6 +148,7 @@ export default async function DashboardPage() {
     chartData,
     lowStock,
     pendingMomoLinks,
+    unrunDepreciation,
   ] = await Promise.all([
     getDashboardData(businessId),
     getDashboardTodaySales(businessId),
@@ -157,6 +160,7 @@ export default async function DashboardPage() {
     showFinancials ? getDashboardChartData(businessId) : null,
     getDashboardLowStock(businessId),
     showFinancials ? getDashboardPendingMomoLinks(businessId) : null,
+    showFinancials && showDepreciationAlert ? getDashboardUnrunDepreciation(businessId) : null,
   ])
 
   const greeting = getGreeting()
@@ -359,6 +363,58 @@ export default async function DashboardPage() {
                       stroke="currentColor"
                       strokeWidth={2}
                       className="shrink-0 text-yellow-600"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                      />
+                    </svg>
+                  </Card>
+                </Link>
+              )}
+
+              {/* Depreciation reminder alert */}
+              {showFinancials && showDepreciationAlert && unrunDepreciation?.needsRun && (
+                <Link href="/assets/depreciation" className="block">
+                  <Card
+                    size="sm"
+                    className="flex-row items-center gap-3 bg-amber-50 px-4 py-3 transition-colors hover:bg-amber-100"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-amber-800">
+                        Monthly depreciation not yet posted for{' '}
+                        {new Date().toLocaleString('en-GH', {
+                          month: 'long',
+                          year: 'numeric',
+                          timeZone: 'UTC',
+                        })}
+                      </p>
+                    </div>
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      className="shrink-0 text-amber-500"
                     >
                       <path
                         strokeLinecap="round"
